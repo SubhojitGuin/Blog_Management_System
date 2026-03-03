@@ -22,7 +22,7 @@ public class CommentEntity {
     @Column(nullable = false, length = 1000)
     private String body;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private UserEntity user;
 
