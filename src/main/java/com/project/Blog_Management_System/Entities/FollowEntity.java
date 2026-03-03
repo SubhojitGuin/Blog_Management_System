@@ -19,11 +19,11 @@ public class FollowEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "follower_id", nullable = false, updatable = false)
     private UserEntity follower; // The user who is following
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "following_id", nullable = false, updatable = false)
     private UserEntity following; // The user being followed
 

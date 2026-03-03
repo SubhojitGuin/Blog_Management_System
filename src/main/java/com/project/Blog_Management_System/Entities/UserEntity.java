@@ -44,7 +44,7 @@ public class UserEntity {
     private LocalDate dateOfBirth;
 
     @Column(nullable = false)
-    private boolean active;
+    private Boolean active;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
