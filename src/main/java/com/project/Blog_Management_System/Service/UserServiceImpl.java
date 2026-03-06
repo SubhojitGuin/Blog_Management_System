@@ -6,9 +6,7 @@ import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +16,7 @@ import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
@@ -37,13 +35,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.save(user);
     }
 
+    @Override
+    public UserEntity getUserByUsernameOrEmail(String username, String email) {
+        return userRepository.findByUsernameOrEmail(username, email).orElse(null);
+    }
+
     public boolean hasRole(Role role) {
         UserEntity user = getCurrentUser();
         return user.getRoles().contains(role);
     }
 
     @Override
-    public @Nullable UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username).orElse(null);
     }
 }

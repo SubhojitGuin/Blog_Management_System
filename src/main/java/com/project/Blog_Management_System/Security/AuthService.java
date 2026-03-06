@@ -31,11 +31,7 @@ public class AuthService {
 
     public UserDTO signUp(SignUpRequestDTO signUpRequestDto) {
 
-        UserEntity user = userService.getUserByEmail(signUpRequestDto.getEmail());
-        if (user == null) {
-            user = (UserEntity) userService.loadUserByUsername(signUpRequestDto.getUsername());
-        }
-
+        UserEntity user = userService.getUserByUsernameOrEmail(signUpRequestDto.getUsername(), signUpRequestDto.getEmail());
         if (user != null) {
             throw new ResourceConflictException("User is already present with same email id or username");
         }
@@ -52,12 +48,11 @@ public class AuthService {
     public String[] login(LoginRequestDTO loginRequestDTO) {
         String username = loginRequestDTO.getEmailOrUsername();
 
-        if (username.contains("@")) {
-            UserEntity user = userService.getUserByEmail(username);
-            if (user == null) {
-                throw new UsernameNotFoundException("User not found with email: " + username);
-            }
+        UserEntity loginUser = userService.getUserByUsernameOrEmail(username, username);
+        if (loginUser == null) {
+            throw new UsernameNotFoundException("User not found with email or username: " + username);
         }
+        username = loginUser.getUsername();
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 username, loginRequestDTO.getPassword()
