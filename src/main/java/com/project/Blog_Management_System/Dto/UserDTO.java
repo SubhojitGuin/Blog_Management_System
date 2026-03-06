@@ -8,9 +8,9 @@ public class UserDTO {
     private String name;
     private String username;
     private String bio;
-    private Integer noOfFollowers;
-    private Integer noOfFollowings;
-    private Integer noOfPosts;
+    private Integer noOfFollowers = 0;
+    private Integer noOfFollowings = 0;
+    private Integer noOfPosts = 0;
     private Boolean active;
-    private Boolean isCurrentUser;
+    private Boolean isCurrentUser = true;
 }
