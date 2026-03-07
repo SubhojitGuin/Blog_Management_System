@@ -1,12 +1,8 @@
 package com.project.Blog_Management_System.Entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Enums.Role;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,7 +13,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity
@@ -32,14 +31,12 @@ public class UserEntity implements UserDetails {
 
     private String name;
 
-    @Pattern(regexp = "\\w{3,}", message = "Username must be at least 3 characters long and contain only letters, numbers, and underscores")
     @Column(unique = true)
     private String username;
 
     private String password;
 
     @Column(unique = true)
-    @Email
     private String email;
 
     private String bio;
@@ -47,8 +44,6 @@ public class UserEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Past
-    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
@@ -70,7 +65,7 @@ public class UserEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_"+role.name()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toSet());
     }
 
