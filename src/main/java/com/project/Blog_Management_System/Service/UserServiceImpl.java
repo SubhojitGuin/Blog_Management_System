@@ -1,11 +1,13 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.Dto.ProfileUpdateDTO;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,15 +22,11 @@ import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public UserEntity getUserById(UUID id) {
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-    }
-
-    @Override
-    public UserEntity getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElse(null);
     }
 
     @Override
@@ -40,6 +38,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity getUserByUsernameOrEmail(String username, String email) {
         return userRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(username, email).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public ProfileUpdateDTO updateProfile(ProfileUpdateDTO profileUpdateDTO) {
+        UserEntity user = getCurrentUser();
+        System.out.println("user = " + user);
+        modelMapper.map(profileUpdateDTO, user);
+        userRepository.save(user);
+        return modelMapper.map(user, ProfileUpdateDTO.class);
     }
 
     public boolean hasRole(Role role) {
