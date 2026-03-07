@@ -2,8 +2,6 @@ package com.project.Blog_Management_System.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Blog_Management_System.Enums.Gender;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
