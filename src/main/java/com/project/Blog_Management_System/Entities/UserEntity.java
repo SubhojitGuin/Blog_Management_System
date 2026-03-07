@@ -1,9 +1,12 @@
 package com.project.Blog_Management_System.Entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Enums.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,6 +32,7 @@ public class UserEntity implements UserDetails {
 
     private String name;
 
+    @Pattern(regexp = "\\w{3,}", message = "Username must be at least 3 characters long and contain only letters, numbers, and underscores")
     @Column(unique = true)
     private String username;
 
@@ -43,6 +47,8 @@ public class UserEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @Past
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
