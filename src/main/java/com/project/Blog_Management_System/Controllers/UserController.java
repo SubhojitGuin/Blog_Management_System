@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Controllers;
 
+import com.project.Blog_Management_System.Dto.PasswordUpdateDTO;
 import com.project.Blog_Management_System.Dto.ProfileUpdateDTO;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,10 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -27,5 +25,12 @@ public class UserController {
     @Operation(summary = "Update User Profile", description = "updates the existing user account.")
     public ResponseEntity<ProfileUpdateDTO> updateUserProfile(@Valid @RequestBody ProfileUpdateDTO profileUpdateDTO) {
         return new ResponseEntity<>(userService.updateProfile(profileUpdateDTO), HttpStatus.OK);
+    }
+
+    @PatchMapping("/update_password")
+    @Operation(summary = "Update User Password", description = "updates the existing user password.")
+    public ResponseEntity<Void> updateUserPassword(@Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO) {
+        userService.updatePassword(passwordUpdateDTO);
+        return ResponseEntity.noContent().build();
     }
 }

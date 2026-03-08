@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.Dto.PasswordUpdateDTO;
 import com.project.Blog_Management_System.Dto.ProfileUpdateDTO;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Role;
@@ -8,8 +9,10 @@ import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserEntity getUserById(UUID id) {
@@ -48,6 +52,16 @@ public class UserServiceImpl implements UserService {
         modelMapper.map(profileUpdateDTO, user);
         userRepository.save(user);
         return modelMapper.map(user, ProfileUpdateDTO.class);
+    }
+
+    @Override
+    public void updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
+        UserEntity user = getCurrentUser();
+        if (!passwordEncoder.matches(passwordUpdateDTO.getOldPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Old password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(passwordUpdateDTO.getNewPassword()));
+        userRepository.save(user);
     }
 
     public boolean hasRole(Role role) {

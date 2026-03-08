@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Service.Interfaces;
 
+import com.project.Blog_Management_System.Dto.PasswordUpdateDTO;
 import com.project.Blog_Management_System.Dto.ProfileUpdateDTO;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,4 +15,6 @@ public interface UserService extends UserDetailsService {
     UserEntity getUserByUsernameOrEmail(String username, String email);
 
     ProfileUpdateDTO updateProfile(ProfileUpdateDTO profileUpdateDTO);
+
+    void updatePassword(PasswordUpdateDTO passwordUpdateDTO);
 }
