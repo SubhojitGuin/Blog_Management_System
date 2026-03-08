@@ -1,16 +1,19 @@
 package com.project.Blog_Management_System.Controllers;
 
-import com.project.Blog_Management_System.Dto.PasswordUpdateDTO;
-import com.project.Blog_Management_System.Dto.ProfileUpdateDTO;
+import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -33,4 +36,51 @@ public class UserController {
         userService.updatePassword(passwordUpdateDTO);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/update_username")
+    @Operation(summary = "Update User Name", description = "updates the existing user name.")
+    public ResponseEntity<Void> updateUserName(@Valid @RequestBody UsernameUpdateDTO usernameUpdateDTO) {
+        userService.updateUserName(usernameUpdateDTO);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}")
+    public ResponseEntity<UserDTO> getUserProfile(@PathVariable String username,
+                                                  @PathVariable UUID id) {
+        return new ResponseEntity<>(userService.getUserProfile(username, id), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search Users", description = "search users by username or email.")
+    public ResponseEntity<List<UserInfoDTO>> searchUsers(@RequestParam String query) {
+        return new ResponseEntity<>(userService.searchUsers(query), HttpStatus.OK);
+    }
+
+    @PostMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/follow")
+    @Operation(summary = "Follow or Unfollow User", description = "follow or unfollow a user by username and id.")
+    public ResponseEntity<Void> followOrUnfollowUser(@PathVariable String username,
+                                                     @PathVariable UUID id,
+                                                     @RequestBody FollowDTO followDTO) {
+        userService.followOrUnfollowUser(username, id, followDTO);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/followers")
+    @Operation(summary = "Get Followers", description = "get followers of a user by username and id.")
+    public ResponseEntity<Slice<UserInfoDTO>> getFollowers(@PathVariable String username,
+                                                           @PathVariable UUID id,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(userService.getFollowers(username, id, page, size), HttpStatus.OK);
+    }
+
+    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/followings")
+    @Operation(summary = "Get Followings", description = "get followings of a user by username and id.")
+    public ResponseEntity<Slice<UserInfoDTO>> getFollowings(@PathVariable String username,
+                                                            @PathVariable UUID id,
+                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(userService.getFollowings(username, id, page, size), HttpStatus.OK);
+    }
+
 }

@@ -1,8 +1,7 @@
 package com.project.Blog_Management_System.Entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -11,6 +10,9 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "follows",
        uniqueConstraints = {@UniqueConstraint(columnNames = {"follower_id", "following_id"})})
 public class FollowEntity {

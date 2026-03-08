@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Data
 public class CommentResponseDTO {
     private String body;
-    private UserDTO user;
+    private UserInfoDTO user;
     private LocalDateTime createdAt;
+    private Boolean isAuthor;
 }

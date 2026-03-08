@@ -11,6 +11,7 @@ public class PostResponseDTO {
     private String content;
     private Integer likeCount;
     private Integer commentCount;
-    private UserDTO user;
+    private UserInfoDTO user;
     private CategoryResponseDTO category;
+    private Boolean isOwner;
 }

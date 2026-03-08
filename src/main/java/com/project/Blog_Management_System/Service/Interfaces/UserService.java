@@ -1,10 +1,11 @@
 package com.project.Blog_Management_System.Service.Interfaces;
 
-import com.project.Blog_Management_System.Dto.PasswordUpdateDTO;
-import com.project.Blog_Management_System.Dto.ProfileUpdateDTO;
+import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UserService extends UserDetailsService {
@@ -17,4 +18,16 @@ public interface UserService extends UserDetailsService {
     ProfileUpdateDTO updateProfile(ProfileUpdateDTO profileUpdateDTO);
 
     void updatePassword(PasswordUpdateDTO passwordUpdateDTO);
+
+    void updateUserName(UsernameUpdateDTO usernameUpdateDTO);
+
+    UserDTO getUserProfile(String username, UUID id);
+
+    List<UserInfoDTO> searchUsers(String query);
+
+    void followOrUnfollowUser(String username, UUID id, FollowDTO followDTO);
+
+    Slice<UserInfoDTO> getFollowers(String username, UUID id, int page, int size);
+
+    Slice<UserInfoDTO> getFollowings(String username, UUID id, int page, int size);
 }
