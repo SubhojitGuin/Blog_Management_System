@@ -83,4 +83,20 @@ public class UserController {
         return new ResponseEntity<>(userService.getFollowings(username, id, page, size), HttpStatus.OK);
     }
 
+    @DeleteMapping
+    @Operation(summary = "Delete User Account", description = "Deactivate the user account, the user can login again to his account within 15 days of deactivation, after that the account will be permanently deleted.")
+    public ResponseEntity<Void> deleteUser() {
+        userService.deleteUser();
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/posts")
+    @Operation(summary = "Get User Posts", description = "get posts of a user by username and id.")
+    public ResponseEntity<Slice<PostResponseDTO>> getUserPosts(@PathVariable String username,
+                                                              @PathVariable UUID id,
+                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(userService.getUserPosts(username, id, page, size), HttpStatus.OK);
+    }
+
 }

@@ -39,7 +39,6 @@ public class AuthService {
         UserEntity newUser = modelMapper.map(signUpRequestDto, UserEntity.class);
         newUser.setRoles(Set.of(Role.USER));
         newUser.setPassword(passwordEncoder.encode(signUpRequestDto.getPassword()));
-        newUser.setActive(true);
         newUser = userService.addUser(newUser);
 
         return modelMapper.map(newUser, UserDTO.class);
@@ -64,6 +63,8 @@ public class AuthService {
         arr[0] = jwtService.generateAccessToken(user);
         arr[1] = jwtService.generateRefreshToken(user);
 
+        loginUser.setActive(true);
+        userService.addUser(loginUser);
         return arr;
     }
 

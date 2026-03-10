@@ -98,9 +98,6 @@ public class UserServiceImpl implements UserService {
 
         UserDTO retrievedUserDTO = modelMapper.map(retrievedUser, UserDTO.class);
         retrievedUserDTO.setIsCurrentUser(user.equals(retrievedUser));
-        retrievedUserDTO.setNoOfPosts(postRepository.countByUser(retrievedUser));
-        retrievedUserDTO.setNoOfFollowers(followRepository.countByFollowing(retrievedUser));
-        retrievedUserDTO.setNoOfFollowings(followRepository.countByFollower(retrievedUser));
 
         return retrievedUserDTO;
     }
@@ -150,6 +147,22 @@ public class UserServiceImpl implements UserService {
         return followRepository.findFollowing(id, pageable);
     }
 
+    @Override
+    public void deleteUser() {
+        UserEntity user = getCurrentUser();
+        user.setActive(false);
+        userRepository.save(user);
+    }
+
+    @Override
+    public Slice<PostResponseDTO> getUserPosts(String username, UUID id, int page, int size) {
+        UserEntity currentUser = getCurrentUser();
+        UserEntity retrievedUser = userRepository.findById(id).orElse(null);
+        isInvalidUser(retrievedUser, username);
+        Pageable pageable = PageRequest.of(page, size);
+        return postRepository.findPostsByUser(retrievedUser, currentUser, pageable);
+    }
+
     public boolean hasRole(Role role) {
         UserEntity user = getCurrentUser();
         return user.getRoles().contains(role);
@@ -162,7 +175,7 @@ public class UserServiceImpl implements UserService {
 
     public void isInvalidUser(UserEntity user, String username)
     {
-        if(user == null || !user.getActive() || !user.getUsername().equalsIgnoreCase(username)) {
+        if(user == null || user.getIsDeleted() || !user.getUsername().equalsIgnoreCase(username)) {
             throw new ResourceNotFoundException("User account does not exist");
         }
     }

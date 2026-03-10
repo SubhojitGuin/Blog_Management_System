@@ -30,4 +30,8 @@ public interface UserService extends UserDetailsService {
     Slice<UserInfoDTO> getFollowers(String username, UUID id, int page, int size);
 
     Slice<UserInfoDTO> getFollowings(String username, UUID id, int page, int size);
+
+    void deleteUser();
+
+    Slice<PostResponseDTO> getUserPosts(String username, UUID id, int page, int size);
 }

@@ -47,8 +47,20 @@ public class UserEntity implements UserDetails {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Column(name = "no_of_followers", nullable = false)
+    private Integer noOfFollowers = 0;
+
+    @Column(name = "no_of_followings", nullable = false)
+    private Integer noOfFollowings = 0;
+
+    @Column(name = "no_of_posts", nullable = false)
+    private Integer noOfPosts = 0;
+
     @Column(nullable = false)
-    private Boolean active;
+    private Boolean active = true;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
