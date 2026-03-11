@@ -46,4 +46,8 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
          """
     )
     Slice<UserInfoDTO> findFollowing(UUID userId, Pageable pageable);
+
+    void deleteByFollowerAndFollowing(UserEntity follower, UserEntity followee);
+
+    void deleteByFollowerOrFollowing(UserEntity follower, UserEntity followee);
 }
