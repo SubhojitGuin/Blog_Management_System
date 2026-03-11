@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService {
         if (followDTO.getFollow()) {
             followRepository.save(followEntity);
         } else {
-            followRepository.delete(followEntity);
+            followRepository.deleteByFollowerAndFollowing(follower, followee);
         }
     }
 
