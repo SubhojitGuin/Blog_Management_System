@@ -3,7 +3,7 @@ package com.project.Blog_Management_System.Service;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
-import com.project.Blog_Management_System.Exceptions.InvalidFollowActionException;
+import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Repositories.FollowRepository;
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
         isInvalidUser(followee, username);
 
         if (follower.equals(followee)) {
-            throw new InvalidFollowActionException("User cannot follow/unfollow themselves");
+            throw new InvalidActionException("User cannot follow/unfollow themselves");
         }
 
         FollowEntity followEntity = FollowEntity.builder()
@@ -167,7 +167,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameIgnoreCase(username).orElse(null);
     }
 
-    public void isInvalidUser(UserEntity user, String username) {
+    private void isInvalidUser(UserEntity user, String username) {
         if (user == null || user.getIsDeleted() || !user.getUsername().equalsIgnoreCase(username)) {
             throw new ResourceNotFoundException("User account does not exist");
         }
