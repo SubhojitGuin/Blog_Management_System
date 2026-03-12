@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Advice;
 
-import com.project.Blog_Management_System.Exceptions.InvalidFollowActionException;
+import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import io.jsonwebtoken.JwtException;
@@ -34,8 +34,8 @@ public class GlobalExceptionHandler {
         return buildErrorResponseEntity(apiError);
     }
 
-    @ExceptionHandler(InvalidFollowActionException.class)
-    public ResponseEntity<ApiResponse<?>> handleInvalidFollowActionException(InvalidFollowActionException exception) {
+    @ExceptionHandler(InvalidActionException.class)
+    public ResponseEntity<ApiResponse<?>> handleInvalidActionException(InvalidActionException exception) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.NOT_ACCEPTABLE)
                 .message(exception.getMessage())

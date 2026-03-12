@@ -4,6 +4,8 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Role;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Objects;
+
 public class AppUtils {
 
     public static UserEntity getCurrentUser() {
@@ -11,8 +13,9 @@ public class AppUtils {
     }
 
     public static boolean hasRole(Role role) {
-        UserEntity user = getCurrentUser();
-        return user.getRoles().contains(role);
+        return Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getAuthorities().stream().anyMatch(
+                authority -> Objects.equals(authority.getAuthority(), "ROLE_" + role.name())
+        );
     }
 
 }
