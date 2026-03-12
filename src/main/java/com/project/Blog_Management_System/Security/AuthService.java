@@ -63,8 +63,11 @@ public class AuthService {
         arr[0] = jwtService.generateAccessToken(user);
         arr[1] = jwtService.generateRefreshToken(user);
 
-        loginUser.setActive(true);
-        userService.addUser(loginUser);
+        if (!user.getActive()) {
+            loginUser.setActive(true);
+            userService.addUser(loginUser);
+        }
+
         return arr;
     }
 
