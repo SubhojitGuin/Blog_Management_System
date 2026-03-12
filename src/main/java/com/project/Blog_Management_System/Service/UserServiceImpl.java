@@ -3,7 +3,6 @@ package com.project.Blog_Management_System.Service;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
-import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Exceptions.InvalidFollowActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
@@ -163,19 +162,13 @@ public class UserServiceImpl implements UserService {
         return postRepository.findPostsByUser(retrievedUser, currentUser, pageable);
     }
 
-    public boolean hasRole(Role role) {
-        UserEntity user = getCurrentUser();
-        return user.getRoles().contains(role);
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsernameIgnoreCase(username).orElse(null);
     }
 
-    public void isInvalidUser(UserEntity user, String username)
-    {
-        if(user == null || user.getIsDeleted() || !user.getUsername().equalsIgnoreCase(username)) {
+    public void isInvalidUser(UserEntity user, String username) {
+        if (user == null || user.getIsDeleted() || !user.getUsername().equalsIgnoreCase(username)) {
             throw new ResourceNotFoundException("User account does not exist");
         }
     }

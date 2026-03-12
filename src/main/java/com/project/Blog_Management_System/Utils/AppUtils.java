@@ -1,12 +1,18 @@
 package com.project.Blog_Management_System.Utils;
 
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Enums.Role;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AppUtils {
 
     public static UserEntity getCurrentUser() {
         return (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    public static boolean hasRole(Role role) {
+        UserEntity user = getCurrentUser();
+        return user.getRoles().contains(role);
     }
 
 }
