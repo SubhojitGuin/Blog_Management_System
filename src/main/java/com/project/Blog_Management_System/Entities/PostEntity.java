@@ -42,10 +42,10 @@ public class PostEntity {
     private CategoryEntity category;
 
     @Column(name = "like_count", nullable = false)
-    private Integer likeCount;
+    private Integer likeCount = 0;
 
     @Column(name = "comment_count", nullable = false)
-    private Integer commentCount;
+    private Integer commentCount = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

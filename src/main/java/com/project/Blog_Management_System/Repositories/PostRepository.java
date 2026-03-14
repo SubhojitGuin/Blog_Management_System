@@ -72,4 +72,43 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
             @Param("newCategory") CategoryEntity newCategory
     );
 
+    @Query("""
+                SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
+                p.id, p.slug, p.title, p.description, p.content, p.likeCount, p.commentCount,
+                new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
+                new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
+                CASE WHEN u = :currentUser THEN true ELSE false END,
+                CASE WHEN l.id IS NOT NULL THEN true ELSE false END
+                )
+                FROM PostEntity p
+                JOIN p.user u
+                JOIN p.category c
+                LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
+                ORDER BY p.createdAt DESC
+            """)
+    Slice<PostResponseDTO> findAllPosts(
+            @Param("currentUser") UserEntity currentUser,
+            Pageable pageable
+    );
+
+    @Query("""
+                SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
+                p.id, p.slug, p.title, p.description, p.content, p.likeCount, p.commentCount,
+                new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
+                new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
+                CASE WHEN u = :currentUser THEN true ELSE false END,
+                CASE WHEN l.id IS NOT NULL THEN true ELSE false END
+                )
+                FROM PostEntity p
+                JOIN p.user u
+                JOIN p.category c
+                JOIN FollowEntity f ON f.following = u AND f.follower = :currentUser
+                LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
+                ORDER BY p.createdAt DESC
+            """)
+    Slice<PostResponseDTO> findAllPostsOfFollowings(
+            @Param("currentUser") UserEntity currentUser,
+            Pageable pageable
+    );
+
 }

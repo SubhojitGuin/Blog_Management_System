@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
+import static com.project.Blog_Management_System.Utils.ValidationUtils.isInvalidUser;
 
 @Service
 @RequiredArgsConstructor
@@ -167,10 +168,5 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameIgnoreCase(username).orElse(null);
     }
 
-    private void isInvalidUser(UserEntity user, String username) {
-        if (user == null || user.getIsDeleted() || !user.getUsername().equalsIgnoreCase(username)) {
-            throw new ResourceNotFoundException("User account does not exist");
-        }
-    }
 
 }
