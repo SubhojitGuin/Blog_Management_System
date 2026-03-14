@@ -18,4 +18,10 @@ public class AppUtils {
         );
     }
 
+    public static String generateSlug(String name) {
+        return name.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "-");
+    }
+
 }

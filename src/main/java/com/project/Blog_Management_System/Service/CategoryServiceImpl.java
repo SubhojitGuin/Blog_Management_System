@@ -7,7 +7,6 @@ import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
-import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
@@ -21,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
 import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
+import static com.project.Blog_Management_System.Utils.ValidationUtils.isInvalidCategory;
 
 @Service
 @RequiredArgsConstructor
@@ -109,15 +110,4 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
 
-    private String generateSlug(String name) {
-        return name.toLowerCase()
-                .replaceAll("[^a-z0-9\\s]", "")
-                .replaceAll("\\s+", "-");
-    }
-
-    private void isInvalidCategory(CategoryEntity category, String slug) {
-        if (category == null || !category.getSlug().equals(slug)) {
-            throw new ResourceNotFoundException("Category does not exist");
-        }
-    }
 }
