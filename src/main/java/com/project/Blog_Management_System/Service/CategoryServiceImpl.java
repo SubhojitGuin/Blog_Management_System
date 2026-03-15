@@ -69,7 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryEntity category = modelMapper.map(categoryRequestDTO, CategoryEntity.class);
         category.setSlug(slug);
 
-        CategoryEntity savedCategory = categoryRepository.save(category);
+        CategoryEntity savedCategory = categoryRepository.saveAndFlush(category);
         return modelMapper.map(savedCategory, CategoryResponseDTO.class);
     }
 
@@ -86,7 +86,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         modelMapper.map(categoryRequestDTO, category);
         category.setSlug(newSlug);
-        categoryRepository.save(category);
+        categoryRepository.saveAndFlush(category);
 
         return modelMapper.map(category, CategoryResponseDTO.class);
     }
@@ -108,6 +108,5 @@ public class CategoryServiceImpl implements CategoryService {
         postRepository.updatePostsCategory(oldCategory, newCategory);
         categoryRepository.delete(oldCategory);
     }
-
 
 }
