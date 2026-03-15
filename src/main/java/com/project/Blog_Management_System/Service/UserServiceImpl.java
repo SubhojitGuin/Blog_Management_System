@@ -12,7 +12,6 @@ import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -47,7 +46,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserEntity addUser(UserEntity user) {
-        return userRepository.save(user);
+        return userRepository.saveAndFlush(user);
     }
 
     @Override
@@ -63,7 +62,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceConflictException("Email is already taken");
         }
         modelMapper.map(profileUpdateDTO, user);
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
         return modelMapper.map(user, ProfileUpdateDTO.class);
     }
 
@@ -75,7 +74,7 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Old password is incorrect");
         }
         user.setPassword(passwordEncoder.encode(passwordUpdateDTO.getNewPassword()));
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
     }
 
     @Override
@@ -86,7 +85,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceConflictException("Username is already taken");
         }
         user.setUsername(usernameUpdateDTO.getUsername());
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
     }
 
     @Override
@@ -104,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserInfoDTO> searchUsers(String query) {
-        return userRepository.findByUsernameContainingIgnoreCase(query, Limit.of(10));
+        return userRepository.findByUsernameContainingIgnoreCase(query, PageRequest.of(0, 10));
     }
 
     @Override
@@ -125,7 +124,7 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         if (followDTO.getFollow()) {
-            followRepository.save(followEntity);
+            followRepository.saveAndFlush(followEntity);
         } else {
             followRepository.deleteByFollowerAndFollowing(follower, followee);
         }
@@ -151,7 +150,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser() {
         UserEntity user = getCurrentUser();
         user.setActive(false);
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
     }
 
     @Override

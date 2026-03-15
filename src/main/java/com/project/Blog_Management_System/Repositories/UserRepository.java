@@ -2,7 +2,6 @@ package com.project.Blog_Management_System.Repositories;
 
 import com.project.Blog_Management_System.Dto.UserInfoDTO;
 import com.project.Blog_Management_System.Entities.UserEntity;
-import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,15 +23,28 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
     Optional<UserEntity> findByEmailIgnoreCase(String email);
 
-    List<UserInfoDTO> findByUsernameContainingIgnoreCase(String query, Limit limit);
+    @Query("""
+            SELECT new com.project.Blog_Management_System.Dto.UserInfoDTO(
+                u.id,
+                u.name,
+                u.username,
+                u.active
+            )
+            FROM UserEntity u
+            WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%'))
+            """)
+    List<UserInfoDTO> findByUsernameContainingIgnoreCase(
+            @Param("query") String query,
+            Pageable pageable
+    );
 
     @Query("""
-        SELECT u
-        FROM UserEntity u
-        WHERE u.active = false
-          AND u.isDeleted = false
-          AND u.updatedAt <= :cutoff
-        ORDER BY u.updatedAt ASC
-        """)
+            SELECT u
+            FROM UserEntity u
+            WHERE u.active = false
+              AND u.isDeleted = false
+              AND u.updatedAt <= :cutoff
+            ORDER BY u.updatedAt ASC
+            """)
     Slice<UserEntity> findInactiveUsers(@Param("cutoff") LocalDateTime cutoff, Pageable pageable);
 }

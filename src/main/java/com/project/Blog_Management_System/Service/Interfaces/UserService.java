@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService extends UserDetailsService {
+
     UserEntity getUserById(UUID id);
 
     UserEntity addUser(UserEntity user);
