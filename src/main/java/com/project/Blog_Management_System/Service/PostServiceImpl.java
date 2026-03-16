@@ -2,6 +2,7 @@ package com.project.Blog_Management_System.Service;
 
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
+import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.CommentRepository;
 import com.project.Blog_Management_System.Repositories.LikeRepository;
@@ -18,8 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
-import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
+import static com.project.Blog_Management_System.Utils.AppUtils.*;
 import static com.project.Blog_Management_System.Utils.ValidationUtils.*;
 
 @Service
@@ -116,7 +116,7 @@ public class PostServiceImpl implements PostService {
         PostEntity post = postRepository.findById(id).orElse(null);
         isInvalidPost(post, slug);
 
-        if (!post.getUser().equals(user)) {
+        if (!post.getUser().equals(user) && !hasRole(Role.ADMIN)) {
             throw new AccessDeniedException("You are not authorized to delete this post");
         }
 
@@ -179,7 +179,7 @@ public class PostServiceImpl implements PostService {
         CommentEntity comment = commentRepository.findById(comment_id).orElse(null);
         isInvalidComment(comment);
 
-        if (!comment.getUser().equals(user)) {
+        if (!comment.getUser().equals(user) && !hasRole(Role.ADMIN)) {
             throw new AccessDeniedException("You are not authorized to delete this comment");
         }
 

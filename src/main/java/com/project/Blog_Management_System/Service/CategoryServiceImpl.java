@@ -11,6 +11,7 @@ import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -24,6 +25,7 @@ import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
 import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
 import static com.project.Blog_Management_System.Utils.ValidationUtils.isInvalidCategory;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -70,6 +72,9 @@ public class CategoryServiceImpl implements CategoryService {
         category.setSlug(slug);
 
         CategoryEntity savedCategory = categoryRepository.saveAndFlush(category);
+
+        log.info("ADMIN CREATED CATEGORY {}", savedCategory.getName());
+
         return modelMapper.map(savedCategory, CategoryResponseDTO.class);
     }
 
@@ -88,6 +93,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setSlug(newSlug);
         categoryRepository.saveAndFlush(category);
 
+        log.info("ADMIN UPDATED CATEGORY: {}", category.getName());
         return modelMapper.map(category, CategoryResponseDTO.class);
     }
 
@@ -106,6 +112,7 @@ public class CategoryServiceImpl implements CategoryService {
         isInvalidCategory(newCategory, newSlug);
 
         postRepository.updatePostsCategory(oldCategory, newCategory);
+        log.info("ADMIN DELETED OLD CATEGORY: {} AND UPDATED WITH NEW CATEGORY: {}", oldCategory.getName(), newCategory.getName());
         categoryRepository.delete(oldCategory);
     }
 
