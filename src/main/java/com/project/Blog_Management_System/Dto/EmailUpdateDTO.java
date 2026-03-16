@@ -1,0 +1,12 @@
+package com.project.Blog_Management_System.Dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+@Data
+public class EmailUpdateDTO {
+    @Email(message = "Invalid Email format")
+    @NotNull
+    private String email;
+}

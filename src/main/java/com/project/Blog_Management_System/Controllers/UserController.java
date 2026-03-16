@@ -5,6 +5,7 @@ import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.project.Blog_Management_System.Utils.AppUtils.clearAuthCookie;
 
 @RestController
 @RequestMapping("/users")
@@ -32,15 +35,25 @@ public class UserController {
 
     @PatchMapping("/update_password")
     @Operation(summary = "Update User Password", description = "updates the existing user password.")
-    public ResponseEntity<Void> updateUserPassword(@Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO) {
+    public ResponseEntity<Void> updateUserPassword(@Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO, HttpServletResponse httpServletResponse) {
         userService.updatePassword(passwordUpdateDTO);
+        httpServletResponse.addCookie(clearAuthCookie());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/update_username")
     @Operation(summary = "Update User Name", description = "updates the existing user name.")
-    public ResponseEntity<Void> updateUserName(@Valid @RequestBody UsernameUpdateDTO usernameUpdateDTO) {
+    public ResponseEntity<Void> updateUserName(@Valid @RequestBody UsernameUpdateDTO usernameUpdateDTO, HttpServletResponse httpServletResponse) {
         userService.updateUserName(usernameUpdateDTO);
+        httpServletResponse.addCookie(clearAuthCookie());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/update_email")
+    @Operation(summary = "Update User Email", description = "updates the existing user email.")
+    public ResponseEntity<Void> updateEmail(@Valid @RequestBody EmailUpdateDTO emailUpdateDTO, HttpServletResponse httpServletResponse) {
+        userService.updateEmail(emailUpdateDTO);
+        httpServletResponse.addCookie(clearAuthCookie());
         return ResponseEntity.noContent().build();
     }
 

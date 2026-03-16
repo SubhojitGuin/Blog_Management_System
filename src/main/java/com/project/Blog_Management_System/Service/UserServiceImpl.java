@@ -58,9 +58,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public ProfileUpdateDTO updateProfile(ProfileUpdateDTO profileUpdateDTO) {
         UserEntity user = getCurrentUser();
-        if (userRepository.findByEmailIgnoreCase(profileUpdateDTO.getEmail()).isPresent()) {
-            throw new ResourceConflictException("Email is already taken");
-        }
         modelMapper.map(profileUpdateDTO, user);
         userRepository.saveAndFlush(user);
         return modelMapper.map(user, ProfileUpdateDTO.class);
@@ -74,6 +71,7 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Old password is incorrect");
         }
         user.setPassword(passwordEncoder.encode(passwordUpdateDTO.getNewPassword()));
+        user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
         userRepository.saveAndFlush(user);
     }
 
@@ -85,6 +83,18 @@ public class UserServiceImpl implements UserService {
             throw new ResourceConflictException("Username is already taken");
         }
         user.setUsername(usernameUpdateDTO.getUsername());
+        user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
+        userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public void updateEmail(EmailUpdateDTO emailUpdateDTO) {
+        UserEntity user = getCurrentUser();
+        if (userRepository.findByEmailIgnoreCase(emailUpdateDTO.getEmail()).isPresent()) {
+            throw new ResourceConflictException("Email is already taken");
+        }
+        user.setEmail(emailUpdateDTO.getEmail());
+        user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
         userRepository.saveAndFlush(user);
     }
 

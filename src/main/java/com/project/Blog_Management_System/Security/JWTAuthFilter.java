@@ -45,6 +45,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserEntity user = userService.getUserById(userId);
+                int tokenVersion = jwtService.getTokenVersionFromToken(token);
+
+                if (!user.getTokenVersion().equals(tokenVersion)) {
+                    throw new JwtException("Invalid access token");
+                }
                 // check if the user should be allowed
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
