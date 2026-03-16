@@ -1,10 +1,7 @@
 package com.project.Blog_Management_System.Service;
 
 import com.project.Blog_Management_System.Dto.*;
-import com.project.Blog_Management_System.Entities.CategoryEntity;
-import com.project.Blog_Management_System.Entities.CommentEntity;
-import com.project.Blog_Management_System.Entities.PostEntity;
-import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.CommentRepository;
 import com.project.Blog_Management_System.Repositories.LikeRepository;
@@ -23,8 +20,7 @@ import java.util.UUID;
 
 import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
 import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
-import static com.project.Blog_Management_System.Utils.ValidationUtils.isInvalidCategory;
-import static com.project.Blog_Management_System.Utils.ValidationUtils.isInvalidPost;
+import static com.project.Blog_Management_System.Utils.ValidationUtils.*;
 
 @Service
 @RequiredArgsConstructor
@@ -150,6 +146,76 @@ public class PostServiceImpl implements PostService {
         CommentEntity savedComment = commentRepository.saveAndFlush(comment);
 
         return modelMapper.map(savedComment, CommentResponseDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public CommentResponseDTO updateComment(String slug, UUID post_id, UUID comment_id, CommentRequestDTO commentRequestDTO) {
+        UserEntity user = getCurrentUser();
+
+        PostEntity post = postRepository.findById(post_id).orElse(null);
+        isInvalidPost(post, slug);
+
+        CommentEntity comment = commentRepository.findById(comment_id).orElse(null);
+        isInvalidComment(comment);
+
+        if (!comment.getUser().equals(user)) {
+            throw new AccessDeniedException("You are not authorized to update this comment");
+        }
+
+        modelMapper.map(commentRequestDTO, comment);
+        commentRepository.saveAndFlush(comment);
+        return modelMapper.map(comment, CommentResponseDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public void deleteComment(String slug, UUID post_id, UUID comment_id) {
+        UserEntity user = getCurrentUser();
+
+        PostEntity post = postRepository.findById(post_id).orElse(null);
+        isInvalidPost(post, slug);
+
+        CommentEntity comment = commentRepository.findById(comment_id).orElse(null);
+        isInvalidComment(comment);
+
+        if (!comment.getUser().equals(user)) {
+            throw new AccessDeniedException("You are not authorized to delete this comment");
+        }
+
+        commentRepository.delete(comment);
+    }
+
+    @Override
+    public Slice<UserInfoDTO> getLikesOfPost(String slug, UUID id, int page, int size) {
+        PostEntity post = postRepository.findById(id).orElse(null);
+        isInvalidPost(post, slug);
+
+        return likeRepository.findLikesOfPost(post, PageRequest.of(page, size));
+    }
+
+    @Override
+    @Transactional
+    public void likeOrDislikePost(String slug, UUID id, LikeDTO likeDTO) {
+        UserEntity user = getCurrentUser();
+
+        PostEntity post = postRepository.findById(id).orElse(null);
+        isInvalidPost(post, slug);
+
+        LikeEntity like = LikeEntity.builder()
+                .user(user)
+                .post(post)
+                .build();
+
+        if (likeDTO.getLike()) {
+            if (likeRepository.findByUserAndPost(user, post).isEmpty()) {
+                likeRepository.saveAndFlush(like);
+            }
+        } else {
+            if (likeRepository.findByUserAndPost(user, post).isPresent()) {
+                likeRepository.deleteByUserAndPost(user, post);
+            }
+        }
     }
 
 }

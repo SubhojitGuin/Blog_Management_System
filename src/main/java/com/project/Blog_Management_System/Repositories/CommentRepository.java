@@ -18,6 +18,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
 
     @Query("""
             SELECT new com.project.Blog_Management_System.Dto.CommentResponseDTO(
+                c.id,
                 c.body,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 c.createdAt,

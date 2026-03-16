@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -50,4 +51,7 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
     void deleteByFollowerAndFollowing(UserEntity follower, UserEntity followee);
 
     void deleteByFollowerOrFollowing(UserEntity follower, UserEntity followee);
+
+    Optional<FollowEntity> findByFollowerAndFollowing(UserEntity follower, UserEntity followee);
+
 }
