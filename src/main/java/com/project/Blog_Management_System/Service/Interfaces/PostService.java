@@ -26,4 +26,12 @@ public interface PostService {
 
     CommentResponseDTO addComment(String slug, UUID id, CommentRequestDTO commentRequestDTO);
 
+    CommentResponseDTO updateComment(String slug, UUID post_id, UUID comment_id, CommentRequestDTO commentRequestDTO);
+
+    void deleteComment(String slug, UUID post_id, UUID comment_id);
+
+    Slice<UserInfoDTO> getLikesOfPost(String slug, UUID id, int page, int size);
+
+    void likeOrDislikePost(String slug, UUID id, LikeDTO likeDTO);
+
 }

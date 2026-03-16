@@ -90,4 +90,40 @@ public class PostController {
         return new ResponseEntity<>(postService.addComment(slug, id, commentRequestDTO), HttpStatus.CREATED);
     }
 
+    @PutMapping("/{slug}-{post_id:[0-9a-fA-F\\-]{36}}/comments/{comment_id:[0-9a-fA-F\\-]{36}}")
+    @Operation(summary = "Update comment of the post", description = "Update a comment to a post identified by its post slug, post ID and comment ID.")
+    public ResponseEntity<CommentResponseDTO> updateComment(@PathVariable String slug,
+                                                            @PathVariable UUID post_id,
+                                                            @PathVariable UUID comment_id,
+                                                            @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
+        return new ResponseEntity<>(postService.updateComment(slug, post_id, comment_id, commentRequestDTO), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{slug}-{post_id:[0-9a-fA-F\\-]{36}}/comments/{comment_id:[0-9a-fA-F\\-]{36}}")
+    @Operation(summary = "Delete a comment of the post", description = "Delete a comment to a post identified by its post slug, post ID and comment ID.")
+    public ResponseEntity<Void> deleteComment(@PathVariable String slug,
+                                              @PathVariable UUID post_id,
+                                              @PathVariable UUID comment_id) {
+        postService.deleteComment(slug, post_id, comment_id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{slug}-{id:[0-9a-fA-F\\-]{36}}/likes")
+    @Operation(summary = "Get all likes of a post", description = "Get all the liked users of a post using the post slug and post ID")
+    public ResponseEntity<Slice<UserInfoDTO>> getLikesOfPost(@PathVariable String slug,
+                                                             @PathVariable UUID id,
+                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(postService.getLikesOfPost(slug, id, page, size), HttpStatus.OK);
+    }
+
+    @PostMapping("/{slug}-{id:[0-9a-fA-F\\-]{36}}/likes")
+    @Operation(summary = "Like or Dislike a post", description = "Like or Dislike a post using the post slug and post ID. Set 'like' field to `true` for like and `false` for dislike in the request body.")
+    public ResponseEntity<Void> likeOrDislikePost(@PathVariable String slug,
+                                                  @PathVariable UUID id,
+                                                  @Valid @RequestBody LikeDTO likeDTO) {
+        postService.likeOrDislikePost(slug, id, likeDTO);
+        return ResponseEntity.noContent().build();
+    }
+
 }

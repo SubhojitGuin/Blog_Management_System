@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Utils;
 
 import com.project.Blog_Management_System.Entities.CategoryEntity;
+import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
@@ -24,4 +25,11 @@ public class ValidationUtils {
             throw new ResourceNotFoundException("Post does not exist");
         }
     }
+
+    public static void isInvalidComment(CommentEntity comment) {
+        if (comment == null) {
+            throw new ResourceNotFoundException("Comment does not exist");
+        }
+    }
+
 }
