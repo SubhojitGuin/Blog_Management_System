@@ -22,6 +22,8 @@ public interface UserService extends UserDetailsService {
 
     void updateUserName(UsernameUpdateDTO usernameUpdateDTO);
 
+    void updateEmail(EmailUpdateDTO emailUpdateDTO);
+
     UserDTO getUserProfile(String username, UUID id);
 
     List<UserInfoDTO> searchUsers(String query);

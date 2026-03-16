@@ -27,6 +27,7 @@ public class JWTService {
                 .subject(user.getId().toString())
                 .claim("username", user.getUsername())
                 .claim("roles", user.getRoles().toString())
+                .claim("tokenVersion", user.getTokenVersion())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10)) // 10 minutes
                 .signWith(getSecretKey())
@@ -36,6 +37,7 @@ public class JWTService {
     public String generateRefreshToken(UserEntity user) {
         return Jwts.builder()
                 .subject(user.getId().toString())
+                .claim("tokenVersion", user.getTokenVersion())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30 * 6)) // 6 months
                 .signWith(getSecretKey())
@@ -49,5 +51,14 @@ public class JWTService {
                 .parseSignedClaims(token)
                 .getPayload();
         return UUID.fromString(claims.getSubject());
+    }
+
+    public int getTokenVersionFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return (int) claims.get("tokenVersion");
     }
 }

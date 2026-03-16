@@ -2,7 +2,6 @@ package com.project.Blog_Management_System.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Blog_Management_System.Enums.Gender;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Data;
@@ -13,10 +12,6 @@ import java.time.LocalDate;
 public class ProfileUpdateDTO {
     @NotNull
     private String name;
-
-    @Email(message = "Invalid Email format")
-    @NotNull
-    private String email;
 
     private String bio;
 

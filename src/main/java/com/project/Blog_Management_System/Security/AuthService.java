@@ -7,6 +7,7 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -73,8 +74,13 @@ public class AuthService {
 
     public String refreshToken(String refreshToken) {
         UUID id = jwtService.getUserIdFromToken(refreshToken);
-
+        int tokenVersion = jwtService.getTokenVersionFromToken(refreshToken);
         UserEntity user = userService.getUserById(id);
+
+        if (!user.getTokenVersion().equals(tokenVersion)) {
+            throw new JwtException("Invalid refresh token");
+        }
+
         return jwtService.generateAccessToken(user);
     }
 
