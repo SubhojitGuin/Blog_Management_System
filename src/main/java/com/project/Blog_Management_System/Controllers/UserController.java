@@ -59,6 +59,7 @@ public class UserController {
     }
 
     @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}")
+    @Operation(summary = "Get User Profile", description = "get user profile by username and id.")
     public ResponseEntity<UserDTO> getUserProfile(@PathVariable String username,
                                                   @PathVariable UUID id) {
         return new ResponseEntity<>(userService.getUserProfile(username, id), HttpStatus.OK);
