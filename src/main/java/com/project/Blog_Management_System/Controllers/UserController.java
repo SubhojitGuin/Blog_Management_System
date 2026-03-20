@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import static com.project.Blog_Management_System.Utils.AppUtils.clearAuthCookie;
+import static com.project.Blog_Management_System.Security.SecurityUtils.clearAuthCookie;
+
 
 @RestController
 @RequestMapping("/users")

@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 
+import static com.project.Blog_Management_System.Security.SecurityUtils.getAuthCookie;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -38,26 +40,23 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Authenticates a user and returns an JWT access token.")
-    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginDto, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginDto, HttpServletResponse httpServletResponse) {
         String[] tokens = authService.login(loginDto);
-
-        Cookie cookie = new Cookie("refreshToken", tokens[1]);
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(60 * 60 * 24 * 30 * 6); // 6 months
-        httpServletResponse.addCookie(cookie);
+        httpServletResponse.addCookie(getAuthCookie(tokens[1]));
         return ResponseEntity.ok(new LoginResponseDTO(tokens[0]));
     }
 
     @PostMapping("/refresh")
     @Operation(summary = "Refresh access token", description = "Generates a new access token using a refresh token.")
-    public ResponseEntity<LoginResponseDTO> refresh(HttpServletRequest request) {
+    public ResponseEntity<LoginResponseDTO> refresh(HttpServletRequest request, HttpServletResponse httpServletResponse) {
         String refreshToken = Arrays.stream(request.getCookies())
                 .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new AuthenticationServiceException("Refresh token not found inside the Cookies"));
 
-        String accessToken = authService.refreshToken(refreshToken);
-        return ResponseEntity.ok(new LoginResponseDTO(accessToken));
+        String[] tokens = authService.refreshToken(refreshToken);
+        httpServletResponse.addCookie(getAuthCookie(tokens[1]));
+        return ResponseEntity.ok(new LoginResponseDTO(tokens[0]));
     }
 }

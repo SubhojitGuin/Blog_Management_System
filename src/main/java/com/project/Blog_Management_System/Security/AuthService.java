@@ -72,7 +72,7 @@ public class AuthService {
         return arr;
     }
 
-    public String refreshToken(String refreshToken) {
+    public String[] refreshToken(String refreshToken) {
         UUID id = jwtService.getUserIdFromToken(refreshToken);
         int tokenVersion = jwtService.getTokenVersionFromToken(refreshToken);
         UserEntity user = userService.getUserById(id);
@@ -81,7 +81,11 @@ public class AuthService {
             throw new JwtException("Invalid refresh token");
         }
 
-        return jwtService.generateAccessToken(user);
+        String[] arr = new String[2];
+        arr[0] = jwtService.generateAccessToken(user);
+        arr[1] = jwtService.generateRefreshToken(user);
+
+        return arr;
     }
 
 }
