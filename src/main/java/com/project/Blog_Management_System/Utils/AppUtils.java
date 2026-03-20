@@ -28,7 +28,6 @@ public class AppUtils {
     public static Cookie clearAuthCookie() {
         Cookie cookie = new Cookie("refreshToken", null);
         cookie.setHttpOnly(true);
-        cookie.setPath("/");
         cookie.setMaxAge(0);
         return cookie;
     }

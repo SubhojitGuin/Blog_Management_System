@@ -43,7 +43,7 @@ public class AuthController {
 
         Cookie cookie = new Cookie("refreshToken", tokens[1]);
         cookie.setHttpOnly(true);
-
+        cookie.setMaxAge(60 * 60 * 24 * 30 * 6); // 6 months
         httpServletResponse.addCookie(cookie);
         return ResponseEntity.ok(new LoginResponseDTO(tokens[0]));
     }
