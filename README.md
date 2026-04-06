@@ -12,8 +12,8 @@ This application provides backend APIs for a **Blog Management System**, includi
 - **User Authentication**
 - **User Information & Handling**
 
-![](docs\assets\swagger-img-1.png "Swagger docs for Endpoints")
-![](docs\assets\swagger-img-2.png "Swagger docs for Endpoints")
+![](docs/assets/swagger-img-1.png "Swagger docs for Endpoints")
+![](docs/assets/swagger-img-2.png "Swagger docs for Endpoints")
 
 ## API Endpoints
 
@@ -77,4 +77,4 @@ This application provides backend APIs for a **Blog Management System**, includi
 
 ## Entity Relationship Diagram
 
-![](docs\assets\erd.png "Entity Relationship Diagram")
+![](docs/assets/erd.png "Entity Relationship Diagram")
