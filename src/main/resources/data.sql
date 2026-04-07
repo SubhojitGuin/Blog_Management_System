@@ -1,179 +1,179 @@
 -- CATEGORIES
 INSERT INTO CATEGORIES(ID, DESCRIPTION, NAME, SLUG, CREATED_AT, UPDATED_AT)
 VALUES ('995ef0ea-eb82-44bb-81f0-62701e3dbd68', 'Default category', 'Uncategorised', 'uncategorised',
-        CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO CATEGORIES(ID, DESCRIPTION, NAME, SLUG, CREATED_AT, UPDATED_AT)
 VALUES ('af9817d9-d5d6-4b9d-9472-d46622a47ee3', 'New category', 'Category 1',
-        'category-1', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
+        'category-1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- USERS
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('1c06c933-6795-483b-8f55-2be257493037', TRUE, 'I am Subhojit', CURRENT_TIMESTAMP(), '2004-01-23',
+VALUES ('1c06c933-6795-483b-8f55-2be257493037', TRUE, 'I am Subhojit', CURRENT_TIMESTAMP, '2004-01-23',
         'subhojit@gmail.com', 'MALE', 'Subhojit Guin', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'subhojit', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'subhojit', 0, 0, 0, FALSE, 0);
 --Subhojit@123
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('b1a3e6e2-7a2e-4d8e-8d92-9f0a4a3c1101', TRUE, 'Hello I am Suraj', CURRENT_TIMESTAMP(), '1999-05-12',
+VALUES ('b1a3e6e2-7a2e-4d8e-8d92-9f0a4a3c1101', TRUE, 'Hello I am Suraj', CURRENT_TIMESTAMP, '1999-05-12',
         'suraj1@gmail.com', 'MALE', 'Suraj Sharma', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'suraj', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'suraj', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('c4e1b5a1-5bde-4c2f-9f6e-3b8c94d6c101', TRUE, 'Tech enthusiast', CURRENT_TIMESTAMP(), '2000-07-18',
+VALUES ('c4e1b5a1-5bde-4c2f-9f6e-3b8c94d6c101', TRUE, 'Tech enthusiast', CURRENT_TIMESTAMP, '2000-07-18',
         'sudipta@gmail.com', 'MALE', 'Sudipta Roy', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'sudipta', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'sudipta', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('8f2c9f1e-14f1-4b5a-b6a8-11b4d6c82001', TRUE, 'Love coding', CURRENT_TIMESTAMP(), '1998-11-02',
+VALUES ('8f2c9f1e-14f1-4b5a-b6a8-11b4d6c82001', TRUE, 'Love coding', CURRENT_TIMESTAMP, '1998-11-02',
         'suman1@gmail.com', 'MALE', 'Suman Das', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'suman', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'suman', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('0d23c6a2-0c91-4d8f-93ad-72b6e2b92002', TRUE, 'Traveler', CURRENT_TIMESTAMP(), '1997-03-21', 'suvam@gmail.com',
-        'MALE', 'Suvam Dutta', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('0d23c6a2-0c91-4d8f-93ad-72b6e2b92002', TRUE, 'Traveler', CURRENT_TIMESTAMP, '1997-03-21', 'suvam@gmail.com',
+        'MALE', 'Suvam Dutta', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'suvam', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('9c5e6a32-4c1b-4c21-a74a-63c0c9c33003', TRUE, 'Music lover', CURRENT_TIMESTAMP(), '2001-09-14',
+VALUES ('9c5e6a32-4c1b-4c21-a74a-63c0c9c33003', TRUE, 'Music lover', CURRENT_TIMESTAMP, '2001-09-14',
         'sujit@gmail.com', 'MALE', 'Sujit Paul', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'sujit', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'sujit', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('e7d1b3f4-ec72-49d0-9c55-ff1a1d0a3004', TRUE, 'Football fan', CURRENT_TIMESTAMP(), '1996-06-30',
+VALUES ('e7d1b3f4-ec72-49d0-9c55-ff1a1d0a3004', TRUE, 'Football fan', CURRENT_TIMESTAMP, '1996-06-30',
         'sudip@gmail.com', 'MALE', 'Sudip Ghosh', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'sudip', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'sudip', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('f0a9c0a3-2e64-4b7a-9c4f-8f9c10a43005', TRUE, 'Reader', CURRENT_TIMESTAMP(), '1995-02-11', 'sushanta@gmail.com',
-        'MALE', 'Sushanta Kar', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('f0a9c0a3-2e64-4b7a-9c4f-8f9c10a43005', TRUE, 'Reader', CURRENT_TIMESTAMP, '1995-02-11', 'sushanta@gmail.com',
+        'MALE', 'Sushanta Kar', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'sushanta', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('a9b4b7d2-7f3a-4e4c-b7e1-2b8b91d23006', TRUE, 'Nature lover', CURRENT_TIMESTAMP(), '2002-10-19',
+VALUES ('a9b4b7d2-7f3a-4e4c-b7e1-2b8b91d23006', TRUE, 'Nature lover', CURRENT_TIMESTAMP, '2002-10-19',
         'sukanta@gmail.com', 'MALE', 'Sukanta Mondal', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'sukanta', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'sukanta', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('c2c7e3d1-bd44-4cda-8a20-11fa8e7f3007', TRUE, 'Developer', CURRENT_TIMESTAMP(), '1999-12-01', 'sumit@gmail.com',
-        'MALE', 'Sumit Sen', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('c2c7e3d1-bd44-4cda-8a20-11fa8e7f3007', TRUE, 'Developer', CURRENT_TIMESTAMP, '1999-12-01', 'sumit@gmail.com',
+        'MALE', 'Sumit Sen', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'sumit', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('5b21f01e-9b8d-4b9c-a0c1-b8e2d3f73008', TRUE, 'Foodie', CURRENT_TIMESTAMP(), '2003-01-07', 'supriyo@gmail.com',
-        'MALE', 'Supriyo Banerjee', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('5b21f01e-9b8d-4b9c-a0c1-b8e2d3f73008', TRUE, 'Foodie', CURRENT_TIMESTAMP, '2003-01-07', 'supriyo@gmail.com',
+        'MALE', 'Supriyo Banerjee', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'supriyo', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('a6c8e8d3-21a1-4f7c-98b1-29c3c3a13009', TRUE, 'Designer', CURRENT_TIMESTAMP(), '2000-04-25', 'sudesh@gmail.com',
-        'MALE', 'Sudesh Kumar', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('a6c8e8d3-21a1-4f7c-98b1-29c3c3a13009', TRUE, 'Designer', CURRENT_TIMESTAMP, '2000-04-25', 'sudesh@gmail.com',
+        'MALE', 'Sudesh Kumar', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'sudesh', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('d2c4b8a2-9c0f-4c99-bb5e-8a6c4d2e3010', TRUE, 'Student', CURRENT_TIMESTAMP(), '2004-02-14', 'sujan@gmail.com',
-        'MALE', 'Sujan Saha', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('d2c4b8a2-9c0f-4c99-bb5e-8a6c4d2e3010', TRUE, 'Student', CURRENT_TIMESTAMP, '2004-02-14', 'sujan@gmail.com',
+        'MALE', 'Sujan Saha', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'sujan', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('b3d7a6e1-2f6c-4a1e-9f8b-91a3b5c63011', TRUE, 'Cricket fan', CURRENT_TIMESTAMP(), '1998-08-09',
+VALUES ('b3d7a6e1-2f6c-4a1e-9f8b-91a3b5c63011', TRUE, 'Cricket fan', CURRENT_TIMESTAMP, '1998-08-09',
         'subhajit@gmail.com', 'MALE', 'Subhajit Dey', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'subhajit', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'subhajit', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('c9d0a8f2-6e3d-48c7-a7d4-0a3c8b733012', TRUE, 'Gamer', CURRENT_TIMESTAMP(), '2001-06-16', 'subir@gmail.com',
-        'MALE', 'Subir Nandi', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('c9d0a8f2-6e3d-48c7-a7d4-0a3c8b733012', TRUE, 'Gamer', CURRENT_TIMESTAMP, '2001-06-16', 'subir@gmail.com',
+        'MALE', 'Subir Nandi', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'subir', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('f1e0a7c2-0e32-4c51-b7f2-2c9b5e2e3013', TRUE, 'Engineer', CURRENT_TIMESTAMP(), '1997-05-03', 'sudhan@gmail.com',
+VALUES ('f1e0a7c2-0e32-4c51-b7f2-2c9b5e2e3013', TRUE, 'Engineer', CURRENT_TIMESTAMP, '1997-05-03', 'sudhan@gmail.com',
         'MALE', 'Sudhan Chakraborty', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'sudhan', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'sudhan', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('e4f2b7c3-1c9e-46c0-b2a4-3a9e1c6d3014', TRUE, 'Traveler', CURRENT_TIMESTAMP(), '1999-03-27', 'rahul1@gmail.com',
-        'MALE', 'Rahul Mehta', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('e4f2b7c3-1c9e-46c0-b2a4-3a9e1c6d3014', TRUE, 'Traveler', CURRENT_TIMESTAMP, '1999-03-27', 'rahul1@gmail.com',
+        'MALE', 'Rahul Mehta', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'rahul_mehta', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('d5b8e9a1-3f44-4e7b-9d1e-4a0d2b8f3015', TRUE, 'Photographer', CURRENT_TIMESTAMP(), '2002-12-10',
+VALUES ('d5b8e9a1-3f44-4e7b-9d1e-4a0d2b8f3015', TRUE, 'Photographer', CURRENT_TIMESTAMP, '2002-12-10',
         'ananya@gmail.com', 'FEMALE', 'Ananya Das', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'ananya', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'ananya', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('c6f3e8b2-8a91-4d7a-9a11-5f2b6e913016', TRUE, 'Writer', CURRENT_TIMESTAMP(), '1996-01-19', 'vikram@gmail.com',
-        'MALE', 'Vikram Singh', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('c6f3e8b2-8a91-4d7a-9a11-5f2b6e913016', TRUE, 'Writer', CURRENT_TIMESTAMP, '1996-01-19', 'vikram@gmail.com',
+        'MALE', 'Vikram Singh', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'vikram', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('b7e2c1a3-5b7d-4c9e-8d4f-6a3e1c243017', TRUE, 'Blogger', CURRENT_TIMESTAMP(), '2003-07-05', 'priya@gmail.com',
-        'FEMALE', 'Priya Kapoor', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP(),
+VALUES ('b7e2c1a3-5b7d-4c9e-8d4f-6a3e1c243017', TRUE, 'Blogger', CURRENT_TIMESTAMP, '2003-07-05', 'priya@gmail.com',
+        'FEMALE', 'Priya Kapoor', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O', CURRENT_TIMESTAMP,
         'priya', 0, 0, 0, FALSE, 0);
 
 INSERT INTO USERS(ID, ACTIVE, BIO, CREATED_AT, DATE_OF_BIRTH, EMAIL, GENDER, NAME, PASSWORD, UPDATED_AT, USERNAME,
                   NO_OF_FOLLOWERS, NO_OF_FOLLOWINGS, NO_OF_POSTS, IS_DELETED,
                   TOKEN_VERSION)
-VALUES ('a8d3b2c4-9c21-4a5e-b7e1-7c2f5a8a3018', TRUE, 'Entrepreneur', CURRENT_TIMESTAMP(), '1995-09-28',
+VALUES ('a8d3b2c4-9c21-4a5e-b7e1-7c2f5a8a3018', TRUE, 'Entrepreneur', CURRENT_TIMESTAMP, '1995-09-28',
         'arjun@gmail.com', 'MALE', 'Arjun Verma', '$2a$10$.ht0xGmqKPvJtx4b6WoaEebt39NwiDVqxXTvGIMCX1xQgkg.dyh5O',
-        CURRENT_TIMESTAMP(), 'arjun', 0, 0, 0, FALSE, 0);
+        CURRENT_TIMESTAMP, 'arjun', 0, 0, 0, FALSE, 0);
 
 -- POSTS
 INSERT INTO POSTS(ID, COMMENT_COUNT, CONTENT, CREATED_AT, DESCRIPTION, LIKE_COUNT, SLUG, TITLE, UPDATED_AT, CATEGORY_ID,
                   USER_ID)
 VALUES ('1c06c933-7995-503b-8f55-2be357493037', 0, 'This is my first post!',
-        CURRENT_TIMESTAMP(), 'My first post description', 0, 'this-is-my-first-post',
-        'My First Post', CURRENT_TIMESTAMP(), '995ef0ea-eb82-44bb-81f0-62701e3dbd68',
+        CURRENT_TIMESTAMP, 'My first post description', 0, 'this-is-my-first-post',
+        'My First Post', CURRENT_TIMESTAMP, '995ef0ea-eb82-44bb-81f0-62701e3dbd68',
         '1c06c933-6795-483b-8f55-2be257493037');
 
 INSERT INTO POSTS(ID, COMMENT_COUNT, CONTENT, CREATED_AT, DESCRIPTION, LIKE_COUNT, SLUG, TITLE, UPDATED_AT, CATEGORY_ID,
                   USER_ID)
 VALUES ('1c06a933-7995-833c-8f55-2be367693037', 0, 'This is my Second post!',
-        CURRENT_TIMESTAMP(), 'My Second post description', 0, 'this-is-my-second-post',
-        'My Second Post', CURRENT_TIMESTAMP(), 'af9817d9-d5d6-4b9d-9472-d46622a47ee3',
+        CURRENT_TIMESTAMP, 'My Second post description', 0, 'this-is-my-second-post',
+        'My Second Post', CURRENT_TIMESTAMP, 'af9817d9-d5d6-4b9d-9472-d46622a47ee3',
         'b1a3e6e2-7a2e-4d8e-8d92-9f0a4a3c1101');
 
 -- COMMENTS
 INSERT INTO COMMENTS(ID, BODY, CREATED_AT, UPDATED_AT, POST_ID, USER_ID)
-VALUES ('1c06a933-7885-833c-8f55-2be367693037', 'This is a new comment', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP(),
+VALUES ('1c06a933-7885-833c-8f55-2be367693037', 'This is a new comment', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
         '1c06a933-7995-833c-8f55-2be367693037', 'b1a3e6e2-7a2e-4d8e-8d92-9f0a4a3c1101');
 
 
