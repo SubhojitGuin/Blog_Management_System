@@ -5,6 +5,7 @@ import com.project.Blog_Management_System.Dto.PostResponseDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,6 +37,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
                 WHERE u = :profileUser
                 ORDER BY p.createdAt DESC
             """)
+    @ReadFast
     Slice<PostResponseDTO> findPostsByUser(
             @Param("profileUser") UserEntity profileUser,
             @Param("currentUser") UserEntity currentUser,
@@ -57,6 +59,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
                 WHERE c = :category
                 ORDER BY p.createdAt DESC
             """)
+    @ReadFast
     Slice<PostResponseDTO> findPostsByCategory(
             @Param("category") CategoryEntity category,
             @Param("currentUser") UserEntity currentUser,
@@ -88,6 +91,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
                 ORDER BY p.createdAt DESC
             """)
+    @ReadFast
     Slice<PostResponseDTO> findAllPosts(
             @Param("currentUser") UserEntity currentUser,
             Pageable pageable
@@ -108,6 +112,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
                 ORDER BY p.createdAt DESC
             """)
+    @ReadFast
     Slice<PostResponseDTO> findAllPostsOfFollowings(
             @Param("currentUser") UserEntity currentUser,
             Pageable pageable
@@ -121,6 +126,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
                 FROM PostEntity p
                 WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%'))
             """)
+    @ReadFast
     List<PostInfoDTO> findByTitleContainingIgnoreCase(
             @Param("query") String query,
             Pageable pageable

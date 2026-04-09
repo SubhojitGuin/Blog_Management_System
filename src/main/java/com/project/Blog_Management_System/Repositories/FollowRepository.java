@@ -3,6 +3,7 @@ package com.project.Blog_Management_System.Repositories;
 import com.project.Blog_Management_System.Dto.UserInfoDTO;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,6 +32,7 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
        WHERE f.following.id = :userId
        ORDER BY f.followedAt DESC
        """)
+    @ReadFast
     Slice<UserInfoDTO> findFollowers(UUID userId, Pageable pageable);
 
     @Query("""
@@ -46,12 +48,14 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
          ORDER BY f.followedAt DESC
          """
     )
+    @ReadFast
     Slice<UserInfoDTO> findFollowing(UUID userId, Pageable pageable);
 
     void deleteByFollowerAndFollowing(UserEntity follower, UserEntity followee);
 
     void deleteByFollowerOrFollowing(UserEntity follower, UserEntity followee);
 
+    @ReadFast
     Optional<FollowEntity> findByFollowerAndFollowing(UserEntity follower, UserEntity followee);
 
 }

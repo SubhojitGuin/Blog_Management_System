@@ -4,6 +4,7 @@ import com.project.Blog_Management_System.Dto.UserInfoDTO;
 import com.project.Blog_Management_System.Entities.LikeEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Repository
 public interface LikeRepository extends JpaRepository<LikeEntity, UUID> {
 
+    @ReadFast
     Optional<LikeEntity> findByUserAndPost(UserEntity user, PostEntity post);
 
     void deleteByUserAndPost(UserEntity user, PostEntity post);
@@ -27,6 +29,7 @@ public interface LikeRepository extends JpaRepository<LikeEntity, UUID> {
                 LEFT JOIN l.user u
                 WHERE l.post = :post
             """)
+    @ReadFast
     Slice<UserInfoDTO> findLikesOfPost(
             @Param("post") PostEntity post,
             Pageable pageable

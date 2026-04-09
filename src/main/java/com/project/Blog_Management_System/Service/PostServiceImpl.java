@@ -51,23 +51,27 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getAllPosts(int page, int size) {
         UserEntity user = getCurrentUser();
         return postRepository.findAllPosts(user, PageRequest.of(page, size));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getAllPostsOfFollowings(int page, int size) {
         UserEntity user = getCurrentUser();
         return postRepository.findAllPostsOfFollowings(user, PageRequest.of(page, size));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PostInfoDTO> searchPosts(String query) {
         return postRepository.findByTitleContainingIgnoreCase(query, PageRequest.of(0, 10));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PostResponseDTO getPost(String slug, UUID id) {
         UserEntity user = getCurrentUser();
 
@@ -124,6 +128,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<CommentResponseDTO> getCommentsOfPost(String slug, UUID id, int page, int size) {
         UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(id).orElse(null);
@@ -187,6 +192,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<UserInfoDTO> getLikesOfPost(String slug, UUID id, int page, int size) {
         PostEntity post = postRepository.findById(id).orElse(null);
         isInvalidPost(post, slug);

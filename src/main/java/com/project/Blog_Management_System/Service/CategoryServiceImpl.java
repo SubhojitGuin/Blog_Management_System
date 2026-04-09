@@ -35,6 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getPostsByCategory(String slug, UUID id, Integer page, Integer size) {
         UserEntity user = getCurrentUser();
 
@@ -45,6 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryResponseDTO> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(category -> modelMapper.map(category, CategoryResponseDTO.class))
@@ -52,6 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryResponseDTO getCategoryDetails(String slug, UUID id) {
         CategoryEntity category = categoryRepository.findById(id).orElse(null);
         isInvalidCategory(category, slug);

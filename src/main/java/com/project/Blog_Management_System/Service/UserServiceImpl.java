@@ -39,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final PostRepository postRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity getUserById(UUID id) {
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
@@ -50,6 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserEntity getUserByUsernameOrEmail(String username, String email) {
         return userRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(username, email).orElse(null);
     }
@@ -88,6 +90,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void updateEmail(EmailUpdateDTO emailUpdateDTO) {
         UserEntity user = getCurrentUser();
         if (userRepository.findByEmailIgnoreCase(emailUpdateDTO.getEmail()).isPresent()) {
@@ -99,6 +102,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDTO getUserProfile(String username, UUID id) {
         UserEntity user = getCurrentUser();
         UserEntity retrievedUser = userRepository.findById(id).orElse(null);
@@ -112,6 +116,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserInfoDTO> searchUsers(String query) {
         return userRepository.findByUsernameContainingIgnoreCase(query, PageRequest.of(0, 10));
     }
@@ -145,6 +150,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<UserInfoDTO> getFollowers(String username, UUID id, int page, int size) {
         UserEntity retrievedUser = userRepository.findById(id).orElse(null);
         isInvalidUser(retrievedUser, username);
@@ -153,6 +159,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<UserInfoDTO> getFollowings(String username, UUID id, int page, int size) {
         UserEntity retrievedUser = userRepository.findById(id).orElse(null);
         isInvalidUser(retrievedUser, username);
@@ -161,6 +168,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser() {
         UserEntity user = getCurrentUser();
         user.setActive(false);
@@ -168,6 +176,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getUserPosts(String username, UUID id, int page, int size) {
         UserEntity currentUser = getCurrentUser();
         UserEntity retrievedUser = userRepository.findById(id).orElse(null);
@@ -177,6 +186,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsernameIgnoreCase(username).orElse(null);
     }

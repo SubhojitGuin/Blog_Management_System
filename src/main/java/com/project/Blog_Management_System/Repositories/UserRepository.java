@@ -2,6 +2,7 @@ package com.project.Blog_Management_System.Repositories;
 
 import com.project.Blog_Management_System.Dto.UserInfoDTO;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,10 +18,13 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, UUID> {
 
+    @ReadFast
     Optional<UserEntity> findByUsernameIgnoreCase(String username);
 
+    @ReadFast
     Optional<UserEntity> findByUsernameIgnoreCaseOrEmailIgnoreCase(String username, String email);
 
+    @ReadFast
     Optional<UserEntity> findByEmailIgnoreCase(String email);
 
     @Query("""
@@ -33,6 +37,7 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             FROM UserEntity u
             WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%'))
             """)
+    @ReadFast
     List<UserInfoDTO> findByUsernameContainingIgnoreCase(
             @Param("query") String query,
             Pageable pageable
@@ -46,5 +51,6 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
               AND u.updatedAt <= :cutoff
             ORDER BY u.updatedAt ASC
             """)
+    @ReadFast
     Slice<UserEntity> findInactiveUsers(@Param("cutoff") LocalDateTime cutoff, Pageable pageable);
 }
