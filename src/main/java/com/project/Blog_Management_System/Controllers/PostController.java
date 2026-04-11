@@ -46,12 +46,11 @@ public class PostController {
 
     @GetMapping("/search")
     @Operation(summary = "Search Posts", description = "Searches for posts based on the provided query string.")
-    public ResponseEntity<List<PostInfoDTO>> searchPosts(@RequestParam String query) {
-        return new ResponseEntity<>(postService.searchPosts(query), HttpStatus.OK);
     public ResponseEntity<Slice<PostInfoDTO>> searchPosts(@ModelAttribute PostFilterRequestDTO postFilterRequestDTO,
+                                                          @RequestParam(required = false) List<String> sort,
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(postService.searchPosts(postFilterRequestDTO, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(postService.searchPosts(postFilterRequestDTO, page, size, sort), HttpStatus.OK);
     }
 
     @GetMapping("/{slug}-{id:[0-9a-fA-F\\-]{36}}")

@@ -18,6 +18,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.project.Blog_Management_System.Utils.AppUtils.*;
@@ -67,9 +69,18 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size) {
+    public Slice<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size, List<String> sort) {
+
+        final Set<String> ALLOWED_SORT_FIELDS = Set.of(
+                PostEntity.Fields.title,
+                PostEntity.Fields.createdAt,
+                PostEntity.Fields.updatedAt,
+                PostEntity.Fields.likeCount,
+                PostEntity.Fields.commentCount
+        );
+
         Specification<PostEntity> spec = PostFilterSpecification.buildSpecification(postFilterRequestDTO);
-        return postRepository.findAll(spec, PageRequest.of(page, size))
+        return postRepository.findAll(spec, PageRequest.of(page, size, convertToSort(sort, ALLOWED_SORT_FIELDS)))
                 .map(post -> modelMapper.map(post, PostInfoDTO.class));
     }
 
