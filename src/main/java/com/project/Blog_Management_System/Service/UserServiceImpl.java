@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<UserInfoDTO> searchUsers(String query) {
-        return userRepository.findByUsernameContainingIgnoreCase(query, PageRequest.of(0, 10));
+        return userRepository.findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(query, PageRequest.of(0, 10));
     }
 
     @Override

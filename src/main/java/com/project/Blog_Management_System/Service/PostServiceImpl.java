@@ -8,15 +8,16 @@ import com.project.Blog_Management_System.Repositories.CommentRepository;
 import com.project.Blog_Management_System.Repositories.LikeRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
+import com.project.Blog_Management_System.Specifications.PostFilterSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.project.Blog_Management_System.Utils.AppUtils.*;
@@ -66,8 +67,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PostInfoDTO> searchPosts(String query) {
-        return postRepository.findByTitleContainingIgnoreCase(query, PageRequest.of(0, 10));
+    public Slice<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size) {
+        Specification<PostEntity> spec = PostFilterSpecification.buildSpecification(postFilterRequestDTO);
+        return postRepository.findAll(spec, PageRequest.of(page, size))
+                .map(post -> modelMapper.map(post, PostInfoDTO.class));
     }
 
     @Override

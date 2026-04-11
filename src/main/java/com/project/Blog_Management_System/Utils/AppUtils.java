@@ -24,5 +24,21 @@ public class AppUtils {
                 .replaceAll("\\s+", "-");
     }
 
+    public Sort convertToSort(List<String> sortFields) {
+        List<Sort.Order> orders = new ArrayList<>();
+        for (String field : sortFields) {
+            String[] propertyAndDirection = field.split(",");
+            String property = propertyAndDirection[0];
+            Sort.Direction direction = Sort.DEFAULT_DIRECTION;
+            if (propertyAndDirection.length > 1) {
+                String directionString = propertyAndDirection[1];
+                direction = Sort.Direction.fromOptionalString(directionString)
+                        .orElse(Sort.DEFAULT_DIRECTION);
+            }
+            Sort.Order order = new Sort.Order(direction, property);
+            orders.add(order);
+        }
+        return Sort.by(orders);
+    }
 
 }

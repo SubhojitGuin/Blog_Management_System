@@ -1,6 +1,5 @@
 package com.project.Blog_Management_System.Repositories;
 
-import com.project.Blog_Management_System.Dto.PostInfoDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
@@ -9,16 +8,16 @@ import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface PostRepository extends JpaRepository<PostEntity, UUID> {
+public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpecificationExecutor<PostEntity> {
 
     Integer countByUser(UserEntity user);
 
@@ -118,18 +117,5 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
             Pageable pageable
     );
 
-
-    @Query("""
-                SELECT new com.project.Blog_Management_System.Dto.PostInfoDTO(
-                    p.id, p.slug, p.title, p.description, p.likeCount, p.commentCount
-                )
-                FROM PostEntity p
-                WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%'))
-            """)
-    @ReadFast
-    List<PostInfoDTO> findByTitleContainingIgnoreCase(
-            @Param("query") String query,
-            Pageable pageable
-    );
 
 }
