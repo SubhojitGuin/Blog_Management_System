@@ -14,7 +14,7 @@ public interface PostService {
 
     Slice<PostResponseDTO> getAllPostsOfFollowings(int page, int size);
 
-    List<PostInfoDTO> searchPosts(String query);
+    Slice<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size);
 
     PostResponseDTO getPost(String slug, UUID id);
 

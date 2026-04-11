@@ -36,9 +36,10 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
             )
             FROM UserEntity u
             WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%'))
+            OR LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%'))
             """)
     @ReadFast
-    List<UserInfoDTO> findByUsernameContainingIgnoreCase(
+    List<UserInfoDTO> findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(
             @Param("query") String query,
             Pageable pageable
     );
