@@ -9,18 +9,18 @@ import java.time.LocalDate;
 
 @Data
 public class SignUpRequestDTO {
-    @NotNull
+    @NotBlank
     private String name;
 
     @Pattern(
             regexp = "^\\w{3,}$",
             message = "Username must be at least 3 characters long and contain only letters, numbers, and underscores"
     )
-    @NotNull
+    @NotBlank
     private String username;
 
-    @Email(message = "Invalid Email format")
-    @NotNull
+    @Email
+    @NotBlank
     private String email;
 
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
@@ -29,7 +29,7 @@ public class SignUpRequestDTO {
     @NotNull
     private String password;
 
-    @NotNull
+    @NotBlank
     private Gender gender;
 
     private String bio;

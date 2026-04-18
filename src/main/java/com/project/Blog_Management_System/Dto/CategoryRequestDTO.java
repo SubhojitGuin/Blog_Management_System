@@ -8,11 +8,11 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CategoryRequestDTO {
-    @NotNull
-    @Size(min = 2, max = 200, message = "Name must be between 2 and 200 characters")
+    @NotBlank
+    @Size(min = 2, max = 200)
     private String name;
 
-    @NotNull
-    @Size(min = 10, max = 500, message = "Description must be between 10 and 500 characters")
+    @NotBlank
+    @Size(min = 10, max = 500)
     private String description;
 }

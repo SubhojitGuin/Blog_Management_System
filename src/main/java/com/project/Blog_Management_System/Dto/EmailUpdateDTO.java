@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class EmailUpdateDTO {
-    @Email(message = "Invalid Email format")
-    @NotNull
+    @Email
+    @NotBlank
     private String email;
 }

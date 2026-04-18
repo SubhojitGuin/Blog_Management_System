@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @QueryHints(value = {
-        @QueryHint(name = "javax.persistence.query.timeout", value = "3000"),
+        @QueryHint(name = "jakarta.persistence.query.timeout", value = "3000"),
         @QueryHint(name = "org.hibernate.readOnly", value = "true"),
 })
 public @interface ReadFast {
