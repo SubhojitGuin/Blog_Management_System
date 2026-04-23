@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.Blog_Management_System.Utils.ReadingTimeUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +35,15 @@ public class PostEntity {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    @Column(name = "reading_time_minutes", nullable = false)
+    private Integer readingTimeMinutes = 1;
+
+    @PrePersist
+    @PreUpdate
+    private void computeReadingTime() {
+        this.readingTimeMinutes = ReadingTimeUtils.estimate(this.content);
+    }
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)

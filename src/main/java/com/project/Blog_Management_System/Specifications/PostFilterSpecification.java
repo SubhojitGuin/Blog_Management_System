@@ -27,8 +27,22 @@ public class PostFilterSpecification {
                         cb.equal(root.get(PostEntity.Fields.category).get(CategoryEntity.Fields.slug), categorySlug.toLowerCase());
     }
 
+    private static Specification<PostEntity> hasMaxReadingTime(Integer max) {
+        return (root, query, cb) ->
+                max == null ? null :
+                        cb.lessThanOrEqualTo(root.get(PostEntity.Fields.readingTimeMinutes), max);
+    }
+
+    private static Specification<PostEntity> hasMinReadingTime(Integer min) {
+        return (root, query, cb) ->
+                min == null ? null :
+                        cb.greaterThanOrEqualTo(root.get(PostEntity.Fields.readingTimeMinutes), min);
+    }
+
     public static Specification<PostEntity> buildSpecification(PostFilterRequestDTO params) {
         return Specification.where(hasTitle(params.getTitle()))
-                .and(hasCategory(params.getCategorySlug()));
+                .and(hasCategory(params.getCategorySlug()))
+                .and(hasMaxReadingTime(params.getMaxReadingTime()))
+                .and(hasMinReadingTime(params.getMinReadingTime()));
     }
 }
