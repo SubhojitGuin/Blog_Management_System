@@ -89,7 +89,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public PostResponseDTO getPost(String slug, UUID id) {
         UserEntity user = getCurrentUser();
 
@@ -99,6 +99,8 @@ public class PostServiceImpl implements PostService {
         PostResponseDTO postResponseDTO = modelMapper.map(post, PostResponseDTO.class);
         postResponseDTO.setIsOwner(user.equals(post.getUser()));
         postResponseDTO.setIsLiked(likeRepository.findByUserAndPost(user, post).isPresent());
+
+        postRepository.incrementViewCount(post);
 
         return postResponseDTO;
     }
