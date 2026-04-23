@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 public class PostFilterRequestDTO {
     @NotBlank
-    String categorySlug;
+    private String categorySlug;
 
     @NotBlank
-    String title;
+    private String title;
 }

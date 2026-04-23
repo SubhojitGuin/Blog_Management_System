@@ -6,6 +6,7 @@ import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -52,6 +53,53 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
               AND u.updatedAt <= :cutoff
             ORDER BY u.updatedAt ASC
             """)
-    @ReadFast
     Slice<UserEntity> findInactiveUsers(@Param("cutoff") LocalDateTime cutoff, Pageable pageable);
+
+    @Modifying
+    @Query("""
+                UPDATE UserEntity u
+                SET u.noOfPosts = u.noOfPosts + 1
+                WHERE u = :user
+            """)
+    int incrementPostCount(@Param("user") UserEntity user);
+
+    @Modifying
+    @Query("""
+                UPDATE UserEntity u
+                SET u.noOfPosts = u.noOfPosts - 1
+                WHERE u = :user
+            """)
+    int decrementPostCount(@Param("user") UserEntity user);
+
+    @Modifying
+    @Query("""
+                UPDATE UserEntity u
+                SET u.noOfFollowers = u.noOfFollowers + 1
+                WHERE u = :user
+            """)
+    int incrementFollowersCount(@Param("user") UserEntity user);
+
+    @Modifying
+    @Query("""
+                UPDATE UserEntity u
+                SET u.noOfFollowers = u.noOfFollowers - 1
+                WHERE u = :user
+            """)
+    int decrementFollowersCount(@Param("user") UserEntity user);
+
+    @Modifying
+    @Query("""
+                UPDATE UserEntity u
+                SET u.noOfFollowings = u.noOfFollowings + 1
+                WHERE u = :user
+            """)
+    int incrementFollowingsCount(@Param("user") UserEntity user);
+
+    @Modifying
+    @Query("""
+                UPDATE UserEntity u
+                SET u.noOfFollowings = u.noOfFollowings - 1
+                WHERE u = :user
+            """)
+    int decrementFollowingsCount(@Param("user") UserEntity user);
 }

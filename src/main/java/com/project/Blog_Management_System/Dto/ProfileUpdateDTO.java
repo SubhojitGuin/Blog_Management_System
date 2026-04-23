@@ -16,7 +16,6 @@ public class ProfileUpdateDTO {
 
     private String bio;
 
-    @NotBlank
     private Gender gender;
 
     @Past(message = "Date of birth must be in the past and in the format yyyy-MM-dd")

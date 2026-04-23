@@ -29,7 +29,6 @@ public class SignUpRequestDTO {
     @NotNull
     private String password;
 
-    @NotBlank
     private Gender gender;
 
     private String bio;

@@ -141,10 +141,22 @@ public class UserServiceImpl implements UserService {
         if (followDTO.getFollow()) {
             if (followRepository.findByFollowerAndFollowing(follower, followee).isEmpty()) {
                 followRepository.saveAndFlush(followEntity);
+                int followerRowsUpdated = userRepository.incrementFollowersCount(followee);
+                int followingsRowsUpdated = userRepository.incrementFollowingsCount(follower);
+
+                if (followerRowsUpdated == 0 || followingsRowsUpdated == 0) {
+                    throw new ResourceConflictException("Failed to update followers/followings count");
+                }
             }
         } else {
             if (followRepository.findByFollowerAndFollowing(follower, followee).isPresent()) {
                 followRepository.deleteByFollowerAndFollowing(follower, followee);
+                int followerRowsUpdated = userRepository.decrementFollowersCount(followee);
+                int followingsRowsUpdated = userRepository.decrementFollowingsCount(follower);
+
+                if (followerRowsUpdated == 0 || followingsRowsUpdated == 0) {
+                    throw new ResourceConflictException("Failed to update followers/followings count");
+                }
             }
         }
     }

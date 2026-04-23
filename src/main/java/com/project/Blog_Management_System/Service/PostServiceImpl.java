@@ -3,10 +3,8 @@ package com.project.Blog_Management_System.Service;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Enums.Role;
-import com.project.Blog_Management_System.Repositories.CategoryRepository;
-import com.project.Blog_Management_System.Repositories.CommentRepository;
-import com.project.Blog_Management_System.Repositories.LikeRepository;
-import com.project.Blog_Management_System.Repositories.PostRepository;
+import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
+import com.project.Blog_Management_System.Repositories.*;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
 import com.project.Blog_Management_System.Specifications.PostFilterSpecification;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +32,7 @@ public class PostServiceImpl implements PostService {
     private final CategoryRepository categoryRepository;
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -49,6 +48,10 @@ public class PostServiceImpl implements PostService {
         post.setSlug(generateSlug(postRequestDTO.getTitle()));
         post.setCategory(category);
         PostEntity savedPost = postRepository.saveAndFlush(post);
+
+        int rowsUpdated = userRepository.incrementPostCount(user);
+        if (rowsUpdated == 0)
+            throw new ResourceConflictException("Failed to increment posts count of the user. Possible concurrent modification.");
 
         return modelMapper.map(savedPost, PostResponseDTO.class);
     }
@@ -139,6 +142,10 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
+
+        int rowsUpdated = userRepository.decrementPostCount(post.getUser());
+        if (rowsUpdated == 0)
+            throw new ResourceConflictException("Failed to decrement posts count of the user. Possible concurrent modification.");
     }
 
     @Override
@@ -163,6 +170,10 @@ public class PostServiceImpl implements PostService {
         comment.setUser(user);
         comment.setPost(post);
         CommentEntity savedComment = commentRepository.saveAndFlush(comment);
+
+        int rowsUpdated = postRepository.incrementCommentCount(post);
+        if (rowsUpdated == 0)
+            throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
 
         return modelMapper.map(savedComment, CommentResponseDTO.class);
     }
@@ -203,6 +214,10 @@ public class PostServiceImpl implements PostService {
         }
 
         commentRepository.delete(comment);
+
+        int rowsUpdated = postRepository.decrementCommentCount(post);
+        if (rowsUpdated == 0)
+            throw new ResourceConflictException("Failed to decrement comment count of the post. Possible concurrent modification or stale entity.");
     }
 
     @Override
@@ -230,10 +245,16 @@ public class PostServiceImpl implements PostService {
         if (likeDTO.getLike()) {
             if (likeRepository.findByUserAndPost(user, post).isEmpty()) {
                 likeRepository.saveAndFlush(like);
+                int rowsUpdated = postRepository.incrementLikeCount(post);
+                if (rowsUpdated == 0)
+                    throw new ResourceConflictException("Failed to increment like count of the post. Possible concurrent modification or stale entity.");
             }
         } else {
             if (likeRepository.findByUserAndPost(user, post).isPresent()) {
                 likeRepository.deleteByUserAndPost(user, post);
+                int rowsUpdated = postRepository.decrementLikeCount(post);
+                if (rowsUpdated == 0)
+                    throw new ResourceConflictException("Failed to decrement like count of the post. Possible concurrent modification or stale entity.");
             }
         }
     }

@@ -19,8 +19,6 @@ import java.util.UUID;
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpecificationExecutor<PostEntity> {
 
-    Integer countByUser(UserEntity user);
-
     @Query("""
                 SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
                 p.id, p.slug, p.title, p.description, p.content, p.likeCount, p.commentCount,
@@ -117,5 +115,44 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
             Pageable pageable
     );
 
+    @Modifying
+    @Query(
+            """
+                        UPDATE PostEntity p
+                        SET p.likeCount = p.likeCount + 1
+                        WHERE p = :post
+                    """
+    )
+    int incrementLikeCount(@Param("post") PostEntity post);
+
+    @Modifying
+    @Query(
+            """
+                        UPDATE PostEntity p
+                        SET p.likeCount = p.likeCount - 1
+                        WHERE p = :post
+                    """
+    )
+    int decrementLikeCount(@Param("post") PostEntity post);
+
+    @Modifying
+    @Query(
+            """
+                        UPDATE PostEntity p
+                        SET p.commentCount = p.commentCount + 1
+                        WHERE p = :post
+                    """
+    )
+    int incrementCommentCount(@Param("post") PostEntity post);
+
+    @Modifying
+    @Query(
+            """
+                        UPDATE PostEntity p
+                        SET p.commentCount = p.commentCount - 1
+                        WHERE p = :post
+                    """
+    )
+    int decrementCommentCount(@Param("post") PostEntity post);
 
 }
