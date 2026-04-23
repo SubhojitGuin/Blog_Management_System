@@ -14,6 +14,7 @@ public class PostInfoDTO {
     private String slug;
     private String title;
     private String description;
+    private Integer readingTimeMinutes;
     private Integer likeCount;
     private Integer commentCount;
 }

@@ -15,6 +15,7 @@ public class PostResponseDTO {
     private String title;
     private String description;
     private String content;
+    private Integer readingTimeMinutes;
     private Integer likeCount;
     private Integer commentCount;
     private UserInfoDTO user;

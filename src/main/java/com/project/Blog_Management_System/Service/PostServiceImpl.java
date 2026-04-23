@@ -79,7 +79,8 @@ public class PostServiceImpl implements PostService {
                 PostEntity.Fields.createdAt,
                 PostEntity.Fields.updatedAt,
                 PostEntity.Fields.likeCount,
-                PostEntity.Fields.commentCount
+                PostEntity.Fields.commentCount,
+                PostEntity.Fields.readingTimeMinutes
         );
 
         Specification<PostEntity> spec = PostFilterSpecification.buildSpecification(postFilterRequestDTO);

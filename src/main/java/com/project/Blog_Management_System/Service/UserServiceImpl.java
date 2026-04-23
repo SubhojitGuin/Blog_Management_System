@@ -203,5 +203,4 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByUsernameIgnoreCase(username).orElse(null);
     }
 
-
 }

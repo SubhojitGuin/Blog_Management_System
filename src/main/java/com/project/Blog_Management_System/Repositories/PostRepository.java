@@ -21,7 +21,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
 
     @Query("""
                 SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
-                p.id, p.slug, p.title, p.description, p.content, p.likeCount, p.commentCount,
+                p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
                 CASE WHEN u = :currentUser THEN true ELSE false END,
@@ -43,7 +43,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
 
     @Query("""
                 SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
-                p.id, p.slug, p.title, p.description, p.content, p.likeCount, p.commentCount,
+                p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
                 CASE WHEN u = :currentUser THEN true ELSE false END,
@@ -76,7 +76,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
 
     @Query("""
                 SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
-                p.id, p.slug, p.title, p.description, p.content, p.likeCount, p.commentCount,
+                p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
                 CASE WHEN u = :currentUser THEN true ELSE false END,
@@ -96,7 +96,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
 
     @Query("""
                 SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
-                p.id, p.slug, p.title, p.description, p.content, p.likeCount, p.commentCount,
+                p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
                 CASE WHEN u = :currentUser THEN true ELSE false END,

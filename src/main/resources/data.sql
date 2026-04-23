@@ -158,18 +158,18 @@ VALUES ('a8d3b2c4-9c21-4a5e-b7e1-7c2f5a8a3018', TRUE, 'Entrepreneur', CURRENT_TI
 
 -- POSTS
 INSERT INTO POSTS(ID, COMMENT_COUNT, CONTENT, CREATED_AT, DESCRIPTION, LIKE_COUNT, SLUG, TITLE, UPDATED_AT, CATEGORY_ID,
-                  USER_ID)
+                  USER_ID, READING_TIME_MINUTES)
 VALUES ('1c06c933-7995-503b-8f55-2be357493037', 0, 'This is my first post!',
         CURRENT_TIMESTAMP, 'My first post description', 0, 'this-is-my-first-post',
         'My First Post', CURRENT_TIMESTAMP, '995ef0ea-eb82-44bb-81f0-62701e3dbd68',
-        '1c06c933-6795-483b-8f55-2be257493037');
+        '1c06c933-6795-483b-8f55-2be257493037', 1);
 
 INSERT INTO POSTS(ID, COMMENT_COUNT, CONTENT, CREATED_AT, DESCRIPTION, LIKE_COUNT, SLUG, TITLE, UPDATED_AT, CATEGORY_ID,
-                  USER_ID)
+                  USER_ID, READING_TIME_MINUTES)
 VALUES ('1c06a933-7995-833c-8f55-2be367693037', 0, 'This is my Second post!',
         CURRENT_TIMESTAMP, 'My Second post description', 0, 'this-is-my-second-post',
         'My Second Post', CURRENT_TIMESTAMP, 'af9817d9-d5d6-4b9d-9472-d46622a47ee3',
-        'b1a3e6e2-7a2e-4d8e-8d92-9f0a4a3c1101');
+        'b1a3e6e2-7a2e-4d8e-8d92-9f0a4a3c1101', 1);
 
 -- COMMENTS
 INSERT INTO COMMENTS(ID, BODY, CREATED_AT, UPDATED_AT, POST_ID, USER_ID)
