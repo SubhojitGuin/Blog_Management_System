@@ -36,7 +36,7 @@ public class ViewSyncScheduling {
 
         for (String key : keys) {
 
-            String postId = key.split(":")[2];
+            String postId = key.split(":")[3];
 
             try {
                 String processingKey = VIEW_PROCESSING_KEY + postId;
