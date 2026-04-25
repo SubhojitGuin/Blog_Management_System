@@ -17,5 +17,5 @@ public class PostInfoDTO {
     private Integer readingTimeMinutes;
     private Integer likeCount;
     private Integer commentCount;
-    private Integer viewCount;
+    private Long viewCount;
 }

@@ -18,7 +18,7 @@ public class PostResponseDTO {
     private Integer readingTimeMinutes;
     private Integer likeCount;
     private Integer commentCount;
-    private Integer viewCount;
+    private Long viewCount;
     private UserInfoDTO user;
     private CategoryResponseDTO category;
     private Boolean isOwner = true;

@@ -6,6 +6,7 @@ import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Repositories.*;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
+import com.project.Blog_Management_System.Service.Interfaces.RedisViewCountService;
 import com.project.Blog_Management_System.Specifications.PostFilterSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -33,6 +34,7 @@ public class PostServiceImpl implements PostService {
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final RedisViewCountService redisViewCountService;
 
     @Override
     @Transactional
@@ -100,7 +102,7 @@ public class PostServiceImpl implements PostService {
         postResponseDTO.setIsOwner(user.equals(post.getUser()));
         postResponseDTO.setIsLiked(likeRepository.findByUserAndPost(user, post).isPresent());
 
-        postRepository.incrementViewCount(post);
+        redisViewCountService.addViewer(id, user.getId());
 
         return postResponseDTO;
     }
