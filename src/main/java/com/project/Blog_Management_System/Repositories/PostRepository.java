@@ -158,10 +158,10 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
     @Modifying
     @Query("""
                 UPDATE PostEntity p
-                SET p.viewCount = p.viewCount + 1
-                WHERE p = :post
+                SET p.viewCount = p.viewCount + :delta
+                WHERE p.id = :postId
             """
     )
-    void incrementViewCount(@Param("post") PostEntity post);
+    void incrementViewCount(@Param("postId") UUID postId, @Param("delta") Long delta);
 
 }

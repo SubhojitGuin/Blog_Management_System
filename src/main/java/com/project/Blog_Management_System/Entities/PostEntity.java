@@ -60,7 +60,7 @@ public class PostEntity {
     private Integer commentCount = 0;
 
     @Column(name = "view_count", nullable = false)
-    private Integer viewCount = 0;
+    private Long viewCount = 0L;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

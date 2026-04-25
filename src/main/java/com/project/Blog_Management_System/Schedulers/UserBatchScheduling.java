@@ -22,7 +22,7 @@ public class UserBatchScheduling {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
 
-    @Scheduled(cron = "${blog.schedulers.userDeletion.cron}")
+    @Scheduled(cron = "${blog.schedulers.userDeletion.cron:0 0 0 * * *}")
     public void deleteUsersInBatches() {
         int page = 0;
         int size = 1000;
