@@ -139,20 +139,20 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         if (followDTO.getFollow()) {
-            if (followRepository.findByFollowerAndFollowing(follower, followee).isEmpty()) {
+            if (followRepository.findByFollower_IdAndFollowing_Id(follower.getId(), followee.getId()).isEmpty()) {
                 followRepository.saveAndFlush(followEntity);
-                int followerRowsUpdated = userRepository.incrementFollowersCount(followee);
-                int followingsRowsUpdated = userRepository.incrementFollowingsCount(follower);
+                int followerRowsUpdated = userRepository.incrementFollowersCount(followee.getId());
+                int followingsRowsUpdated = userRepository.incrementFollowingsCount(follower.getId());
 
                 if (followerRowsUpdated == 0 || followingsRowsUpdated == 0) {
                     throw new ResourceConflictException("Failed to update followers/followings count");
                 }
             }
         } else {
-            if (followRepository.findByFollowerAndFollowing(follower, followee).isPresent()) {
-                followRepository.deleteByFollowerAndFollowing(follower, followee);
-                int followerRowsUpdated = userRepository.decrementFollowersCount(followee);
-                int followingsRowsUpdated = userRepository.decrementFollowingsCount(follower);
+            if (followRepository.findByFollower_IdAndFollowing_Id(follower.getId(), followee.getId()).isPresent()) {
+                followRepository.deleteByFollower_IdAndFollowing_Id(follower.getId(), followee.getId());
+                int followerRowsUpdated = userRepository.decrementFollowersCount(followee.getId());
+                int followingsRowsUpdated = userRepository.decrementFollowingsCount(follower.getId());
 
                 if (followerRowsUpdated == 0 || followingsRowsUpdated == 0) {
                     throw new ResourceConflictException("Failed to update followers/followings count");
@@ -194,7 +194,7 @@ public class UserServiceImpl implements UserService {
         UserEntity retrievedUser = userRepository.findById(id).orElse(null);
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(page, size);
-        return postRepository.findPostsByUser(retrievedUser, currentUser, pageable);
+        return postRepository.findPostsByUser(id, currentUser.getId(), pageable);
     }
 
     @Override

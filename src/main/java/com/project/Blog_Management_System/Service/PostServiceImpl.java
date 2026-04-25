@@ -51,7 +51,7 @@ public class PostServiceImpl implements PostService {
         post.setCategory(category);
         PostEntity savedPost = postRepository.saveAndFlush(post);
 
-        int rowsUpdated = userRepository.incrementPostCount(user);
+        int rowsUpdated = userRepository.incrementPostCount(user.getId());
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to increment posts count of the user. Possible concurrent modification.");
 
@@ -62,14 +62,14 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getAllPosts(int page, int size) {
         UserEntity user = getCurrentUser();
-        return postRepository.findAllPosts(user, PageRequest.of(page, size));
+        return postRepository.findAllPosts(user.getId(), PageRequest.of(page, size));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getAllPostsOfFollowings(int page, int size) {
         UserEntity user = getCurrentUser();
-        return postRepository.findAllPostsOfFollowings(user, PageRequest.of(page, size));
+        return postRepository.findAllPostsOfFollowings(user.getId(), PageRequest.of(page, size));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class PostServiceImpl implements PostService {
 
         PostResponseDTO postResponseDTO = modelMapper.map(post, PostResponseDTO.class);
         postResponseDTO.setIsOwner(user.equals(post.getUser()));
-        postResponseDTO.setIsLiked(likeRepository.findByUserAndPost(user, post).isPresent());
+        postResponseDTO.setIsLiked(likeRepository.findByUser_IdAndPost_Id(user.getId(), post.getId()).isPresent());
 
         redisViewCountService.addViewer(id, user.getId());
 
@@ -148,7 +148,7 @@ public class PostServiceImpl implements PostService {
 
         postRepository.delete(post);
 
-        int rowsUpdated = userRepository.decrementPostCount(post.getUser());
+        int rowsUpdated = userRepository.decrementPostCount(post.getUser().getId());
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to decrement posts count of the user. Possible concurrent modification.");
     }
@@ -160,7 +160,7 @@ public class PostServiceImpl implements PostService {
         PostEntity post = postRepository.findById(id).orElse(null);
         isInvalidPost(post, slug);
 
-        return commentRepository.findByPost(post, user, PageRequest.of(page, size));
+        return commentRepository.findByPost(id, user.getId(), PageRequest.of(page, size));
     }
 
     @Override
@@ -176,7 +176,7 @@ public class PostServiceImpl implements PostService {
         comment.setPost(post);
         CommentEntity savedComment = commentRepository.saveAndFlush(comment);
 
-        int rowsUpdated = postRepository.incrementCommentCount(post);
+        int rowsUpdated = postRepository.incrementCommentCount(id);
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
 
@@ -185,13 +185,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public CommentResponseDTO updateComment(String slug, UUID post_id, UUID comment_id, CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO updateComment(String slug, UUID postId, UUID commentId, CommentRequestDTO commentRequestDTO) {
         UserEntity user = getCurrentUser();
 
-        PostEntity post = postRepository.findById(post_id).orElse(null);
+        PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, slug);
 
-        CommentEntity comment = commentRepository.findById(comment_id).orElse(null);
+        CommentEntity comment = commentRepository.findById(commentId).orElse(null);
         isInvalidComment(comment);
 
         if (!comment.getUser().equals(user)) {
@@ -205,13 +205,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deleteComment(String slug, UUID post_id, UUID comment_id) {
+    public void deleteComment(String slug, UUID postId, UUID commentId) {
         UserEntity user = getCurrentUser();
 
-        PostEntity post = postRepository.findById(post_id).orElse(null);
+        PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, slug);
 
-        CommentEntity comment = commentRepository.findById(comment_id).orElse(null);
+        CommentEntity comment = commentRepository.findById(commentId).orElse(null);
         isInvalidComment(comment);
 
         if (!comment.getUser().equals(user) && !hasRole(Role.ADMIN)) {
@@ -220,7 +220,7 @@ public class PostServiceImpl implements PostService {
 
         commentRepository.delete(comment);
 
-        int rowsUpdated = postRepository.decrementCommentCount(post);
+        int rowsUpdated = postRepository.decrementCommentCount(postId);
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to decrement comment count of the post. Possible concurrent modification or stale entity.");
     }
@@ -231,7 +231,7 @@ public class PostServiceImpl implements PostService {
         PostEntity post = postRepository.findById(id).orElse(null);
         isInvalidPost(post, slug);
 
-        return likeRepository.findLikesOfPost(post, PageRequest.of(page, size));
+        return likeRepository.findLikesOfPost(id, PageRequest.of(page, size));
     }
 
     @Override
@@ -248,16 +248,16 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         if (likeDTO.getLike()) {
-            if (likeRepository.findByUserAndPost(user, post).isEmpty()) {
+            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), id).isEmpty()) {
                 likeRepository.saveAndFlush(like);
-                int rowsUpdated = postRepository.incrementLikeCount(post);
+                int rowsUpdated = postRepository.incrementLikeCount(id);
                 if (rowsUpdated == 0)
                     throw new ResourceConflictException("Failed to increment like count of the post. Possible concurrent modification or stale entity.");
             }
         } else {
-            if (likeRepository.findByUserAndPost(user, post).isPresent()) {
-                likeRepository.deleteByUserAndPost(user, post);
-                int rowsUpdated = postRepository.decrementLikeCount(post);
+            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), id).isPresent()) {
+                likeRepository.deleteByUser_IdAndPost_Id(user.getId(), id);
+                int rowsUpdated = postRepository.decrementLikeCount(id);
                 if (rowsUpdated == 0)
                     throw new ResourceConflictException("Failed to decrement like count of the post. Possible concurrent modification or stale entity.");
             }

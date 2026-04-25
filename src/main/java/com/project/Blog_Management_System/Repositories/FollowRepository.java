@@ -2,12 +2,12 @@ package com.project.Blog_Management_System.Repositories;
 
 import com.project.Blog_Management_System.Dto.UserInfoDTO;
 import com.project.Blog_Management_System.Entities.FollowEntity;
-import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,10 +15,6 @@ import java.util.UUID;
 
 @Repository
 public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
-
-    Integer countByFollower(UserEntity follower);
-
-    Integer countByFollowing(UserEntity following);
 
     @Query("""
        SELECT new com.project.Blog_Management_System.Dto.UserInfoDTO(
@@ -33,7 +29,7 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
        ORDER BY f.followedAt DESC
        """)
     @ReadFast
-    Slice<UserInfoDTO> findFollowers(UUID userId, Pageable pageable);
+    Slice<UserInfoDTO> findFollowers(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("""
          SELECT new com.project.Blog_Management_System.Dto.UserInfoDTO(
@@ -49,13 +45,13 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
          """
     )
     @ReadFast
-    Slice<UserInfoDTO> findFollowing(UUID userId, Pageable pageable);
+    Slice<UserInfoDTO> findFollowing(@Param("userId") UUID userId, Pageable pageable);
 
-    void deleteByFollowerAndFollowing(UserEntity follower, UserEntity followee);
+    void deleteByFollower_IdAndFollowing_Id(UUID follower_id, UUID following_id);
 
-    void deleteByFollowerOrFollowing(UserEntity follower, UserEntity followee);
+    void deleteByFollower_IdOrFollowing_Id(UUID follower_id, UUID following_id);
 
     @ReadFast
-    Optional<FollowEntity> findByFollowerAndFollowing(UserEntity follower, UserEntity followee);
+    Optional<FollowEntity> findByFollower_IdAndFollowing_Id(UUID follower_id, UUID followee_id);
 
 }

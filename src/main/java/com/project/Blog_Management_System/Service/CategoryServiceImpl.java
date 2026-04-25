@@ -42,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryEntity category = categoryRepository.findById(id).orElse(null);
         isInvalidCategory(category, slug);
 
-        return postRepository.findPostsByCategory(category, user, PageRequest.of(page, size));
+        return postRepository.findPostsByCategory(id, user.getId(), PageRequest.of(page, size));
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.project.Blog_Management_System.Repositories;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
-import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -24,20 +23,20 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
-                CASE WHEN u = :currentUser THEN true ELSE false END,
+                CASE WHEN u.id = :currentUserId THEN true ELSE false END,
                 CASE WHEN l.id IS NOT NULL THEN true ELSE false END
                 )
                 FROM PostEntity p
                 JOIN p.user u
                 JOIN p.category c
-                LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
-                WHERE u = :profileUser
+                LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
+                WHERE u.id = :profileUserId
                 ORDER BY p.createdAt DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findPostsByUser(
-            @Param("profileUser") UserEntity profileUser,
-            @Param("currentUser") UserEntity currentUser,
+            @Param("profileUserId") UUID profileUserId,
+            @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
 
@@ -46,20 +45,20 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
-                CASE WHEN u = :currentUser THEN true ELSE false END,
+                CASE WHEN u.id = :currentUserId THEN true ELSE false END,
                 CASE WHEN l.id IS NOT NULL THEN true ELSE false END
                 )
                 FROM PostEntity p
                 JOIN p.user u
                 JOIN p.category c
-                LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
-                WHERE c = :category
+                LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
+                WHERE c.id = :categoryId
                 ORDER BY p.createdAt DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findPostsByCategory(
-            @Param("category") CategoryEntity category,
-            @Param("currentUser") UserEntity currentUser,
+            @Param("categoryId") UUID categoryId,
+            @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
 
@@ -79,18 +78,18 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
-                CASE WHEN u = :currentUser THEN true ELSE false END,
+                CASE WHEN u.id = :currentUserId THEN true ELSE false END,
                 CASE WHEN l.id IS NOT NULL THEN true ELSE false END
                 )
                 FROM PostEntity p
                 JOIN p.user u
                 JOIN p.category c
-                LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
+                LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
                 ORDER BY p.createdAt DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findAllPosts(
-            @Param("currentUser") UserEntity currentUser,
+            @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
 
@@ -99,69 +98,60 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
-                CASE WHEN u = :currentUser THEN true ELSE false END,
+                CASE WHEN u.id = :currentUserId THEN true ELSE false END,
                 CASE WHEN l.id IS NOT NULL THEN true ELSE false END
                 )
                 FROM PostEntity p
                 JOIN p.user u
                 JOIN p.category c
-                JOIN FollowEntity f ON f.following = u AND f.follower = :currentUser
-                LEFT JOIN LikeEntity l ON l.post = p AND l.user = :currentUser
+                JOIN FollowEntity f ON f.following = u AND f.follower.id = :currentUserId
+                LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
                 ORDER BY p.createdAt DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findAllPostsOfFollowings(
-            @Param("currentUser") UserEntity currentUser,
+            @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
 
     @Modifying
-    @Query(
-            """
-                        UPDATE PostEntity p
-                        SET p.likeCount = p.likeCount + 1
-                        WHERE p = :post
-                    """
-    )
-    int incrementLikeCount(@Param("post") PostEntity post);
+    @Query("""
+                UPDATE PostEntity p
+                SET p.likeCount = p.likeCount + 1
+                WHERE p.id = :postId
+            """)
+    int incrementLikeCount(@Param("postId") UUID postId);
 
     @Modifying
-    @Query(
-            """
-                        UPDATE PostEntity p
-                        SET p.likeCount = p.likeCount - 1
-                        WHERE p = :post
-                    """
-    )
-    int decrementLikeCount(@Param("post") PostEntity post);
+    @Query("""
+                UPDATE PostEntity p
+                SET p.likeCount = p.likeCount - 1
+                WHERE p.id = :postId
+            """)
+    int decrementLikeCount(@Param("postId") UUID postId);
 
     @Modifying
-    @Query(
-            """
-                        UPDATE PostEntity p
-                        SET p.commentCount = p.commentCount + 1
-                        WHERE p = :post
-                    """
-    )
-    int incrementCommentCount(@Param("post") PostEntity post);
+    @Query("""
+                UPDATE PostEntity p
+                SET p.commentCount = p.commentCount + 1
+                WHERE p.id = :postId
+            """)
+    int incrementCommentCount(@Param("postId") UUID postId);
 
     @Modifying
-    @Query(
-            """
-                        UPDATE PostEntity p
-                        SET p.commentCount = p.commentCount - 1
-                        WHERE p = :post
-                    """
-    )
-    int decrementCommentCount(@Param("post") PostEntity post);
+    @Query("""
+                UPDATE PostEntity p
+                SET p.commentCount = p.commentCount - 1
+                WHERE p.id = :postId
+            """)
+    int decrementCommentCount(@Param("postId") UUID postId);
 
     @Modifying
     @Query("""
                 UPDATE PostEntity p
                 SET p.viewCount = p.viewCount + :delta
                 WHERE p.id = :postId
-            """
-    )
+            """)
     void incrementViewCount(@Param("postId") UUID postId, @Param("delta") Long delta);
 
 }
