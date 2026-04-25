@@ -2,8 +2,6 @@ package com.project.Blog_Management_System.Repositories;
 
 import com.project.Blog_Management_System.Dto.CommentResponseDTO;
 import com.project.Blog_Management_System.Entities.CommentEntity;
-import com.project.Blog_Management_System.Entities.PostEntity;
-import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -23,16 +21,16 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
                 c.body,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 c.createdAt,
-                CASE WHEN u = :currentUser THEN true ELSE false END
+                CASE WHEN u.id = :currentUserId THEN true ELSE false END
             )
             FROM CommentEntity c
             JOIN c.user u
-            WHERE c.post = :post
+            WHERE c.post.id = :postId
             """)
     @ReadFast
     Slice<CommentResponseDTO> findByPost(
-            @Param("post") PostEntity post,
-            @Param("currentUser") UserEntity currentUser,
+            @Param("postId") UUID postId,
+            @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
 

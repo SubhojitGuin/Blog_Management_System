@@ -59,47 +59,47 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     @Query("""
                 UPDATE UserEntity u
                 SET u.noOfPosts = u.noOfPosts + 1
-                WHERE u = :user
+                WHERE u.id = :userId
             """)
-    int incrementPostCount(@Param("user") UserEntity user);
+    int incrementPostCount(@Param("userId") UUID userId);
 
     @Modifying
     @Query("""
                 UPDATE UserEntity u
                 SET u.noOfPosts = u.noOfPosts - 1
-                WHERE u = :user
+                WHERE u.id = :userId
             """)
-    int decrementPostCount(@Param("user") UserEntity user);
+    int decrementPostCount(@Param("userId") UUID userId);
 
     @Modifying
     @Query("""
                 UPDATE UserEntity u
                 SET u.noOfFollowers = u.noOfFollowers + 1
-                WHERE u = :user
+                WHERE u.id = :userId
             """)
-    int incrementFollowersCount(@Param("user") UserEntity user);
+    int incrementFollowersCount(@Param("userId") UUID userId);
 
     @Modifying
     @Query("""
                 UPDATE UserEntity u
                 SET u.noOfFollowers = u.noOfFollowers - 1
-                WHERE u = :user
+                WHERE u.id = :userId
             """)
-    int decrementFollowersCount(@Param("user") UserEntity user);
+    int decrementFollowersCount(@Param("userId") UUID userId);
 
     @Modifying
     @Query("""
                 UPDATE UserEntity u
                 SET u.noOfFollowings = u.noOfFollowings + 1
-                WHERE u = :user
+                WHERE u.id = :userId
             """)
-    int incrementFollowingsCount(@Param("user") UserEntity user);
+    int incrementFollowingsCount(@Param("userId") UUID userId);
 
     @Modifying
     @Query("""
                 UPDATE UserEntity u
                 SET u.noOfFollowings = u.noOfFollowings - 1
-                WHERE u = :user
+                WHERE u.id = :userId
             """)
-    int decrementFollowingsCount(@Param("user") UserEntity user);
+    int decrementFollowingsCount(@Param("userId") UUID userId);
 }
