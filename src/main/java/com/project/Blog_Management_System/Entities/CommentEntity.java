@@ -12,7 +12,9 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@Table(name = "comments")
+@Table(name = "comments", indexes = {
+        @Index(name = "idx_comments_post_id", columnList = "post_id")
+})
 public class CommentEntity {
 
     @Id
