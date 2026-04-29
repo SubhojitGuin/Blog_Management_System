@@ -14,7 +14,13 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Table(name = "likes",
-       uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "post_id"})})
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "post_id"})
+        },
+        indexes = {
+                @Index(name = "idx_likes_post_id", columnList = "post_id")
+        }
+)
 public class LikeEntity {
 
     @Id

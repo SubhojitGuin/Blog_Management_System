@@ -14,7 +14,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Table(name = "follows",
-       uniqueConstraints = {@UniqueConstraint(columnNames = {"follower_id", "following_id"})})
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"follower_id", "following_id"})
+        },
+        indexes = {
+                @Index(name = "idx_follows_following_id_followed_at", columnList = "following_id, followed_at DESC"),
+                @Index(name = "idx_follows_follower_id_followed_at", columnList = "follower_id, followed_at DESC")
+        }
+)
 public class FollowEntity {
 
     @Id

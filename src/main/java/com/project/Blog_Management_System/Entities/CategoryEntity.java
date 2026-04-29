@@ -14,7 +14,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @FieldNameConstants
-@Table(name = "categories")
+@Table(name = "categories", indexes = {
+        @Index(name = "idx_categories_slug", columnList = "slug")
+})
 public class CategoryEntity {
 
     @Id
