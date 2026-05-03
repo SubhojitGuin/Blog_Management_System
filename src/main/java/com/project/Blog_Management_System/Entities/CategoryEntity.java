@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Entities;
 
+import com.project.Blog_Management_System.Entities.uuidV7.GeneratedUuidV7;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +21,7 @@ import java.util.UUID;
 public class CategoryEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedUuidV7
     private UUID id;
 
     @Column(unique = true, nullable = false)

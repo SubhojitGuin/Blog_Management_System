@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Entities;
 
+import com.project.Blog_Management_System.Entities.uuidV7.GeneratedUuidV7;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Enums.Role;
 import jakarta.persistence.*;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 public class UserEntity implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedUuidV7
     private UUID id;
 
     private String name;

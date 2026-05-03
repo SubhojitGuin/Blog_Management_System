@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.project.Blog_Management_System.Entities.uuidV7.GeneratedUuidV7;
 import com.project.Blog_Management_System.Utils.ReadingTimeUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,7 +25,7 @@ import java.util.UUID;
 public class PostEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedUuidV7
     private UUID id;
 
     @Column(nullable = false)
