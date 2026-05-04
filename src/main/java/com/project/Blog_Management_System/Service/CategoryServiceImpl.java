@@ -36,13 +36,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getPostsByCategory(String slug, UUID id, Integer page, Integer size) {
+    public Slice<PostResponseDTO> getPostsByCategory(String categorySlug, UUID categoryId, Integer page, Integer size) {
         UserEntity user = getCurrentUser();
 
-        CategoryEntity category = categoryRepository.findById(id).orElse(null);
-        isInvalidCategory(category, slug);
+        CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
+        isInvalidCategory(category, categorySlug);
 
-        return postRepository.findPostsByCategory(id, user.getId(), PageRequest.of(page, size));
+        return postRepository.findPostsByCategory(categoryId, user.getId(), PageRequest.of(page, size));
     }
 
     @Override
@@ -55,9 +55,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponseDTO getCategoryDetails(String slug, UUID id) {
-        CategoryEntity category = categoryRepository.findById(id).orElse(null);
-        isInvalidCategory(category, slug);
+    public CategoryResponseDTO getCategoryDetails(String categorySlug, UUID categoryId) {
+        CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
+        isInvalidCategory(category, categorySlug);
 
         return modelMapper.map(category, CategoryResponseDTO.class);
     }
@@ -83,9 +83,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryResponseDTO updateCategory(String slug, UUID id, CategoryRequestDTO categoryRequestDTO) {
-        CategoryEntity category = categoryRepository.findById(id).orElse(null);
-        isInvalidCategory(category, slug);
+    public CategoryResponseDTO updateCategory(String categorySlug, UUID categoryId, CategoryRequestDTO categoryRequestDTO) {
+        CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
+        isInvalidCategory(category, categorySlug);
 
         String newSlug = generateSlug(categoryRequestDTO.getName());
         if (categoryRepository.findBySlug(newSlug).isPresent()) {
@@ -103,13 +103,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void deleteCategory(String slug, UUID id, String newSlug) {
-        if (slug.equals("uncategorised")) {
+    public void deleteCategory(String oldSlug, UUID categoryId, String newSlug) {
+        if (oldSlug.equals("uncategorised")) {
             throw new InvalidActionException("Uncategorised category can't be deleted");
         }
 
-        CategoryEntity oldCategory = categoryRepository.findById(id).orElse(null);
-        isInvalidCategory(oldCategory, slug);
+        CategoryEntity oldCategory = categoryRepository.findById(categoryId).orElse(null);
+        isInvalidCategory(oldCategory, oldSlug);
 
         CategoryEntity newCategory = categoryRepository.findBySlug(newSlug).orElse(null);
         isInvalidCategory(newCategory, newSlug);

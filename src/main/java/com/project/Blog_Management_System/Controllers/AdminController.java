@@ -33,17 +33,17 @@ public class AdminController {
     @PutMapping(ApiRoutes.ADMIN_CATEGORY_PATH)
     @Operation(summary = "Update an Existing Category", description = "Updates the details of an existing category identified by its slug and ID.")
     public ResponseEntity<CategoryResponseDTO> updateCategory(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO,
-                                                              @PathVariable String slug,
+                                                              @PathVariable String category_slug,
                                                               @PathVariable UUID category_id) {
-        return new ResponseEntity<>(categoryService.updateCategory(slug, category_id, categoryRequestDTO), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.updateCategory(category_slug, category_id, categoryRequestDTO), HttpStatus.OK);
     }
 
     @DeleteMapping(ApiRoutes.ADMIN_CATEGORY_PATH)
     @Operation(summary = "Delete a Category", description = "Deletes an existing category identified by its slug and ID. Optionally, specify a new category slug to reassign posts from the deleted category.")
-    public ResponseEntity<Void> deleteCategory(@PathVariable String slug,
+    public ResponseEntity<Void> deleteCategory(@PathVariable String category_slug,
                                                @PathVariable UUID category_id,
                                                @RequestParam(defaultValue = "uncategorised") String newSlug) {
-        categoryService.deleteCategory(slug, category_id, newSlug);
+        categoryService.deleteCategory(category_slug, category_id, newSlug);
         return ResponseEntity.noContent().build();
     }
 

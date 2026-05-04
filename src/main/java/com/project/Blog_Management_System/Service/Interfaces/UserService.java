@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface UserService extends UserDetailsService {
 
-    UserEntity getUserById(UUID id);
+    UserEntity getUserById(UUID userId);
 
     UserEntity addUser(UserEntity user);
 
@@ -24,17 +24,17 @@ public interface UserService extends UserDetailsService {
 
     void updateEmail(EmailUpdateDTO emailUpdateDTO);
 
-    UserDTO getUserProfile(String username, UUID id);
+    UserDTO getUserProfile(String username, UUID userId);
 
     List<UserInfoDTO> searchUsers(String query);
 
-    void followOrUnfollowUser(String username, UUID id, FollowDTO followDTO);
+    void followOrUnfollowUser(String username, UUID userId, FollowDTO followDTO);
 
-    Slice<UserInfoDTO> getFollowers(String username, UUID id, int page, int size);
+    Slice<UserInfoDTO> getFollowers(String username, UUID userId, int page, int size);
 
-    Slice<UserInfoDTO> getFollowings(String username, UUID id, int page, int size);
+    Slice<UserInfoDTO> getFollowings(String username, UUID userId, int page, int size);
 
     void deleteUser();
 
-    Slice<PostResponseDTO> getUserPosts(String username, UUID id, int page, int size);
+    Slice<PostResponseDTO> getUserPosts(String username, UUID userId, int page, int size);
 }

@@ -27,11 +27,11 @@ public class CategoryController {
 
     @GetMapping(ApiRoutes.CATEGORY_POSTS)
     @Operation(summary = "Get Posts by Category", description = "Retrieves a paginated list of posts belonging to a specific category identified by its slug and ID.")
-    public ResponseEntity<Slice<PostResponseDTO>> getPostsByCategory(@PathVariable String slug,
+    public ResponseEntity<Slice<PostResponseDTO>> getPostsByCategory(@PathVariable String category_slug,
                                                                      @PathVariable UUID category_id,
                                                                      @RequestParam(defaultValue = "0") Integer page,
                                                                      @RequestParam(defaultValue = "10") Integer size) {
-        return new ResponseEntity<>(categoryService.getPostsByCategory(slug, category_id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.getPostsByCategory(category_slug, category_id, page, size), HttpStatus.OK);
     }
 
     @GetMapping
@@ -42,8 +42,8 @@ public class CategoryController {
 
     @GetMapping(ApiRoutes.CATEGORY_PATH_VARIABLE)
     @Operation(summary = "Get Category Details", description = "Retrieves the details of a specific category by its slug and ID.")
-    public ResponseEntity<CategoryResponseDTO> getCategoryDetails(@PathVariable String slug,
+    public ResponseEntity<CategoryResponseDTO> getCategoryDetails(@PathVariable String category_slug,
                                                                   @PathVariable UUID category_id) {
-        return new ResponseEntity<>(categoryService.getCategoryDetails(slug, category_id), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.getCategoryDetails(category_slug, category_id), HttpStatus.OK);
     }
 }

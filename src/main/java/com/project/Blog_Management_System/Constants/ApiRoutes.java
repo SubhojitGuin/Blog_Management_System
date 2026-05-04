@@ -21,14 +21,14 @@ public class ApiRoutes {
     public static final String POSTS_BASE_PATH = "/posts";
     public static final String POST_FOLLOWING_PATH = "/following";
     public static final String POST_SEARCH_PATH = "/search";
-    public static final String POST_PATH_VARIABLE = "/{slug}-{post_id:" + UUID_REGEX + "}";
+    public static final String POST_PATH_VARIABLE = "/{post_slug}-{post_id:" + UUID_REGEX + "}";
     public static final String POST_COMMENTS_PATH = POST_PATH_VARIABLE + "/comments";
     public static final String POST_COMMENT_PATH = POST_COMMENTS_PATH + "/{comment_id:" + UUID_REGEX + "}";
     public static final String POST_LIKES_PATH = POST_PATH_VARIABLE + "/likes";
 
     // Category Module Paths
     public static final String CATEGORY_BASE_PATH = "/category";
-    public static final String CATEGORY_PATH_VARIABLE = "/{slug}-{category_id:" + UUID_REGEX + "}";
+    public static final String CATEGORY_PATH_VARIABLE = "/{category_slug}-{category_id:" + UUID_REGEX + "}";
     public static final String CATEGORY_POSTS = CATEGORY_PATH_VARIABLE + POSTS_BASE_PATH;
 
     // Admin Module Paths

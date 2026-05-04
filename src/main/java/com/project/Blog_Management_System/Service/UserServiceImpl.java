@@ -40,8 +40,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserEntity getUserById(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+    public UserEntity getUserById(UUID userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
 
     @Override
@@ -103,9 +103,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDTO getUserProfile(String username, UUID id) {
+    public UserDTO getUserProfile(String username, UUID userId) {
         UserEntity user = getCurrentUser();
-        UserEntity retrievedUser = userRepository.findById(id).orElse(null);
+        UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
 
         isInvalidUser(retrievedUser, username);
 
@@ -123,9 +123,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void followOrUnfollowUser(String username, UUID id, FollowDTO followDTO) {
+    public void followOrUnfollowUser(String username, UUID userId, FollowDTO followDTO) {
         UserEntity follower = getCurrentUser();
-        UserEntity followee = userRepository.findById(id).orElse(null);
+        UserEntity followee = userRepository.findById(userId).orElse(null);
 
         isInvalidUser(followee, username);
 
@@ -163,20 +163,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getFollowers(String username, UUID id, int page, int size) {
-        UserEntity retrievedUser = userRepository.findById(id).orElse(null);
+    public Slice<UserInfoDTO> getFollowers(String username, UUID userId, int page, int size) {
+        UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(page, size);
-        return followRepository.findFollowers(id, pageable);
+        return followRepository.findFollowers(userId, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getFollowings(String username, UUID id, int page, int size) {
-        UserEntity retrievedUser = userRepository.findById(id).orElse(null);
+    public Slice<UserInfoDTO> getFollowings(String username, UUID userId, int page, int size) {
+        UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(page, size);
-        return followRepository.findFollowing(id, pageable);
+        return followRepository.findFollowing(userId, pageable);
     }
 
     @Override
@@ -189,12 +189,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getUserPosts(String username, UUID id, int page, int size) {
+    public Slice<PostResponseDTO> getUserPosts(String username, UUID userId, int page, int size) {
         UserEntity currentUser = getCurrentUser();
-        UserEntity retrievedUser = userRepository.findById(id).orElse(null);
+        UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(page, size);
-        return postRepository.findPostsByUser(id, currentUser.getId(), pageable);
+        return postRepository.findPostsByUser(userId, currentUser.getId(), pageable);
     }
 
     @Override

@@ -16,22 +16,22 @@ public interface PostService {
 
     Slice<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size, List<String> sort);
 
-    PostResponseDTO getPost(String slug, UUID id);
+    PostResponseDTO getPost(String postSlug, UUID postId);
 
-    PostResponseDTO updatePost(String slug, UUID id, PostRequestDTO postRequestDTO);
+    PostResponseDTO updatePost(String postSlug, UUID postId, PostRequestDTO postRequestDTO);
 
-    void deletePost(String slug, UUID id);
+    void deletePost(String postSlug, UUID postId);
 
-    Slice<CommentResponseDTO> getCommentsOfPost(String slug, UUID id, int page, int size);
+    Slice<CommentResponseDTO> getCommentsOfPost(String postSlug, UUID postId, int page, int size);
 
-    CommentResponseDTO addComment(String slug, UUID id, CommentRequestDTO commentRequestDTO);
+    CommentResponseDTO addComment(String postSlug, UUID postId, CommentRequestDTO commentRequestDTO);
 
-    CommentResponseDTO updateComment(String slug, UUID post_id, UUID comment_id, CommentRequestDTO commentRequestDTO);
+    CommentResponseDTO updateComment(String postSlug, UUID postId, UUID commentId, CommentRequestDTO commentRequestDTO);
 
-    void deleteComment(String slug, UUID post_id, UUID comment_id);
+    void deleteComment(String postSlug, UUID postId, UUID commentId);
 
-    Slice<UserInfoDTO> getLikesOfPost(String slug, UUID id, int page, int size);
+    Slice<UserInfoDTO> getLikesOfPost(String postSlug, UUID postId, int page, int size);
 
-    void likeOrDislikePost(String slug, UUID id, LikeDTO likeDTO);
+    void likeOrDislikePost(String postSlug, UUID postId, LikeDTO likeDTO);
 
 }

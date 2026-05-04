@@ -92,28 +92,28 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public PostResponseDTO getPost(String slug, UUID id) {
+    public PostResponseDTO getPost(String postSlug, UUID postId) {
         UserEntity user = getCurrentUser();
 
-        PostEntity post = postRepository.findById(id).orElse(null);
-        isInvalidPost(post, slug);
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
 
         PostResponseDTO postResponseDTO = modelMapper.map(post, PostResponseDTO.class);
         postResponseDTO.setIsOwner(user.equals(post.getUser()));
         postResponseDTO.setIsLiked(likeRepository.findByUser_IdAndPost_Id(user.getId(), post.getId()).isPresent());
 
-        redisViewCountService.addViewer(id, user.getId());
+        redisViewCountService.addViewer(postId, user.getId());
 
         return postResponseDTO;
     }
 
     @Override
     @Transactional
-    public PostResponseDTO updatePost(String slug, UUID id, PostRequestDTO postRequestDTO) {
+    public PostResponseDTO updatePost(String postSlug, UUID postId, PostRequestDTO postRequestDTO) {
         UserEntity user = getCurrentUser();
 
-        PostEntity post = postRepository.findById(id).orElse(null);
-        isInvalidPost(post, slug);
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
 
         if (!post.getUser().equals(user)) {
             throw new AccessDeniedException("You are not authorized to update this post");
@@ -136,11 +136,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePost(String slug, UUID id) {
+    public void deletePost(String postSlug, UUID postId) {
         UserEntity user = getCurrentUser();
 
-        PostEntity post = postRepository.findById(id).orElse(null);
-        isInvalidPost(post, slug);
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
 
         if (!post.getUser().equals(user) && !hasRole(Role.ADMIN)) {
             throw new AccessDeniedException("You are not authorized to delete this post");
@@ -155,28 +155,28 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<CommentResponseDTO> getCommentsOfPost(String slug, UUID id, int page, int size) {
+    public Slice<CommentResponseDTO> getCommentsOfPost(String postSlug, UUID postId, int page, int size) {
         UserEntity user = getCurrentUser();
-        PostEntity post = postRepository.findById(id).orElse(null);
-        isInvalidPost(post, slug);
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
 
-        return commentRepository.findByPost(id, user.getId(), PageRequest.of(page, size));
+        return commentRepository.findByPost(postId, user.getId(), PageRequest.of(page, size));
     }
 
     @Override
     @Transactional
-    public CommentResponseDTO addComment(String slug, UUID id, CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO addComment(String postSlug, UUID postId, CommentRequestDTO commentRequestDTO) {
         UserEntity user = getCurrentUser();
 
-        PostEntity post = postRepository.findById(id).orElse(null);
-        isInvalidPost(post, slug);
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
 
         CommentEntity comment = modelMapper.map(commentRequestDTO, CommentEntity.class);
         comment.setUser(user);
         comment.setPost(post);
         CommentEntity savedComment = commentRepository.saveAndFlush(comment);
 
-        int rowsUpdated = postRepository.incrementCommentCount(id);
+        int rowsUpdated = postRepository.incrementCommentCount(postId);
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
 
@@ -185,11 +185,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public CommentResponseDTO updateComment(String slug, UUID postId, UUID commentId, CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO updateComment(String postSlug, UUID postId, UUID commentId, CommentRequestDTO commentRequestDTO) {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, slug);
+        isInvalidPost(post, postSlug);
 
         CommentEntity comment = commentRepository.findById(commentId).orElse(null);
         isInvalidComment(comment);
@@ -205,11 +205,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deleteComment(String slug, UUID postId, UUID commentId) {
+    public void deleteComment(String postSlug, UUID postId, UUID commentId) {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, slug);
+        isInvalidPost(post, postSlug);
 
         CommentEntity comment = commentRepository.findById(commentId).orElse(null);
         isInvalidComment(comment);
@@ -227,20 +227,20 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getLikesOfPost(String slug, UUID id, int page, int size) {
-        PostEntity post = postRepository.findById(id).orElse(null);
-        isInvalidPost(post, slug);
+    public Slice<UserInfoDTO> getLikesOfPost(String postSlug, UUID postId, int page, int size) {
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
 
-        return likeRepository.findLikesOfPost(id, PageRequest.of(page, size));
+        return likeRepository.findLikesOfPost(postId, PageRequest.of(page, size));
     }
 
     @Override
     @Transactional
-    public void likeOrDislikePost(String slug, UUID id, LikeDTO likeDTO) {
+    public void likeOrDislikePost(String postSlug, UUID postId, LikeDTO likeDTO) {
         UserEntity user = getCurrentUser();
 
-        PostEntity post = postRepository.findById(id).orElse(null);
-        isInvalidPost(post, slug);
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
 
         LikeEntity like = LikeEntity.builder()
                 .user(user)
@@ -248,16 +248,16 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         if (likeDTO.getLike()) {
-            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), id).isEmpty()) {
+            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), postId).isEmpty()) {
                 likeRepository.saveAndFlush(like);
-                int rowsUpdated = postRepository.incrementLikeCount(id);
+                int rowsUpdated = postRepository.incrementLikeCount(postId);
                 if (rowsUpdated == 0)
                     throw new ResourceConflictException("Failed to increment like count of the post. Possible concurrent modification or stale entity.");
             }
         } else {
-            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), id).isPresent()) {
-                likeRepository.deleteByUser_IdAndPost_Id(user.getId(), id);
-                int rowsUpdated = postRepository.decrementLikeCount(id);
+            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), postId).isPresent()) {
+                likeRepository.deleteByUser_IdAndPost_Id(user.getId(), postId);
+                int rowsUpdated = postRepository.decrementLikeCount(postId);
                 if (rowsUpdated == 0)
                     throw new ResourceConflictException("Failed to decrement like count of the post. Possible concurrent modification or stale entity.");
             }

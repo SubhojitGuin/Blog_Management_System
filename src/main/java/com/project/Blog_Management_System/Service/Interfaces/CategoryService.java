@@ -10,16 +10,16 @@ import java.util.UUID;
 
 public interface CategoryService {
 
-    Slice<PostResponseDTO> getPostsByCategory(String slug, UUID id, Integer page, Integer size);
+    Slice<PostResponseDTO> getPostsByCategory(String categorySlug, UUID categoryId, Integer page, Integer size);
 
     List<CategoryResponseDTO> getAllCategories();
 
-    CategoryResponseDTO getCategoryDetails(String slug, UUID id);
+    CategoryResponseDTO getCategoryDetails(String categorySlug, UUID categoryId);
 
     CategoryResponseDTO createCategory(CategoryRequestDTO categoryRequestDTO);
 
-    CategoryResponseDTO updateCategory(String slug, UUID id, CategoryRequestDTO categoryRequestDTO);
+    CategoryResponseDTO updateCategory(String categorySlug, UUID categoryId, CategoryRequestDTO categoryRequestDTO);
 
-    void deleteCategory(String slug, UUID id, String newSlug);
+    void deleteCategory(String slug, UUID categoryId, String newSlug);
 
 }
