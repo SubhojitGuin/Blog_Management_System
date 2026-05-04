@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.project.Blog_Management_System.Constants.Constants.VIEW_KEY;
-import static com.project.Blog_Management_System.Constants.Constants.VIEW_PROCESSING_KEY;
+import static com.project.Blog_Management_System.Constants.RedisConstants.VIEW_KEY;
+import static com.project.Blog_Management_System.Constants.RedisConstants.VIEW_PROCESSING_KEY;
 
 @Service
 @Slf4j

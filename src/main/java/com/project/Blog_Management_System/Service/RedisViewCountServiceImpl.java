@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.project.Blog_Management_System.Constants.Constants.*;
+import static com.project.Blog_Management_System.Constants.RedisConstants.*;
 
 @Service
 @Slf4j

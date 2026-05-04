@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Controllers;
 
+import com.project.Blog_Management_System.Constants.ApiRoutes;
 import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping(ApiRoutes.CATEGORY_BASE_PATH)
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth")
 @Tag(name = "Category Management", description = "Perform all category related operations")
@@ -24,13 +25,13 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping("/{slug}-{id:[0-9a-fA-F\\-]{36}}/posts")
+    @GetMapping(ApiRoutes.CATEGORY_POSTS)
     @Operation(summary = "Get Posts by Category", description = "Retrieves a paginated list of posts belonging to a specific category identified by its slug and ID.")
     public ResponseEntity<Slice<PostResponseDTO>> getPostsByCategory(@PathVariable String slug,
-                                                                     @PathVariable UUID id,
+                                                                     @PathVariable UUID category_id,
                                                                      @RequestParam(defaultValue = "0") Integer page,
                                                                      @RequestParam(defaultValue = "10") Integer size) {
-        return new ResponseEntity<>(categoryService.getPostsByCategory(slug, id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.getPostsByCategory(slug, category_id, page, size), HttpStatus.OK);
     }
 
     @GetMapping
@@ -39,10 +40,10 @@ public class CategoryController {
         return new ResponseEntity<>(categoryService.getAllCategories(), HttpStatus.OK);
     }
 
-    @GetMapping("/{slug}-{id:[0-9a-fA-F\\-]{36}}")
+    @GetMapping(ApiRoutes.CATEGORY_PATH_VARIABLE)
     @Operation(summary = "Get Category Details", description = "Retrieves the details of a specific category by its slug and ID.")
     public ResponseEntity<CategoryResponseDTO> getCategoryDetails(@PathVariable String slug,
-                                                                  @PathVariable UUID id) {
-        return new ResponseEntity<>(categoryService.getCategoryDetails(slug, id), HttpStatus.OK);
+                                                                  @PathVariable UUID category_id) {
+        return new ResponseEntity<>(categoryService.getCategoryDetails(slug, category_id), HttpStatus.OK);
     }
 }

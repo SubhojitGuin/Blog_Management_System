@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Controllers;
 
+import com.project.Blog_Management_System.Constants.ApiRoutes;
 import com.project.Blog_Management_System.Dto.CategoryRequestDTO;
 import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping(ApiRoutes.ADMIN_BASE_PATH)
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth")
 @Tag(name = "Admin Operations", description = "Perform all admin related operations")
@@ -23,26 +24,26 @@ public class AdminController {
 
     private final CategoryService categoryService;
 
-    @PostMapping("/category")
+    @PostMapping(ApiRoutes.CATEGORY_BASE_PATH)
     @Operation(summary = "Create a New Category", description = "Creates a new category with the provided details.")
     public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO) {
         return new ResponseEntity<>(categoryService.createCategory(categoryRequestDTO), HttpStatus.CREATED);
     }
 
-    @PutMapping("/category/{slug}-{id:[0-9a-fA-F\\-]{36}}")
+    @PutMapping(ApiRoutes.ADMIN_CATEGORY_PATH)
     @Operation(summary = "Update an Existing Category", description = "Updates the details of an existing category identified by its slug and ID.")
     public ResponseEntity<CategoryResponseDTO> updateCategory(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO,
                                                               @PathVariable String slug,
-                                                              @PathVariable UUID id) {
-        return new ResponseEntity<>(categoryService.updateCategory(slug, id, categoryRequestDTO), HttpStatus.OK);
+                                                              @PathVariable UUID category_id) {
+        return new ResponseEntity<>(categoryService.updateCategory(slug, category_id, categoryRequestDTO), HttpStatus.OK);
     }
 
-    @DeleteMapping("/category/{slug}-{id:[0-9a-fA-F\\-]{36}}")
+    @DeleteMapping(ApiRoutes.ADMIN_CATEGORY_PATH)
     @Operation(summary = "Delete a Category", description = "Deletes an existing category identified by its slug and ID. Optionally, specify a new category slug to reassign posts from the deleted category.")
     public ResponseEntity<Void> deleteCategory(@PathVariable String slug,
-                                               @PathVariable UUID id,
+                                               @PathVariable UUID category_id,
                                                @RequestParam(defaultValue = "uncategorised") String newSlug) {
-        categoryService.deleteCategory(slug, id, newSlug);
+        categoryService.deleteCategory(slug, category_id, newSlug);
         return ResponseEntity.noContent().build();
     }
 

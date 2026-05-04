@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Controllers;
 
+import com.project.Blog_Management_System.Constants.ApiRoutes;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +21,7 @@ import static com.project.Blog_Management_System.Security.SecurityUtils.clearAut
 
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping(ApiRoutes.USERS_BASE_PATH)
 @RequiredArgsConstructor
 @SecurityRequirement(name = "BearerAuth")
 @Tag(name = "User Information & Handling", description = "Perform all user related operations")
@@ -34,7 +35,7 @@ public class UserController {
         return new ResponseEntity<>(userService.updateProfile(profileUpdateDTO), HttpStatus.OK);
     }
 
-    @PatchMapping("/update_password")
+    @PatchMapping(ApiRoutes.USER_UPDATE_PASSWORD_PATH)
     @Operation(summary = "Update User Password", description = "updates the existing user password.")
     public ResponseEntity<Void> updateUserPassword(@Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO, HttpServletResponse httpServletResponse) {
         userService.updatePassword(passwordUpdateDTO);
@@ -42,7 +43,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/update_username")
+    @PatchMapping(ApiRoutes.USER_UPDATE_USERNAME_PATH)
     @Operation(summary = "Update User Name", description = "updates the existing user name.")
     public ResponseEntity<Void> updateUserName(@Valid @RequestBody UsernameUpdateDTO usernameUpdateDTO, HttpServletResponse httpServletResponse) {
         userService.updateUserName(usernameUpdateDTO);
@@ -50,7 +51,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/update_email")
+    @PatchMapping(ApiRoutes.USER_UPDATE_EMAIL_PATH)
     @Operation(summary = "Update User Email", description = "updates the existing user email.")
     public ResponseEntity<Void> updateEmail(@Valid @RequestBody EmailUpdateDTO emailUpdateDTO, HttpServletResponse httpServletResponse) {
         userService.updateEmail(emailUpdateDTO);
@@ -58,44 +59,44 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}")
+    @GetMapping(ApiRoutes.USER_PATH_VARIABLE)
     @Operation(summary = "Get User Profile", description = "get user profile by username and id.")
     public ResponseEntity<UserDTO> getUserProfile(@PathVariable String username,
-                                                  @PathVariable UUID id) {
-        return new ResponseEntity<>(userService.getUserProfile(username, id), HttpStatus.OK);
+                                                  @PathVariable UUID user_id) {
+        return new ResponseEntity<>(userService.getUserProfile(username, user_id), HttpStatus.OK);
     }
 
-    @GetMapping("/search")
+    @GetMapping(ApiRoutes.USER_SEARCH_PATH)
     @Operation(summary = "Search Users", description = "search users by username or email.")
     public ResponseEntity<List<UserInfoDTO>> searchUsers(@RequestParam String query) {
         return new ResponseEntity<>(userService.searchUsers(query), HttpStatus.OK);
     }
 
-    @PostMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/follow")
+    @PostMapping(ApiRoutes.USER_FOLLOW_PATH)
     @Operation(summary = "Follow or Unfollow User", description = "follow or unfollow a user by username and id.")
     public ResponseEntity<Void> followOrUnfollowUser(@PathVariable String username,
-                                                     @PathVariable UUID id,
+                                                     @PathVariable UUID user_id,
                                                      @RequestBody FollowDTO followDTO) {
-        userService.followOrUnfollowUser(username, id, followDTO);
+        userService.followOrUnfollowUser(username, user_id, followDTO);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/followers")
+    @GetMapping(ApiRoutes.USER_FOLLOWERS_PATH)
     @Operation(summary = "Get Followers", description = "get followers of a user by username and id.")
     public ResponseEntity<Slice<UserInfoDTO>> getFollowers(@PathVariable String username,
-                                                           @PathVariable UUID id,
+                                                           @PathVariable UUID user_id,
                                                            @RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.getFollowers(username, id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getFollowers(username, user_id, page, size), HttpStatus.OK);
     }
 
-    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/followings")
+    @GetMapping(ApiRoutes.USER_FOLLOWINGS_PATH)
     @Operation(summary = "Get Followings", description = "get followings of a user by username and id.")
     public ResponseEntity<Slice<UserInfoDTO>> getFollowings(@PathVariable String username,
-                                                            @PathVariable UUID id,
+                                                            @PathVariable UUID user_id,
                                                             @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.getFollowings(username, id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getFollowings(username, user_id, page, size), HttpStatus.OK);
     }
 
     @DeleteMapping
@@ -105,13 +106,13 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{username}-{id:[0-9a-fA-F\\-]{36}}/posts")
+    @GetMapping(ApiRoutes.USER_POSTS_PATH)
     @Operation(summary = "Get User Posts", description = "get posts of a user by username and id.")
     public ResponseEntity<Slice<PostResponseDTO>> getUserPosts(@PathVariable String username,
-                                                              @PathVariable UUID id,
+                                                               @PathVariable UUID user_id,
                                                               @RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.getUserPosts(username, id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getUserPosts(username, user_id, page, size), HttpStatus.OK);
     }
 
 }
