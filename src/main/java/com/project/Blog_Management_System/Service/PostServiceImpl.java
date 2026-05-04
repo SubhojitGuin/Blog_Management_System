@@ -10,6 +10,7 @@ import com.project.Blog_Management_System.Service.Interfaces.RedisViewCountServi
 import com.project.Blog_Management_System.Specifications.PostFilterSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
@@ -60,21 +61,21 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getAllPosts(int page, int size) {
+    public Slice<PostResponseDTO> getAllPosts(UUID postCursor, int size) {
         UserEntity user = getCurrentUser();
-        return postRepository.findAllPosts(user.getId(), PageRequest.of(page, size));
+        return postRepository.findAllPosts(user.getId(), postCursor, PageRequest.of(0, size));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getAllPostsOfFollowings(int page, int size) {
+    public Slice<PostResponseDTO> getAllPostsOfFollowings(UUID postCursor, int size) {
         UserEntity user = getCurrentUser();
-        return postRepository.findAllPostsOfFollowings(user.getId(), PageRequest.of(page, size));
+        return postRepository.findAllPostsOfFollowings(user.getId(), postCursor, PageRequest.of(0, size));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size, List<String> sort) {
+    public Page<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size, List<String> sort) {
 
         final Set<String> ALLOWED_SORT_FIELDS = Set.of(
                 PostEntity.Fields.title,
@@ -155,12 +156,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<CommentResponseDTO> getCommentsOfPost(String postSlug, UUID postId, int page, int size) {
+    public Slice<CommentResponseDTO> getCommentsOfPost(String postSlug, UUID postId, UUID commentCursor, int size) {
         UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
 
-        return commentRepository.findByPost(postId, user.getId(), PageRequest.of(page, size));
+        return commentRepository.findByPost(postId, commentCursor, user.getId(), PageRequest.of(0, size));
     }
 
     @Override
@@ -227,11 +228,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getLikesOfPost(String postSlug, UUID postId, int page, int size) {
+    public Slice<UserInfoDTO> getLikesOfPost(String postSlug, UUID postId, UUID userCursor, int size) {
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
 
-        return likeRepository.findLikesOfPost(postId, PageRequest.of(page, size));
+        return likeRepository.findLikesOfPost(postId, userCursor, PageRequest.of(0, size));
     }
 
     @Override

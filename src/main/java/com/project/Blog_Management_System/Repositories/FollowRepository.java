@@ -26,10 +26,11 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
        FROM FollowEntity f
        JOIN f.follower u
        WHERE f.following.id = :userId
-       ORDER BY f.followedAt DESC
+       AND (:userCursor IS NULL OR u.id < :userCursor)
+       ORDER BY u.id DESC
        """)
     @ReadFast
-    Slice<UserInfoDTO> findFollowers(@Param("userId") UUID userId, Pageable pageable);
+    Slice<UserInfoDTO> findFollowers(@Param("userId") UUID userId, @Param("userCursor") UUID userCursor, Pageable pageable);
 
     @Query("""
          SELECT new com.project.Blog_Management_System.Dto.UserInfoDTO(
@@ -41,11 +42,12 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
          FROM FollowEntity f
          JOIN f.following u
          WHERE f.follower.id = :userId
-         ORDER BY f.followedAt DESC
+         AND (:userCursor IS NULL OR u.id < :userCursor)
+         ORDER BY u.id DESC
          """
     )
     @ReadFast
-    Slice<UserInfoDTO> findFollowing(@Param("userId") UUID userId, Pageable pageable);
+    Slice<UserInfoDTO> findFollowing(@Param("userId") UUID userId, @Param("userCursor") UUID userCursor, Pageable pageable);
 
     void deleteByFollower_IdAndFollowing_Id(UUID follower_id, UUID following_id);
 

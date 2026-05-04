@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface CategoryService {
 
-    Slice<PostResponseDTO> getPostsByCategory(String categorySlug, UUID categoryId, Integer page, Integer size);
+    Slice<PostResponseDTO> getPostsByCategory(String categorySlug, UUID categoryId, UUID postCursor, Integer size);
 
     List<CategoryResponseDTO> getAllCategories();
 

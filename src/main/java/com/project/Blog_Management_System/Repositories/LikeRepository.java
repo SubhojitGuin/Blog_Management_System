@@ -26,10 +26,13 @@ public interface LikeRepository extends JpaRepository<LikeEntity, UUID> {
                 FROM LikeEntity l
                 LEFT JOIN l.user u
                 WHERE l.post.id = :postId
+                AND (:userCursor IS NULL OR u.id < :userCursor)
+                ORDER BY u.id DESC
             """)
     @ReadFast
     Slice<UserInfoDTO> findLikesOfPost(
             @Param("postId") UUID postId,
+            @Param("userCursor") UUID userCursor,
             Pageable pageable
     );
 

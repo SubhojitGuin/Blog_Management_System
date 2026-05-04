@@ -163,20 +163,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getFollowers(String username, UUID userId, int page, int size) {
+    public Slice<UserInfoDTO> getFollowers(String username, UUID userId, UUID userCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
-        Pageable pageable = PageRequest.of(page, size);
-        return followRepository.findFollowers(userId, pageable);
+        Pageable pageable = PageRequest.of(0, size);
+        return followRepository.findFollowers(userId, userCursor, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getFollowings(String username, UUID userId, int page, int size) {
+    public Slice<UserInfoDTO> getFollowings(String username, UUID userId, UUID userCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
-        Pageable pageable = PageRequest.of(page, size);
-        return followRepository.findFollowing(userId, pageable);
+        Pageable pageable = PageRequest.of(0, size);
+        return followRepository.findFollowing(userId, userCursor, pageable);
     }
 
     @Override
@@ -189,12 +189,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getUserPosts(String username, UUID userId, int page, int size) {
+    public Slice<PostResponseDTO> getUserPosts(String username, UUID userId, UUID postCursor, int size) {
         UserEntity currentUser = getCurrentUser();
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
-        Pageable pageable = PageRequest.of(page, size);
-        return postRepository.findPostsByUser(userId, currentUser.getId(), pageable);
+        Pageable pageable = PageRequest.of(0, size);
+        return postRepository.findPostsByUser(userId, currentUser.getId(), postCursor, pageable);
     }
 
     @Override

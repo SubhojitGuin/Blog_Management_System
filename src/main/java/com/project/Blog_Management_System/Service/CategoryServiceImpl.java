@@ -36,13 +36,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getPostsByCategory(String categorySlug, UUID categoryId, Integer page, Integer size) {
+    public Slice<PostResponseDTO> getPostsByCategory(String categorySlug, UUID categoryId, UUID postCursor, Integer size) {
         UserEntity user = getCurrentUser();
 
         CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
         isInvalidCategory(category, categorySlug);
 
-        return postRepository.findPostsByCategory(categoryId, user.getId(), PageRequest.of(page, size));
+        return postRepository.findPostsByCategory(categoryId, postCursor, user.getId(), PageRequest.of(0, size));
     }
 
     @Override

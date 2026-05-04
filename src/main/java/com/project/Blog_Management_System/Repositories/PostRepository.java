@@ -31,12 +31,14 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 JOIN p.category c
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
                 WHERE u.id = :profileUserId
-                ORDER BY p.createdAt DESC
+                AND (:postCursor IS NULL OR p.id < :postCursor)
+                ORDER BY p.id DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findPostsByUser(
             @Param("profileUserId") UUID profileUserId,
             @Param("currentUserId") UUID currentUserId,
+            @Param("postCursor") UUID postCursor,
             Pageable pageable
     );
 
@@ -53,11 +55,13 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 JOIN p.category c
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
                 WHERE c.id = :categoryId
-                ORDER BY p.createdAt DESC
+                AND (:postCursor IS NULL OR p.id < :postCursor)
+                ORDER BY p.id DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findPostsByCategory(
             @Param("categoryId") UUID categoryId,
+            @Param("postCursor") UUID postCursor,
             @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
@@ -85,11 +89,13 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 JOIN p.user u
                 JOIN p.category c
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
-                ORDER BY p.createdAt DESC
+                WHERE (:postCursor IS NULL OR p.id < :postCursor)
+                ORDER BY p.id DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findAllPosts(
             @Param("currentUserId") UUID currentUserId,
+            @Param("postCursor") UUID postCursor,
             Pageable pageable
     );
 
@@ -106,11 +112,13 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 JOIN p.category c
                 JOIN FollowEntity f ON f.following = u AND f.follower.id = :currentUserId
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
-                ORDER BY p.createdAt DESC
+                WHERE (:postCursor IS NULL OR p.id < :postCursor)
+                ORDER BY p.id DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findAllPostsOfFollowings(
             @Param("currentUserId") UUID currentUserId,
+            @Param("postCursor") UUID postCursor,
             Pageable pageable
     );
 

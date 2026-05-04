@@ -29,9 +29,9 @@ public class CategoryController {
     @Operation(summary = "Get Posts by Category", description = "Retrieves a paginated list of posts belonging to a specific category identified by its slug and ID.")
     public ResponseEntity<Slice<PostResponseDTO>> getPostsByCategory(@PathVariable String category_slug,
                                                                      @PathVariable UUID category_id,
-                                                                     @RequestParam(defaultValue = "0") Integer page,
+                                                                     @RequestParam(required = false) UUID post_cursor,
                                                                      @RequestParam(defaultValue = "10") Integer size) {
-        return new ResponseEntity<>(categoryService.getPostsByCategory(category_slug, category_id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(categoryService.getPostsByCategory(category_slug, category_id, post_cursor, size), HttpStatus.OK);
     }
 
     @GetMapping

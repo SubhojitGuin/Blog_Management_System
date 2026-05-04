@@ -30,11 +30,11 @@ public interface UserService extends UserDetailsService {
 
     void followOrUnfollowUser(String username, UUID userId, FollowDTO followDTO);
 
-    Slice<UserInfoDTO> getFollowers(String username, UUID userId, int page, int size);
+    Slice<UserInfoDTO> getFollowers(String username, UUID userId, UUID userCursor, int size);
 
-    Slice<UserInfoDTO> getFollowings(String username, UUID userId, int page, int size);
+    Slice<UserInfoDTO> getFollowings(String username, UUID userId, UUID userCursor, int size);
 
     void deleteUser();
 
-    Slice<PostResponseDTO> getUserPosts(String username, UUID userId, int page, int size);
+    Slice<PostResponseDTO> getUserPosts(String username, UUID userId, UUID postCursor, int size);
 }

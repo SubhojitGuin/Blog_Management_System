@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,24 +34,24 @@ public class PostController {
 
     @GetMapping
     @Operation(summary = "Get All Posts", description = "Retrieves a paginated list of all posts created by the authenticated user.")
-    public ResponseEntity<Slice<PostResponseDTO>> getAllPosts(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Slice<PostResponseDTO>> getAllPosts(@RequestParam(required = false) UUID post_cursor,
                                                               @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(postService.getAllPosts(page, size), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getAllPosts(post_cursor, size), HttpStatus.OK);
     }
 
     @GetMapping(ApiRoutes.POST_FOLLOWING_PATH)
     @Operation(summary = "Get Posts of Followings", description = "Retrieves a paginated list of posts created by the users that the authenticated user is following.")
-    public ResponseEntity<Slice<PostResponseDTO>> getAllPostsOfFollowings(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<Slice<PostResponseDTO>> getAllPostsOfFollowings(@RequestParam(required = false) UUID post_cursor,
                                                                           @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(postService.getAllPostsOfFollowings(page, size), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getAllPostsOfFollowings(post_cursor, size), HttpStatus.OK);
     }
 
     @GetMapping(ApiRoutes.POST_SEARCH_PATH)
     @Operation(summary = "Search Posts", description = "Searches for posts based on the provided query string.")
-    public ResponseEntity<Slice<PostInfoDTO>> searchPosts(@ModelAttribute PostFilterRequestDTO postFilterRequestDTO,
-                                                          @RequestParam(required = false) List<String> sort,
-                                                          @RequestParam(defaultValue = "0") int page,
-                                                          @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<Page<PostInfoDTO>> searchPosts(@ModelAttribute PostFilterRequestDTO postFilterRequestDTO,
+                                                         @RequestParam(required = false) List<String> sort,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(postService.searchPosts(postFilterRequestDTO, page, size, sort), HttpStatus.OK);
     }
 
@@ -77,14 +78,13 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(ApiRoutes.
-            POST_COMMENTS_PATH)
+    @GetMapping(ApiRoutes.POST_COMMENTS_PATH)
     @Operation(summary = "Get comments of the post", description = "Get all the comments of a post identified by its slug and ID.")
     public ResponseEntity<Slice<CommentResponseDTO>> findCommentsOfPost(@PathVariable String post_slug,
                                                                         @PathVariable UUID post_id,
-                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(required = false) UUID comment_cursor,
                                                                         @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(postService.getCommentsOfPost(post_slug, post_id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getCommentsOfPost(post_slug, post_id, comment_cursor, size), HttpStatus.OK);
     }
 
     @PostMapping(ApiRoutes.POST_COMMENTS_PATH)
@@ -117,9 +117,9 @@ public class PostController {
     @Operation(summary = "Get all likes of a post", description = "Get all the liked users of a post using the post slug and post ID")
     public ResponseEntity<Slice<UserInfoDTO>> getLikesOfPost(@PathVariable String post_slug,
                                                              @PathVariable UUID post_id,
-                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(required = false) UUID user_cursor,
                                                              @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(postService.getLikesOfPost(post_slug, post_id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getLikesOfPost(post_slug, post_id, user_cursor, size), HttpStatus.OK);
     }
 
     @PostMapping(ApiRoutes.POST_LIKES_PATH)

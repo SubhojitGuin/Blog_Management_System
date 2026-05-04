@@ -85,18 +85,18 @@ public class UserController {
     @Operation(summary = "Get Followers", description = "get followers of a user by username and id.")
     public ResponseEntity<Slice<UserInfoDTO>> getFollowers(@PathVariable String username,
                                                            @PathVariable UUID user_id,
-                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(required = false) UUID user_cursor,
                                                            @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.getFollowers(username, user_id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getFollowers(username, user_id, user_cursor, size), HttpStatus.OK);
     }
 
     @GetMapping(ApiRoutes.USER_FOLLOWINGS_PATH)
     @Operation(summary = "Get Followings", description = "get followings of a user by username and id.")
     public ResponseEntity<Slice<UserInfoDTO>> getFollowings(@PathVariable String username,
                                                             @PathVariable UUID user_id,
-                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(required = false) UUID user_cursor,
                                                             @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.getFollowings(username, user_id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getFollowings(username, user_id, user_cursor, size), HttpStatus.OK);
     }
 
     @DeleteMapping
@@ -110,9 +110,9 @@ public class UserController {
     @Operation(summary = "Get User Posts", description = "get posts of a user by username and id.")
     public ResponseEntity<Slice<PostResponseDTO>> getUserPosts(@PathVariable String username,
                                                                @PathVariable UUID user_id,
-                                                              @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(required = false) UUID post_cursor,
                                                               @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(userService.getUserPosts(username, user_id, page, size), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getUserPosts(username, user_id, post_cursor, size), HttpStatus.OK);
     }
 
 }

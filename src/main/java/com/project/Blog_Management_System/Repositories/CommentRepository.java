@@ -26,10 +26,13 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
             FROM CommentEntity c
             JOIN c.user u
             WHERE c.post.id = :postId
+            AND (:commentCursor IS NULL OR c.id < :commentCursor)
+            ORDER BY c.id DESC
             """)
     @ReadFast
     Slice<CommentResponseDTO> findByPost(
             @Param("postId") UUID postId,
+            @Param("commentCursor") UUID commentCursor,
             @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
