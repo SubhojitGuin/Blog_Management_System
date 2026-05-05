@@ -8,7 +8,7 @@ import lombok.Data;
 public class UsernameUpdateDTO {
     @NotNull
     @Pattern(
-            regexp = "^\\w{3,}$",
+            regexp = "^\\w{3,30}$",
             message = "Username must be at least 3 characters long and contain only letters, numbers, and underscores"
     )
     private String username;

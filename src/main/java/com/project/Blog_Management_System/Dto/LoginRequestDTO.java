@@ -7,8 +7,8 @@ import lombok.Data;
 @Data
 public class LoginRequestDTO {
     @Pattern(
-            regexp = "(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$)|(^\\w{3,}$)",
-            message = "Input must be a valid email or username (min 3 characters, letters/numbers/underscore)"
+            regexp = "(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$)|(^\\w{3,30}$)",
+            message = "Input must be a valid email or username (min 3 characters, max 30 characters, can be letters or numbers or underscore)"
     )
     @NotNull
     private String emailOrUsername;

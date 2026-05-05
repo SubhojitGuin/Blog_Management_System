@@ -28,13 +28,13 @@ public class PostEntity {
     @GeneratedUuidV7
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String slug;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 2000)
     private String description;
 
     @Column(columnDefinition = "TEXT", nullable = false)

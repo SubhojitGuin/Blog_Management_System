@@ -32,12 +32,12 @@ public class UserEntity implements UserDetails {
 
     private String name;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 30)
     private String username;
 
     private String password;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 320)
     private String email;
 
     private String bio;

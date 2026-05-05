@@ -5,6 +5,7 @@ import com.project.Blog_Management_System.Enums.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -12,8 +13,10 @@ import java.time.LocalDate;
 @Data
 public class ProfileUpdateDTO {
     @NotBlank
+    @Size(min = 2, max = 255)
     private String name;
 
+    @Size(max = 255)
     private String bio;
 
     private Gender gender;

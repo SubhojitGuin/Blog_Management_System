@@ -48,7 +48,7 @@ public class PostController {
 
     @GetMapping(ApiRoutes.POST_SEARCH_PATH)
     @Operation(summary = "Search Posts", description = "Searches for posts based on the provided query string.")
-    public ResponseEntity<Page<PostInfoDTO>> searchPosts(@ModelAttribute PostFilterRequestDTO postFilterRequestDTO,
+    public ResponseEntity<Page<PostInfoDTO>> searchPosts(@Valid @ModelAttribute PostFilterRequestDTO postFilterRequestDTO,
                                                          @RequestParam(required = false) List<String> sort,
                                                          @RequestParam(defaultValue = "0") int page,
                                                          @RequestParam(defaultValue = "10") int size) {

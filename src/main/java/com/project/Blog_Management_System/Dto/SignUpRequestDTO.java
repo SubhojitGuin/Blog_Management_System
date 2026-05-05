@@ -10,10 +10,11 @@ import java.time.LocalDate;
 @Data
 public class SignUpRequestDTO {
     @NotBlank
+    @Size(min = 2, max = 255)
     private String name;
 
     @Pattern(
-            regexp = "^\\w{3,}$",
+            regexp = "^\\w{3,30}$",
             message = "Username must be at least 3 characters long and contain only letters, numbers, and underscores"
     )
     @NotBlank
@@ -21,6 +22,7 @@ public class SignUpRequestDTO {
 
     @Email
     @NotBlank
+    @Size(min = 6, max = 320)
     private String email;
 
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
@@ -31,6 +33,7 @@ public class SignUpRequestDTO {
 
     private Gender gender;
 
+    @Size(max = 255)
     private String bio;
 
     @Past(message = "Date of birth must be in the past and in the format yyyy-MM-dd")
