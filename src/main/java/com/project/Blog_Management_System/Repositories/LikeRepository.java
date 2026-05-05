@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Repositories;
 
-import com.project.Blog_Management_System.Dto.UserInfoDTO;
+import com.project.Blog_Management_System.Dto.LikeInfoDTO;
 import com.project.Blog_Management_System.Entities.LikeEntity;
 import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
@@ -22,17 +22,25 @@ public interface LikeRepository extends JpaRepository<LikeEntity, UUID> {
     void deleteByUser_IdAndPost_Id(UUID user_id, UUID post_id);
 
     @Query("""
-                SELECT new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username,u.active)
+                SELECT new com.project.Blog_Management_System.Dto.LikeInfoDTO(
+                    new com.project.Blog_Management_System.Dto.UserInfoDTO(
+                            u.id,
+                            u.name,
+                            u.username,
+                            u.active
+                    ),
+                    l.id
+                )
                 FROM LikeEntity l
                 LEFT JOIN l.user u
                 WHERE l.post.id = :postId
-                AND (:userCursor IS NULL OR u.id < :userCursor)
-                ORDER BY u.id DESC
+                AND (:likeCursor IS NULL OR l.id < :likeCursor)
+                ORDER BY l.id DESC
             """)
     @ReadFast
-    Slice<UserInfoDTO> findLikesOfPost(
+    Slice<LikeInfoDTO> findLikesOfPost(
             @Param("postId") UUID postId,
-            @Param("userCursor") UUID userCursor,
+            @Param("likeCursor") UUID likeCursor,
             Pageable pageable
     );
 

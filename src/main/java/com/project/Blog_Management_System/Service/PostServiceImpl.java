@@ -228,11 +228,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getLikesOfPost(String postSlug, UUID postId, UUID userCursor, int size) {
+    public Slice<LikeInfoDTO> getLikesOfPost(String postSlug, UUID postId, UUID likeCursor, int size) {
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
 
-        return likeRepository.findLikesOfPost(postId, userCursor, PageRequest.of(0, size));
+        return likeRepository.findLikesOfPost(postId, likeCursor, PageRequest.of(0, size));
     }
 
     @Override

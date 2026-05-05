@@ -163,20 +163,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getFollowers(String username, UUID userId, UUID userCursor, int size) {
+    public Slice<FollowInfoDTO> getFollowers(String username, UUID userId, UUID followCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(0, size);
-        return followRepository.findFollowers(userId, userCursor, pageable);
+        return followRepository.findFollowers(userId, followCursor, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<UserInfoDTO> getFollowings(String username, UUID userId, UUID userCursor, int size) {
+    public Slice<FollowInfoDTO> getFollowings(String username, UUID userId, UUID followCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(0, size);
-        return followRepository.findFollowing(userId, userCursor, pageable);
+        return followRepository.findFollowing(userId, followCursor, pageable);
     }
 
     @Override

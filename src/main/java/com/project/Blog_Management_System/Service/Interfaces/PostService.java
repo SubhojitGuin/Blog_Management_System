@@ -31,7 +31,7 @@ public interface PostService {
 
     void deleteComment(String postSlug, UUID postId, UUID commentId);
 
-    Slice<UserInfoDTO> getLikesOfPost(String postSlug, UUID postId, UUID userCursor, int size);
+    Slice<LikeInfoDTO> getLikesOfPost(String postSlug, UUID postId, UUID likeCursor, int size);
 
     void likeOrDislikePost(String postSlug, UUID postId, LikeDTO likeDTO);
 

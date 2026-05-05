@@ -115,11 +115,11 @@ public class PostController {
 
     @GetMapping(ApiRoutes.POST_LIKES_PATH)
     @Operation(summary = "Get all likes of a post", description = "Get all the liked users of a post using the post slug and post ID")
-    public ResponseEntity<Slice<UserInfoDTO>> getLikesOfPost(@PathVariable String post_slug,
+    public ResponseEntity<Slice<LikeInfoDTO>> getLikesOfPost(@PathVariable String post_slug,
                                                              @PathVariable UUID post_id,
-                                                             @RequestParam(required = false) UUID user_cursor,
+                                                             @RequestParam(required = false) UUID like_cursor,
                                                              @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(postService.getLikesOfPost(post_slug, post_id, user_cursor, size), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getLikesOfPost(post_slug, post_id, like_cursor, size), HttpStatus.OK);
     }
 
     @PostMapping(ApiRoutes.POST_LIKES_PATH)

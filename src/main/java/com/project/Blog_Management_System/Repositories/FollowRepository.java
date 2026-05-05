@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Repositories;
 
-import com.project.Blog_Management_System.Dto.UserInfoDTO;
+import com.project.Blog_Management_System.Dto.FollowInfoDTO;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
@@ -17,37 +17,43 @@ import java.util.UUID;
 public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
 
     @Query("""
-       SELECT new com.project.Blog_Management_System.Dto.UserInfoDTO(
-            u.id,
-            u.name,
-            u.username,
-            u.active
-       )
-       FROM FollowEntity f
-       JOIN f.follower u
-       WHERE f.following.id = :userId
-       AND (:userCursor IS NULL OR u.id < :userCursor)
-       ORDER BY u.id DESC
-       """)
-    @ReadFast
-    Slice<UserInfoDTO> findFollowers(@Param("userId") UUID userId, @Param("userCursor") UUID userCursor, Pageable pageable);
-
-    @Query("""
-         SELECT new com.project.Blog_Management_System.Dto.UserInfoDTO(
+       SELECT new com.project.Blog_Management_System.Dto.FollowInfoDTO(
+            new com.project.Blog_Management_System.Dto.UserInfoDTO(
                 u.id,
                 u.name,
                 u.username,
                 u.active
+            ),
+            f.id
+       )
+       FROM FollowEntity f
+       JOIN f.follower u
+       WHERE f.following.id = :userId
+       AND (:followCursor IS NULL OR f.id < :followCursor)
+       ORDER BY f.id DESC
+       """)
+    @ReadFast
+    Slice<FollowInfoDTO> findFollowers(@Param("userId") UUID userId, @Param("followCursor") UUID followCursor, Pageable pageable);
+
+    @Query("""
+         SELECT new com.project.Blog_Management_System.Dto.FollowInfoDTO(
+             new com.project.Blog_Management_System.Dto.UserInfoDTO(
+                u.id,
+                u.name,
+                u.username,
+                u.active
+             ),
+             f.id
          )
          FROM FollowEntity f
          JOIN f.following u
          WHERE f.follower.id = :userId
-         AND (:userCursor IS NULL OR u.id < :userCursor)
-         ORDER BY u.id DESC
+         AND (:followCursor IS NULL OR f.id < :followCursor)
+         ORDER BY f.id DESC
          """
     )
     @ReadFast
-    Slice<UserInfoDTO> findFollowing(@Param("userId") UUID userId, @Param("userCursor") UUID userCursor, Pageable pageable);
+    Slice<FollowInfoDTO> findFollowing(@Param("userId") UUID userId, @Param("followCursor") UUID followCursor, Pageable pageable);
 
     void deleteByFollower_IdAndFollowing_Id(UUID follower_id, UUID following_id);
 
