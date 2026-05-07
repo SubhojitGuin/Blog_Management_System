@@ -1,9 +1,12 @@
 package com.project.Blog_Management_System.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.project.Blog_Management_System.Deserializers.BasicHtmlSanitizationDeserializer;
+import com.project.Blog_Management_System.Deserializers.StringSanitizationDeserializer;
 import com.project.Blog_Management_System.Enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.LocalDate;
 
@@ -11,6 +14,7 @@ import java.time.LocalDate;
 public class SignUpRequestDTO {
     @NotBlank
     @Size(min = 2, max = 255)
+    @JsonDeserialize(using = StringSanitizationDeserializer.class)
     private String name;
 
     @Pattern(
@@ -34,6 +38,7 @@ public class SignUpRequestDTO {
     private Gender gender;
 
     @Size(max = 255)
+    @JsonDeserialize(using = BasicHtmlSanitizationDeserializer.class)
     private String bio;
 
     @Past(message = "Date of birth must be in the past and in the format yyyy-MM-dd")

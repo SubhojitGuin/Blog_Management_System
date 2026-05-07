@@ -1,12 +1,15 @@
 package com.project.Blog_Management_System.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.project.Blog_Management_System.Deserializers.BasicHtmlSanitizationDeserializer;
+import com.project.Blog_Management_System.Deserializers.StringSanitizationDeserializer;
 import com.project.Blog_Management_System.Enums.Gender;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.LocalDate;
 
@@ -14,9 +17,11 @@ import java.time.LocalDate;
 public class ProfileUpdateDTO {
     @NotBlank
     @Size(min = 2, max = 255)
+    @JsonDeserialize(using = StringSanitizationDeserializer.class)
     private String name;
 
     @Size(max = 255)
+    @JsonDeserialize(using = BasicHtmlSanitizationDeserializer.class)
     private String bio;
 
     private Gender gender;

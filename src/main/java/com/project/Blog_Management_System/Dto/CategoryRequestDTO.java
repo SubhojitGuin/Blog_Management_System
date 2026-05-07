@@ -1,10 +1,12 @@
 package com.project.Blog_Management_System.Dto;
 
+import com.project.Blog_Management_System.Deserializers.BasicHtmlSanitizationDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @Data
 @AllArgsConstructor
@@ -16,5 +18,6 @@ public class CategoryRequestDTO {
 
     @NotBlank
     @Size(min = 10, max = 500)
+    @JsonDeserialize(using = BasicHtmlSanitizationDeserializer.class)
     private String description;
 }

@@ -13,7 +13,7 @@ import static org.springframework.data.web.config.EnableSpringDataWebSupport.Pag
 
 @SpringBootApplication
 @EnableScheduling
-@EnableSpringDataWebSupport(pageSerializationMode=VIA_DTO)
+@EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO)
 public class BlogManagementSystemApplication {
 
 	@Value("${frontend.url}")
