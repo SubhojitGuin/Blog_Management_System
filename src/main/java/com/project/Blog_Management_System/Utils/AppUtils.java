@@ -1,10 +1,13 @@
 package com.project.Blog_Management_System.Utils;
 
+import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -76,6 +79,41 @@ public class AppUtils {
             orders.add(order);
         }
         return Sort.by(orders);
+    }
+
+    /**
+     * Applies the given post status and publish date to the provided post entity.
+     *
+     * @param post      The {@link PostEntity} to update.
+     * @param status    The desired {@link PostStatus} to set on the post. If null, defaults to DRAFT.
+     * @param publishAt The desired publishing date and time for the post. Required if status is SCHEDULED.
+     * @throws IllegalArgumentException if publishAt is null when status is SCHEDULED.
+     */
+    public static void applyStatusAndPublishAt(PostEntity post,
+                                         PostStatus status,
+                                         LocalDateTime publishAt) {
+        if (status == null) {
+            status = PostStatus.DRAFT;
+        }
+
+        switch (status) {
+            case SCHEDULED -> {
+                if (publishAt == null) {
+                    throw new IllegalArgumentException("publishAt is required when status is SCHEDULED");
+                }
+
+                post.setStatus(PostStatus.SCHEDULED);
+                post.setPublishAt(publishAt);
+            }
+            case PUBLISHED -> {
+                post.setStatus(PostStatus.PUBLISHED);
+                post.setPublishAt(null);
+            }
+            default -> {
+                post.setStatus(PostStatus.DRAFT);
+                post.setPublishAt(null);
+            }
+        }
     }
 
 }

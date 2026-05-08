@@ -1,8 +1,10 @@
 package com.project.Blog_Management_System.Repositories;
 
+import com.project.Blog_Management_System.Dto.PostInfoDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -13,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Repository
@@ -89,12 +92,14 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 JOIN p.user u
                 JOIN p.category c
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
-                WHERE (:postCursor IS NULL OR p.id < :postCursor)
+                WHERE p.status = :status
+                AND (:postCursor IS NULL OR p.id < :postCursor)
                 ORDER BY p.id DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findAllPosts(
             @Param("currentUserId") UUID currentUserId,
+            @Param("status") PostStatus status,
             @Param("postCursor") UUID postCursor,
             Pageable pageable
     );
@@ -112,12 +117,14 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                 JOIN p.category c
                 JOIN FollowEntity f ON f.following = u AND f.follower.id = :currentUserId
                 LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
-                WHERE (:postCursor IS NULL OR p.id < :postCursor)
+                WHERE p.status = :status
+                AND (:postCursor IS NULL OR p.id < :postCursor)
                 ORDER BY p.id DESC
             """)
     @ReadFast
     Slice<PostResponseDTO> findAllPostsOfFollowings(
             @Param("currentUserId") UUID currentUserId,
+            @Param("status") PostStatus status,
             @Param("postCursor") UUID postCursor,
             Pageable pageable
     );
@@ -162,4 +169,28 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
             """)
     void incrementViewCount(@Param("postId") UUID postId, @Param("delta") Long delta);
 
+    @Modifying
+    @Query("""
+                UPDATE PostEntity p
+                SET p.status = com.project.Blog_Management_System.Enums.PostStatus.PUBLISHED,
+                    p.publishAt = null
+                WHERE p.status = com.project.Blog_Management_System.Enums.PostStatus.SCHEDULED
+                AND p.publishAt <= :now
+            """)
+    int publishDuePosts(@Param("now") LocalDateTime now);
+
+    @Query("""
+                SELECT new com.project.Blog_Management_System.Dto.PostInfoDTO(
+                    p.id, p.slug, p.title, p.description, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount
+                )
+                FROM PostEntity p
+                WHERE p.status = :status
+                AND p.user.id = :currentUserId
+                AND (:postCursor IS NULL OR p.id < :postCursor)
+                ORDER BY p.id DESC
+            """)
+    Slice<PostInfoDTO> findByUserIdAndStatus(@Param("currentUserId") UUID currentUserId,
+                                             @Param("status") PostStatus status,
+                                             @Param("postCursor") UUID postCursor,
+                                             Pageable pageable);
 }

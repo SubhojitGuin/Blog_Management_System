@@ -18,7 +18,7 @@ import static com.project.Blog_Management_System.Constants.RedisConstants.VIEW_P
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
-public class ViewSyncScheduling {
+public class ViewSyncScheduler {
 
     private final PostRepository postRepository;
     private final StringRedisTemplate redisTemplate;

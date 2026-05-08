@@ -4,6 +4,8 @@ import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Enums.PostStatus;
+import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 
 public class ValidationUtils {
@@ -56,6 +58,20 @@ public class ValidationUtils {
     public static void isInvalidComment(CommentEntity comment) {
         if (comment == null) {
             throw new ResourceNotFoundException("Comment does not exist");
+        }
+    }
+
+    /**
+    * Validates that a {@link PostEntity} is published and throws {@link ResourceNotFoundException} if it is not.
+    *
+    * @param post The {@link PostEntity} to validate.
+    * @throws ResourceNotFoundException if the {@code post} is not in the PUBLISHED status.
+    */
+    public static void isPublishedPost(PostEntity post, UserEntity user) {
+        if (post.getStatus() != PostStatus.PUBLISHED) {
+            throw (post.getUser().equals(user)) ?
+                    new InvalidActionException("Invalid action on unpublished post")
+                    : new ResourceNotFoundException("Post not found");
         }
     }
 

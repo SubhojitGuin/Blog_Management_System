@@ -3,6 +3,7 @@ package com.project.Blog_Management_System.Specifications;
 import com.project.Blog_Management_System.Dto.PostFilterRequestDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 public class PostFilterSpecification {
@@ -39,10 +40,16 @@ public class PostFilterSpecification {
                         cb.greaterThanOrEqualTo(root.get(PostEntity.Fields.readingTimeMinutes), min);
     }
 
+    private static Specification<PostEntity> hasStatus() {
+        return (root, query, cb) ->
+                cb.equal(root.get(PostEntity.Fields.status), PostStatus.PUBLISHED);
+    }
+
     public static Specification<PostEntity> buildSpecification(PostFilterRequestDTO params) {
         return Specification.where(hasTitle(params.getTitle()))
                 .and(hasCategory(params.getCategorySlug()))
                 .and(hasMaxReadingTime(params.getMaxReadingTime()))
-                .and(hasMinReadingTime(params.getMinReadingTime()));
+                .and(hasMinReadingTime(params.getMinReadingTime()))
+                .and(hasStatus());
     }
 }

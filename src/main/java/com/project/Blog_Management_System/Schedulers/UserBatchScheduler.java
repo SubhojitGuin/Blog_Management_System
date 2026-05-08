@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
-public class UserBatchScheduling {
+public class UserBatchScheduler {
 
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
@@ -33,7 +33,7 @@ public class UserBatchScheduling {
             users = userRepository.findInactiveUsers(cutoff, PageRequest.of(page, size));
 
             for (UserEntity user : users) {
-                followRepository.deleteByFollower_IdOrFollowing_Id(user.getId(), user.getId());
+                followRepository.deleteByFollowerIdOrFollowingId(user.getId(), user.getId());
                 user.setName("Deleted User");
                 user.setUsername("deleted_user_" + user.getId());
                 user.setEmail(null);

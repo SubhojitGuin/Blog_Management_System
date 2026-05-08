@@ -2,6 +2,7 @@ package com.project.Blog_Management_System.Controllers;
 
 import com.project.Blog_Management_System.Constants.ApiRoutes;
 import com.project.Blog_Management_System.Dto.*;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -44,6 +45,14 @@ public class PostController {
     public ResponseEntity<Slice<PostResponseDTO>> getAllPostsOfFollowings(@RequestParam(required = false) UUID post_cursor,
                                                                           @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(postService.getAllPostsOfFollowings(post_cursor, size), HttpStatus.OK);
+    }
+
+    @GetMapping(ApiRoutes.POST_UNPUBLISHED_PATH)
+    @Operation(summary = "Get Unpublished Posts", description = "Retrieves a paginated list of all unpublished posts created by the authenticated user.")
+    public ResponseEntity<Slice<PostInfoDTO>> getAllPostsOfCategory(@RequestParam PostStatus status,
+                                                                    @RequestParam(required = false) UUID post_cursor,
+                                                                    @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(postService.getPostsByStatus(status, post_cursor, size), HttpStatus.OK);
     }
 
     @GetMapping(ApiRoutes.POST_SEARCH_PATH)
@@ -130,5 +139,4 @@ public class PostController {
         postService.likeOrDislikePost(post_slug, post_id, likeDTO);
         return ResponseEntity.noContent().build();
     }
-
 }

@@ -55,9 +55,9 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
     @ReadFast
     Slice<FollowInfoDTO> findFollowing(@Param("userId") UUID userId, @Param("followCursor") UUID followCursor, Pageable pageable);
 
-    void deleteByFollower_IdAndFollowing_Id(UUID follower_id, UUID following_id);
+    void deleteByFollowerIdAndFollowingId(UUID followerId, UUID followingId);
 
-    void deleteByFollower_IdOrFollowing_Id(UUID follower_id, UUID following_id);
+    void deleteByFollowerIdOrFollowingId(UUID followerId, UUID followingId);
 
     @ReadFast
     Optional<FollowEntity> findByFollower_IdAndFollowing_Id(UUID follower_id, UUID followee_id);

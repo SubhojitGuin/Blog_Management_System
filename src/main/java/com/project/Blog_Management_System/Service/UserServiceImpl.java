@@ -150,7 +150,7 @@ public class UserServiceImpl implements UserService {
             }
         } else {
             if (followRepository.findByFollower_IdAndFollowing_Id(follower.getId(), followee.getId()).isPresent()) {
-                followRepository.deleteByFollower_IdAndFollowing_Id(follower.getId(), followee.getId());
+                followRepository.deleteByFollowerIdAndFollowingId(follower.getId(), followee.getId());
                 int followerRowsUpdated = userRepository.decrementFollowersCount(followee.getId());
                 int followingsRowsUpdated = userRepository.decrementFollowingsCount(follower.getId());
 

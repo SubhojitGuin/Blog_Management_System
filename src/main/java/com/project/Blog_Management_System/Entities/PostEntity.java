@@ -2,6 +2,7 @@ package com.project.Blog_Management_System.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.Blog_Management_System.Entities.uuidV7.GeneratedUuidV7;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Utils.ReadingTimeUtils;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,7 +21,8 @@ import java.util.UUID;
 @FieldNameConstants
 @Table(name = "posts", indexes = {
         @Index(name = "idx_posts_user_created_at", columnList = "user_id, created_at DESC"),
-        @Index(name = "idx_posts_category_created_at", columnList = "category_id, created_at DESC")
+        @Index(name = "idx_posts_category_created_at", columnList = "category_id, created_at DESC"),
+        @Index(name = "idx_posts_status_publish_at", columnList = "status, publish_at ASC")
 })
 public class PostEntity {
 
@@ -65,6 +67,13 @@ public class PostEntity {
 
     @Column(name = "view_count", nullable = false)
     private Long viewCount = 0L;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PostStatus status = PostStatus.DRAFT;
+
+    @Column(name = "publish_at")
+    private LocalDateTime publishAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

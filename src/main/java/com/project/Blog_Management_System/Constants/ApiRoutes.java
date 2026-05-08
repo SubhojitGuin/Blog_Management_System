@@ -21,6 +21,7 @@ public class ApiRoutes {
     public static final String POSTS_BASE_PATH = "/posts";
     public static final String POST_FOLLOWING_PATH = "/following";
     public static final String POST_SEARCH_PATH = "/search";
+    public static final String POST_UNPUBLISHED_PATH = "/unpublished";
     public static final String POST_PATH_VARIABLE = "/{post_slug}-{post_id:" + UUID_REGEX + "}";
     public static final String POST_COMMENTS_PATH = POST_PATH_VARIABLE + "/comments";
     public static final String POST_COMMENT_PATH = POST_COMMENTS_PATH + "/{comment_id:" + UUID_REGEX + "}";

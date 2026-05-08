@@ -43,6 +43,7 @@ public class UserEntity implements UserDetails {
     private String bio;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private Gender gender;
 
     @Column(name = "date_of_birth")

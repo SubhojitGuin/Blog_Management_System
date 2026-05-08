@@ -2,8 +2,10 @@ package com.project.Blog_Management_System.Service;
 
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
+import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Repositories.*;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
 import com.project.Blog_Management_System.Service.Interfaces.RedisViewCountService;
@@ -50,6 +52,7 @@ public class PostServiceImpl implements PostService {
         post.setUser(user);
         post.setSlug(generateSlug(postRequestDTO.getTitle()));
         post.setCategory(category);
+        applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
         PostEntity savedPost = postRepository.saveAndFlush(post);
 
         int rowsUpdated = userRepository.incrementPostCount(user.getId());
@@ -63,14 +66,14 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getAllPosts(UUID postCursor, int size) {
         UserEntity user = getCurrentUser();
-        return postRepository.findAllPosts(user.getId(), postCursor, PageRequest.of(0, size));
+        return postRepository.findAllPosts(user.getId(), PostStatus.PUBLISHED, postCursor, PageRequest.of(0, size));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Slice<PostResponseDTO> getAllPostsOfFollowings(UUID postCursor, int size) {
         UserEntity user = getCurrentUser();
-        return postRepository.findAllPostsOfFollowings(user.getId(), postCursor, PageRequest.of(0, size));
+        return postRepository.findAllPostsOfFollowings(user.getId(), PostStatus.PUBLISHED, postCursor, PageRequest.of(0, size));
     }
 
     @Override
@@ -92,12 +95,22 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public Slice<PostInfoDTO> getPostsByStatus(PostStatus status, UUID postCursor, int size) {
+        UserEntity user = getCurrentUser();
+        return postRepository.findByUserIdAndStatus(user.getId(), status, postCursor, PageRequest.of(0, size));
+    }
+
+    @Override
     @Transactional
     public PostResponseDTO getPost(String postSlug, UUID postId) {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
+
+        if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
+            throw new ResourceNotFoundException("Post not found");
+        }
 
         PostResponseDTO postResponseDTO = modelMapper.map(post, PostResponseDTO.class);
         postResponseDTO.setIsOwner(user.equals(post.getUser()));
@@ -116,6 +129,10 @@ public class PostServiceImpl implements PostService {
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
 
+        if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
+            throw new ResourceNotFoundException("Post not found");
+        }
+
         if (!post.getUser().equals(user)) {
             throw new AccessDeniedException("You are not authorized to update this post");
         }
@@ -129,6 +146,7 @@ public class PostServiceImpl implements PostService {
         post.setContent(postRequestDTO.getContent());
         post.setSlug(generateSlug(postRequestDTO.getTitle()));
         post.setCategory(category);
+        applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
 
         postRepository.saveAndFlush(post);
 
@@ -143,7 +161,11 @@ public class PostServiceImpl implements PostService {
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
 
-        if (!post.getUser().equals(user) && !hasRole(Role.ADMIN)) {
+        if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
+            throw new ResourceNotFoundException("Post not found");
+        }
+
+        if (!post.getUser().equals(user) && !(hasRole(Role.ADMIN))) {
             throw new AccessDeniedException("You are not authorized to delete this post");
         }
 
@@ -160,6 +182,9 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
+        if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
+            throw new ResourceNotFoundException("Post not found");
+        }
 
         return commentRepository.findByPost(postId, commentCursor, user.getId(), PageRequest.of(0, size));
     }
@@ -171,6 +196,7 @@ public class PostServiceImpl implements PostService {
 
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
+        isPublishedPost(post, user);
 
         CommentEntity comment = modelMapper.map(commentRequestDTO, CommentEntity.class);
         comment.setUser(user);
@@ -191,6 +217,7 @@ public class PostServiceImpl implements PostService {
 
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
+        isPublishedPost(post, user);
 
         CommentEntity comment = commentRepository.findById(commentId).orElse(null);
         isInvalidComment(comment);
@@ -211,6 +238,7 @@ public class PostServiceImpl implements PostService {
 
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
+        isPublishedPost(post, user);
 
         CommentEntity comment = commentRepository.findById(commentId).orElse(null);
         isInvalidComment(comment);
@@ -229,8 +257,13 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Slice<LikeInfoDTO> getLikesOfPost(String postSlug, UUID postId, UUID likeCursor, int size) {
+        UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
+
+        if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
+            throw new ResourceNotFoundException("Post not found");
+        }
 
         return likeRepository.findLikesOfPost(postId, likeCursor, PageRequest.of(0, size));
     }
@@ -242,6 +275,7 @@ public class PostServiceImpl implements PostService {
 
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
+        isPublishedPost(post, user);
 
         LikeEntity like = LikeEntity.builder()
                 .user(user)
@@ -264,5 +298,4 @@ public class PostServiceImpl implements PostService {
             }
         }
     }
-
 }

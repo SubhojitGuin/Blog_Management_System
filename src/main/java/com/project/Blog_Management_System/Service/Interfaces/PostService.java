@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Service.Interfaces;
 
 import com.project.Blog_Management_System.Dto.*;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
@@ -16,6 +17,8 @@ public interface PostService {
     Slice<PostResponseDTO> getAllPostsOfFollowings(UUID postCursor, int size);
 
     Page<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size, List<String> sort);
+
+    Slice<PostInfoDTO> getPostsByStatus(PostStatus status, UUID postCursor, int size);
 
     PostResponseDTO getPost(String postSlug, UUID postId);
 
