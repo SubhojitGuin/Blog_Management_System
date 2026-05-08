@@ -114,7 +114,7 @@ public class PostServiceImpl implements PostService {
 
         PostResponseDTO postResponseDTO = modelMapper.map(post, PostResponseDTO.class);
         postResponseDTO.setIsOwner(user.equals(post.getUser()));
-        postResponseDTO.setIsLiked(likeRepository.findByUser_IdAndPost_Id(user.getId(), post.getId()).isPresent());
+        postResponseDTO.setIsLiked(likeRepository.findByUserIdAndPostId(user.getId(), post.getId()).isPresent());
 
         redisViewCountService.addViewer(postId, user.getId());
 
@@ -283,15 +283,15 @@ public class PostServiceImpl implements PostService {
                 .build();
 
         if (likeDTO.getLike()) {
-            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), postId).isEmpty()) {
+            if (likeRepository.findByUserIdAndPostId(user.getId(), postId).isEmpty()) {
                 likeRepository.saveAndFlush(like);
                 int rowsUpdated = postRepository.incrementLikeCount(postId);
                 if (rowsUpdated == 0)
                     throw new ResourceConflictException("Failed to increment like count of the post. Possible concurrent modification or stale entity.");
             }
         } else {
-            if (likeRepository.findByUser_IdAndPost_Id(user.getId(), postId).isPresent()) {
-                likeRepository.deleteByUser_IdAndPost_Id(user.getId(), postId);
+            if (likeRepository.findByUserIdAndPostId(user.getId(), postId).isPresent()) {
+                likeRepository.deleteByUserIdAndPostId(user.getId(), postId);
                 int rowsUpdated = postRepository.decrementLikeCount(postId);
                 if (rowsUpdated == 0)
                     throw new ResourceConflictException("Failed to decrement like count of the post. Possible concurrent modification or stale entity.");

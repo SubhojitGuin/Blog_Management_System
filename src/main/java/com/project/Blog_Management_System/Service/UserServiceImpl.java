@@ -141,7 +141,7 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         if (followDTO.getFollow()) {
-            if (followRepository.findByFollower_IdAndFollowing_Id(follower.getId(), followee.getId()).isEmpty()) {
+            if (followRepository.findByFollowerIdAndFollowingId(follower.getId(), followee.getId()).isEmpty()) {
                 followRepository.saveAndFlush(followEntity);
                 int followerRowsUpdated = userRepository.incrementFollowersCount(followee.getId());
                 int followingsRowsUpdated = userRepository.incrementFollowingsCount(follower.getId());
@@ -151,7 +151,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
         } else {
-            if (followRepository.findByFollower_IdAndFollowing_Id(follower.getId(), followee.getId()).isPresent()) {
+            if (followRepository.findByFollowerIdAndFollowingId(follower.getId(), followee.getId()).isPresent()) {
                 followRepository.deleteByFollowerIdAndFollowingId(follower.getId(), followee.getId());
                 int followerRowsUpdated = userRepository.decrementFollowersCount(followee.getId());
                 int followingsRowsUpdated = userRepository.decrementFollowingsCount(follower.getId());

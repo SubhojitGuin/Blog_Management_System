@@ -17,9 +17,9 @@ import java.util.UUID;
 public interface LikeRepository extends JpaRepository<LikeEntity, UUID> {
 
     @ReadFast
-    Optional<LikeEntity> findByUser_IdAndPost_Id(UUID user_id, UUID post_id);
+    Optional<LikeEntity> findByUserIdAndPostId(UUID userId, UUID postId);
 
-    void deleteByUser_IdAndPost_Id(UUID user_id, UUID post_id);
+    void deleteByUserIdAndPostId(UUID userId, UUID postId);
 
     @Query("""
                 SELECT new com.project.Blog_Management_System.Dto.LikeInfoDTO(

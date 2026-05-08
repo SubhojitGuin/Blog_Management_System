@@ -60,6 +60,6 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
     void deleteByFollowerIdOrFollowingId(UUID followerId, UUID followingId);
 
     @ReadFast
-    Optional<FollowEntity> findByFollower_IdAndFollowing_Id(UUID follower_id, UUID followee_id);
+    Optional<FollowEntity> findByFollowerIdAndFollowingId(UUID followerId, UUID followeeId);
 
 }
