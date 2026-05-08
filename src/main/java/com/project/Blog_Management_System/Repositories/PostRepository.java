@@ -22,25 +22,17 @@ import java.util.UUID;
 public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpecificationExecutor<PostEntity> {
 
     @Query("""
-                SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
-                p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount,
-                new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
-                new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
-                CASE WHEN u.id = :currentUserId THEN true ELSE false END,
-                CASE WHEN l.id IS NOT NULL THEN true ELSE false END
+                SELECT new com.project.Blog_Management_System.Dto.PostInfoDTO(
+                    p.id, p.slug, p.title, p.description, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount
                 )
                 FROM PostEntity p
-                JOIN p.user u
-                JOIN p.category c
-                LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
-                WHERE u.id = :profileUserId
+                WHERE p.user.id = :profileUserId
                 AND (:postCursor IS NULL OR p.id < :postCursor)
                 ORDER BY p.id DESC
             """)
     @ReadFast
-    Slice<PostResponseDTO> findPostsByUser(
+    Slice<PostInfoDTO> findPostsByUser(
             @Param("profileUserId") UUID profileUserId,
-            @Param("currentUserId") UUID currentUserId,
             @Param("postCursor") UUID postCursor,
             Pageable pageable
     );
@@ -81,48 +73,34 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
     );
 
     @Query("""
-                SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
-                p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount,
-                new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
-                new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
-                CASE WHEN u.id = :currentUserId THEN true ELSE false END,
-                CASE WHEN l.id IS NOT NULL THEN true ELSE false END
+                SELECT new com.project.Blog_Management_System.Dto.PostInfoDTO(
+                p.id, p.slug, p.title, p.description, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount
                 )
                 FROM PostEntity p
-                JOIN p.user u
-                JOIN p.category c
-                LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
                 WHERE p.status = :status
                 AND (:postCursor IS NULL OR p.id < :postCursor)
                 ORDER BY p.id DESC
             """)
     @ReadFast
-    Slice<PostResponseDTO> findAllPosts(
-            @Param("currentUserId") UUID currentUserId,
+    Slice<PostInfoDTO> findAllPosts(
             @Param("status") PostStatus status,
             @Param("postCursor") UUID postCursor,
             Pageable pageable
     );
 
     @Query("""
-                SELECT new com.project.Blog_Management_System.Dto.PostResponseDTO(
-                p.id, p.slug, p.title, p.description, p.content, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount,
-                new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
-                new com.project.Blog_Management_System.Dto.CategoryResponseDTO(c.id, c.slug, c.name, c.description),
-                CASE WHEN u.id = :currentUserId THEN true ELSE false END,
-                CASE WHEN l.id IS NOT NULL THEN true ELSE false END
+                SELECT new com.project.Blog_Management_System.Dto.PostInfoDTO(
+                p.id, p.slug, p.title, p.description, p.readingTimeMinutes, p.likeCount, p.commentCount, p.viewCount
                 )
                 FROM PostEntity p
                 JOIN p.user u
-                JOIN p.category c
                 JOIN FollowEntity f ON f.following = u AND f.follower.id = :currentUserId
-                LEFT JOIN LikeEntity l ON l.post = p AND l.user.id = :currentUserId
                 WHERE p.status = :status
                 AND (:postCursor IS NULL OR p.id < :postCursor)
                 ORDER BY p.id DESC
             """)
     @ReadFast
-    Slice<PostResponseDTO> findAllPostsOfFollowings(
+    Slice<PostInfoDTO> findAllPostsOfFollowings(
             @Param("currentUserId") UUID currentUserId,
             @Param("status") PostStatus status,
             @Param("postCursor") UUID postCursor,

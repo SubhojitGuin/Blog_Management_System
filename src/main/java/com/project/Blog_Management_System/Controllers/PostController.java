@@ -35,14 +35,14 @@ public class PostController {
 
     @GetMapping
     @Operation(summary = "Get All Posts", description = "Retrieves a paginated list of all posts created by the authenticated user.")
-    public ResponseEntity<Slice<PostResponseDTO>> getAllPosts(@RequestParam(required = false) UUID post_cursor,
+    public ResponseEntity<Slice<PostInfoDTO>> getAllPosts(@RequestParam(required = false) UUID post_cursor,
                                                               @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(postService.getAllPosts(post_cursor, size), HttpStatus.OK);
     }
 
     @GetMapping(ApiRoutes.POST_FOLLOWING_PATH)
     @Operation(summary = "Get Posts of Followings", description = "Retrieves a paginated list of posts created by the users that the authenticated user is following.")
-    public ResponseEntity<Slice<PostResponseDTO>> getAllPostsOfFollowings(@RequestParam(required = false) UUID post_cursor,
+    public ResponseEntity<Slice<PostInfoDTO>> getAllPostsOfFollowings(@RequestParam(required = false) UUID post_cursor,
                                                                           @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(postService.getAllPostsOfFollowings(post_cursor, size), HttpStatus.OK);
     }

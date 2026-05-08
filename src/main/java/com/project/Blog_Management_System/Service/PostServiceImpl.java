@@ -64,14 +64,13 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getAllPosts(UUID postCursor, int size) {
-        UserEntity user = getCurrentUser();
-        return postRepository.findAllPosts(user.getId(), PostStatus.PUBLISHED, postCursor, PageRequest.of(0, size));
+    public Slice<PostInfoDTO> getAllPosts(UUID postCursor, int size) {
+        return postRepository.findAllPosts(PostStatus.PUBLISHED, postCursor, PageRequest.of(0, size));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getAllPostsOfFollowings(UUID postCursor, int size) {
+    public Slice<PostInfoDTO> getAllPostsOfFollowings(UUID postCursor, int size) {
         UserEntity user = getCurrentUser();
         return postRepository.findAllPostsOfFollowings(user.getId(), PostStatus.PUBLISHED, postCursor, PageRequest.of(0, size));
     }

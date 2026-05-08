@@ -12,9 +12,9 @@ public interface PostService {
 
     PostResponseDTO createPost(PostRequestDTO postRequestDTO);
 
-    Slice<PostResponseDTO> getAllPosts(UUID postCursor, int size);
+    Slice<PostInfoDTO> getAllPosts(UUID postCursor, int size);
 
-    Slice<PostResponseDTO> getAllPostsOfFollowings(UUID postCursor, int size);
+    Slice<PostInfoDTO> getAllPostsOfFollowings(UUID postCursor, int size);
 
     Page<PostInfoDTO> searchPosts(PostFilterRequestDTO postFilterRequestDTO, int page, int size, List<String> sort);
 

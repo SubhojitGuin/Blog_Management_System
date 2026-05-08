@@ -189,12 +189,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponseDTO> getUserPosts(String username, UUID userId, UUID postCursor, int size) {
-        UserEntity currentUser = getCurrentUser();
+    public Slice<PostInfoDTO> getUserPosts(String username, UUID userId, UUID postCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(0, size);
-        return postRepository.findPostsByUser(userId, currentUser.getId(), postCursor, pageable);
+        return postRepository.findPostsByUser(userId, postCursor, pageable);
     }
 
     @Override
