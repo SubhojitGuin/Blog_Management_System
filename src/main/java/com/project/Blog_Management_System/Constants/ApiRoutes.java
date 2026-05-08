@@ -11,6 +11,7 @@ public class ApiRoutes {
     public static final String USER_UPDATE_USERNAME_PATH = "/update_username";
     public static final String USER_UPDATE_EMAIL_PATH = "/update_email";
     public static final String USER_SEARCH_PATH = "/search";
+    public static final String USER_BOOKMARKS_PATH = "/bookmarks";
     public static final String USER_PATH_VARIABLE = "/{username}-{user_id:" + UUID_REGEX + "}";
     public static final String USER_FOLLOWERS_PATH = USER_PATH_VARIABLE + "/followers";
     public static final String USER_FOLLOWINGS_PATH = USER_PATH_VARIABLE + "/followings";
@@ -26,6 +27,7 @@ public class ApiRoutes {
     public static final String POST_COMMENTS_PATH = POST_PATH_VARIABLE + "/comments";
     public static final String POST_COMMENT_PATH = POST_COMMENTS_PATH + "/{comment_id:" + UUID_REGEX + "}";
     public static final String POST_LIKES_PATH = POST_PATH_VARIABLE + "/likes";
+    public static final String POST_BOOKMARK_PATH = POST_PATH_VARIABLE + "/bookmark";
 
     // Category Module Paths
     public static final String CATEGORY_BASE_PATH = "/category";

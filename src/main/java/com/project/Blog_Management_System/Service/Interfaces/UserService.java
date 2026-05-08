@@ -37,4 +37,6 @@ public interface UserService extends UserDetailsService {
     void deleteUser();
 
     Slice<PostInfoDTO> getUserPosts(String username, UUID userId, UUID postCursor, int size);
+
+    Slice<BookmarkInfoDTO> getUserBookmarks(UUID bookmarkCursor, int size);
 }

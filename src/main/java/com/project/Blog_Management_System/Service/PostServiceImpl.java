@@ -37,6 +37,7 @@ public class PostServiceImpl implements PostService {
     private final LikeRepository likeRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final RedisViewCountService redisViewCountService;
 
     @Override
@@ -294,6 +295,31 @@ public class PostServiceImpl implements PostService {
                 int rowsUpdated = postRepository.decrementLikeCount(postId);
                 if (rowsUpdated == 0)
                     throw new ResourceConflictException("Failed to decrement like count of the post. Possible concurrent modification or stale entity.");
+            }
+        }
+    }
+
+    @Override
+    @Transactional
+    public void bookmarkOrUnbookmarkPost(String postSlug, UUID postId, BookmarkDTO bookmarkDTO) {
+        UserEntity user = getCurrentUser();
+
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
+        isPublishedPost(post, user);
+
+        BookmarkEntity bookmark = BookmarkEntity.builder()
+                .user(user)
+                .post(post)
+                .build();
+
+        if (bookmarkDTO.getBookmark()) {
+            if (bookmarkRepository.findByUserIdAndPostId(user.getId(), postId).isEmpty()) {
+                bookmarkRepository.saveAndFlush(bookmark);
+            }
+        } else {
+            if (bookmarkRepository.findByUserIdAndPostId(user.getId(), postId).isPresent()) {
+                bookmarkRepository.deleteByUserIdAndPostId(user.getId(), postId);
             }
         }
     }

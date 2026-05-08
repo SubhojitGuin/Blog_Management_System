@@ -6,6 +6,7 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
+import com.project.Blog_Management_System.Repositories.BookmarkRepository;
 import com.project.Blog_Management_System.Repositories.FollowRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Repositories.UserRepository;
@@ -37,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final FollowRepository followRepository;
     private final PostRepository postRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -194,6 +196,13 @@ public class UserServiceImpl implements UserService {
         isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(0, size);
         return postRepository.findPostsByUser(userId, postCursor, pageable);
+    }
+
+    @Override
+    public Slice<BookmarkInfoDTO> getUserBookmarks(UUID bookmarkCursor, int size) {
+        UserEntity user = getCurrentUser();
+        Pageable pageable = PageRequest.of(0, size);
+        return bookmarkRepository.findByUser(user.getId(), bookmarkCursor, pageable);
     }
 
     @Override

@@ -38,4 +38,6 @@ public interface PostService {
 
     void likeOrDislikePost(String postSlug, UUID postId, LikeDTO likeDTO);
 
+    void bookmarkOrUnbookmarkPost(String postSlug, UUID postId, BookmarkDTO bookmarkDTO);
+
 }

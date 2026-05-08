@@ -139,4 +139,13 @@ public class PostController {
         postService.likeOrDislikePost(post_slug, post_id, likeDTO);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping(ApiRoutes.POST_BOOKMARK_PATH)
+    @Operation(summary = "Get all bookmarks of a post", description = "Get all the bookmarked users of a post using the post slug and post ID")
+    public ResponseEntity<Void> bookmarkOrUnbookmarkPost(@PathVariable String post_slug,
+                                                         @PathVariable UUID post_id,
+                                                         @Valid @RequestBody BookmarkDTO bookmarkDTO) {
+        postService.bookmarkOrUnbookmarkPost(post_slug, post_id, bookmarkDTO);
+        return ResponseEntity.noContent().build();
+    }
 }

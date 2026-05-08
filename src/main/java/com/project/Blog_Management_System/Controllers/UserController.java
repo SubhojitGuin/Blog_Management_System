@@ -109,10 +109,17 @@ public class UserController {
     @GetMapping(ApiRoutes.USER_POSTS_PATH)
     @Operation(summary = "Get User Posts", description = "get posts of a user by username and id.")
     public ResponseEntity<Slice<PostInfoDTO>> getUserPosts(@PathVariable String username,
-                                                               @PathVariable UUID user_id,
-                                                              @RequestParam(required = false) UUID post_cursor,
-                                                              @RequestParam(defaultValue = "10") int size) {
+                                                           @PathVariable UUID user_id,
+                                                           @RequestParam(required = false) UUID post_cursor,
+                                                           @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(userService.getUserPosts(username, user_id, post_cursor, size), HttpStatus.OK);
+    }
+
+    @GetMapping(ApiRoutes.USER_BOOKMARKS_PATH)
+    @Operation(summary = "Get User Bookmarks", description = "get bookmarks of current user")
+    public ResponseEntity<Slice<BookmarkInfoDTO>> getUserBookmarks(@RequestParam(required = false) UUID bookmark_cursor,
+                                                                   @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(userService.getUserBookmarks(bookmark_cursor, size), HttpStatus.OK);
     }
 
 }
