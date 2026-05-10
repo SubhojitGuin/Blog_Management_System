@@ -178,7 +178,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<CommentResponseDTO> getCommentsOfPost(String postSlug, UUID postId, UUID commentCursor, int size) {
+    public Slice<CommentResponseDTO> getTopLevelCommentsOfPost(String postSlug, UUID postId, UUID commentCursor, int size) {
         UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(postId).orElse(null);
         isInvalidPost(post, postSlug);
@@ -186,12 +186,33 @@ public class PostServiceImpl implements PostService {
             throw new ResourceNotFoundException("Post not found");
         }
 
-        return commentRepository.findByPost(postId, commentCursor, user.getId(), PageRequest.of(0, size));
+        return commentRepository.findTopLevelByPost(postId, commentCursor, user.getId(), PageRequest.of(0, size));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Slice<CommentResponseDTO> getRepliesOfComment(String postSlug, UUID postId, UUID parentCommentId, UUID commentCursor, int size) {
+        UserEntity user = getCurrentUser();
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
+
+        if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
+            throw new ResourceNotFoundException("Post not found");
+        }
+
+        CommentEntity parent = commentRepository.findById(parentCommentId).orElse(null);
+        isInvalidComment(parent);
+
+        if (!parent.getPost().getId().equals(post.getId())) {
+            throw new IllegalArgumentException("Parent comment does not belong to this post");
+        }
+
+        return commentRepository.findRepliesByParentId(parentCommentId, commentCursor, user.getId(), PageRequest.of(0, size));
     }
 
     @Override
     @Transactional
-    public CommentResponseDTO addComment(String postSlug, UUID postId, CommentRequestDTO commentRequestDTO) {
+    public CommentResponseDTO addTopLevelComments(String postSlug, UUID postId, CommentRequestDTO commentRequestDTO) {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
@@ -207,7 +228,43 @@ public class PostServiceImpl implements PostService {
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
 
-        return modelMapper.map(savedComment, CommentResponseDTO.class);
+        CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
+        commentResponseDTO.setIsAuthor(true);
+        return commentResponseDTO;
+    }
+
+    @Override
+    @Transactional
+    public CommentResponseDTO addReplyToComment(String postSlug, UUID postId, UUID parentCommentId, CommentRequestDTO commentRequestDTO) {
+        UserEntity user = getCurrentUser();
+
+        PostEntity post = postRepository.findById(postId).orElse(null);
+        isInvalidPost(post, postSlug);
+        isPublishedPost(post, user);
+
+        CommentEntity parent = commentRepository.findById(parentCommentId).orElse(null);
+        isInvalidComment(parent);
+        validateReplyDepth(parent);
+
+        if (!parent.getPost().getId().equals(post.getId())) {
+            throw new IllegalArgumentException("Parent comment does not belong to this post");
+        }
+
+        CommentEntity comment = modelMapper.map(commentRequestDTO, CommentEntity.class);
+        comment.setUser(user);
+        comment.setPost(post);
+        comment.setParent(parent);
+        comment.setDepth(parent.getDepth() + 1);
+
+        CommentEntity savedComment = commentRepository.saveAndFlush(comment);
+
+        int rowsUpdated = postRepository.incrementCommentCount(postId);
+        if (rowsUpdated == 0)
+            throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
+
+        CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
+        commentResponseDTO.setIsAuthor(true);
+        return commentResponseDTO;
     }
 
     @Override
@@ -227,8 +284,11 @@ public class PostServiceImpl implements PostService {
         }
 
         modelMapper.map(commentRequestDTO, comment);
-        commentRepository.saveAndFlush(comment);
-        return modelMapper.map(comment, CommentResponseDTO.class);
+
+        CommentEntity savedComment = commentRepository.saveAndFlush(comment);
+        CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
+        commentResponseDTO.setIsAuthor(true);
+        return commentResponseDTO;
     }
 
     @Override

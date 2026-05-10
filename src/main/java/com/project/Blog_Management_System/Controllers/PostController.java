@@ -36,14 +36,14 @@ public class PostController {
     @GetMapping
     @Operation(summary = "Get All Posts", description = "Retrieves a paginated list of all posts created by the authenticated user.")
     public ResponseEntity<Slice<PostInfoDTO>> getAllPosts(@RequestParam(required = false) UUID post_cursor,
-                                                              @RequestParam(defaultValue = "10") int size) {
+                                                          @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(postService.getAllPosts(post_cursor, size), HttpStatus.OK);
     }
 
     @GetMapping(ApiRoutes.POST_FOLLOWING_PATH)
     @Operation(summary = "Get Posts of Followings", description = "Retrieves a paginated list of posts created by the users that the authenticated user is following.")
     public ResponseEntity<Slice<PostInfoDTO>> getAllPostsOfFollowings(@RequestParam(required = false) UUID post_cursor,
-                                                                          @RequestParam(defaultValue = "10") int size) {
+                                                                      @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(postService.getAllPostsOfFollowings(post_cursor, size), HttpStatus.OK);
     }
 
@@ -88,20 +88,39 @@ public class PostController {
     }
 
     @GetMapping(ApiRoutes.POST_COMMENTS_PATH)
-    @Operation(summary = "Get comments of the post", description = "Get all the comments of a post identified by its slug and ID.")
-    public ResponseEntity<Slice<CommentResponseDTO>> findCommentsOfPost(@PathVariable String post_slug,
-                                                                        @PathVariable UUID post_id,
-                                                                        @RequestParam(required = false) UUID comment_cursor,
-                                                                        @RequestParam(defaultValue = "10") int size) {
-        return new ResponseEntity<>(postService.getCommentsOfPost(post_slug, post_id, comment_cursor, size), HttpStatus.OK);
+    @Operation(summary = "Get Top level comments of the post", description = "Get all the comments of a post identified by its slug and ID.")
+    public ResponseEntity<Slice<CommentResponseDTO>> findTopLevelCommentsOfPost(@PathVariable String post_slug,
+                                                                                @PathVariable UUID post_id,
+                                                                                @RequestParam(required = false) UUID comment_cursor,
+                                                                                @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(postService.getTopLevelCommentsOfPost(post_slug, post_id, comment_cursor, size), HttpStatus.OK);
+    }
+
+    @GetMapping(ApiRoutes.POST_COMMENT_REPLIES_PATH)
+    @Operation(summary = "Get replies to Top level comments of the post", description = "Get the replies to top level comments of a post identified by its slug and ID.")
+    public ResponseEntity<Slice<CommentResponseDTO>> findRepliesOfComment(@PathVariable String post_slug,
+                                                                          @PathVariable UUID post_id,
+                                                                          @PathVariable UUID comment_id,
+                                                                          @RequestParam(required = false) UUID comment_cursor,
+                                                                          @RequestParam(defaultValue = "10") int size) {
+        return new ResponseEntity<>(postService.getRepliesOfComment(post_slug, post_id, comment_id, comment_cursor, size), HttpStatus.OK);
     }
 
     @PostMapping(ApiRoutes.POST_COMMENTS_PATH)
-    @Operation(summary = "Add comment to the post", description = "Add a comment to a post identified by its slug and ID.")
-    public ResponseEntity<CommentResponseDTO> addComment(@PathVariable String post_slug,
-                                                         @PathVariable UUID post_id,
-                                                         @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
-        return new ResponseEntity<>(postService.addComment(post_slug, post_id, commentRequestDTO), HttpStatus.CREATED);
+    @Operation(summary = "Add Top level comment to the post", description = "Add a top level comment to a post identified by its slug and ID.")
+    public ResponseEntity<CommentResponseDTO> addTopLevelComment(@PathVariable String post_slug,
+                                                                 @PathVariable UUID post_id,
+                                                                 @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
+        return new ResponseEntity<>(postService.addTopLevelComments(post_slug, post_id, commentRequestDTO), HttpStatus.CREATED);
+    }
+
+    @PostMapping(ApiRoutes.POST_COMMENT_REPLIES_PATH)
+    @Operation(summary = "Add Replies to top level comments of post", description = "Add replies to top level comment identified by its slug and ID.")
+    public ResponseEntity<CommentResponseDTO> addReplyToComment(@PathVariable String post_slug,
+                                                                @PathVariable UUID post_id,
+                                                                @PathVariable UUID comment_id,
+                                                                @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
+        return new ResponseEntity<>(postService.addReplyToComment(post_slug, post_id, comment_id, commentRequestDTO), HttpStatus.CREATED);
     }
 
     @PutMapping(ApiRoutes.POST_COMMENT_PATH)

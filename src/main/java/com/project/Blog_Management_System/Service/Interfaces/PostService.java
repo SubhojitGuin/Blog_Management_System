@@ -26,9 +26,13 @@ public interface PostService {
 
     void deletePost(String postSlug, UUID postId);
 
-    Slice<CommentResponseDTO> getCommentsOfPost(String postSlug, UUID postId, UUID commentCursor, int size);
+    CommentResponseDTO addTopLevelComments(String postSlug, UUID postId, CommentRequestDTO commentRequestDTO);
 
-    CommentResponseDTO addComment(String postSlug, UUID postId, CommentRequestDTO commentRequestDTO);
+    CommentResponseDTO addReplyToComment(String postSlug, UUID postId, UUID parentCommentId, CommentRequestDTO commentRequestDTO);
+
+    Slice<CommentResponseDTO> getTopLevelCommentsOfPost(String postSlug, UUID postId, UUID commentCursor, int size);
+
+    Slice<CommentResponseDTO> getRepliesOfComment(String postSlug, UUID postId, UUID parentCommentId, UUID commentCursor, int size);
 
     CommentResponseDTO updateComment(String postSlug, UUID postId, UUID commentId, CommentRequestDTO commentRequestDTO);
 

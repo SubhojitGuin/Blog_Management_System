@@ -8,13 +8,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "comments", indexes = {
-        @Index(name = "idx_comments_post_id", columnList = "post_id")
+        @Index(name = "idx_comments_post_depth", columnList = "post_id, depth"),
+        @Index(name = "idx_comments_parent_id", columnList = "parent_id")
 })
 public class CommentEntity {
 
@@ -32,6 +35,16 @@ public class CommentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false, updatable = false)
     private PostEntity post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", updatable = false)
+    private CommentEntity parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<CommentEntity> replies = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Integer depth = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

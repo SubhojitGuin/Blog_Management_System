@@ -50,18 +50,6 @@ public class ValidationUtils {
     }
 
     /**
-     * Validates a {@link CommentEntity} and throws {@link ResourceNotFoundException} if the comment is invalid.
-     *
-     * @param comment The {@link CommentEntity} to validate.
-     * @throws ResourceNotFoundException if the {@code comment} is null.
-     */
-    public static void isInvalidComment(CommentEntity comment) {
-        if (comment == null) {
-            throw new ResourceNotFoundException("Comment does not exist");
-        }
-    }
-
-    /**
     * Validates that a {@link PostEntity} is published and throws {@link ResourceNotFoundException} if it is not.
     *
     * @param post The {@link PostEntity} to validate.
@@ -75,4 +63,29 @@ public class ValidationUtils {
         }
     }
 
+    /**
+     * Validates a {@link CommentEntity} and throws {@link ResourceNotFoundException} if the comment is invalid.
+     *
+     * @param comment The {@link CommentEntity} to validate.
+     * @throws ResourceNotFoundException if the {@code comment} is null.
+     */
+    public static void isInvalidComment(CommentEntity comment) {
+        if (comment == null) {
+            throw new ResourceNotFoundException("Comment does not exist");
+        }
+    }
+
+    /**
+     * Validates that a reply to a comment does not exceed the maximum allowed depth and throws {@link IllegalArgumentException} if it does.
+     *
+     * @param parentComment The parent {@link CommentEntity} to which the reply is being made.
+     * @throws IllegalArgumentException if the depth of the parent comment is greater than or equal to 1.
+     */
+    public static void validateReplyDepth(CommentEntity parentComment) {
+        if (parentComment.getDepth() >= 1) {
+            throw new IllegalArgumentException(
+                    "Cannot reply to a reply. Maximum comment depth is 1."
+            );
+        }
+    }
 }

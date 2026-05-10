@@ -14,6 +14,8 @@ public class CommentResponseDTO {
     private UUID id;
     private String body;
     private UserInfoDTO user;
+    private UUID parentId;
+    private Boolean hasReplies;
     private LocalDateTime createdAt;
-    private Boolean isAuthor = true;
+    private Boolean isAuthor = false;
 }
