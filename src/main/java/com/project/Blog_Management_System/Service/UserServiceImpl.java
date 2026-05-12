@@ -3,6 +3,7 @@ package com.project.Blog_Management_System.Service;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Events.NewFollowerEvent;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -39,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private final FollowRepository followRepository;
     private final PostRepository postRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -149,6 +152,14 @@ public class UserServiceImpl implements UserService {
                 if (followerRowsUpdated == 0 || followingsRowsUpdated == 0) {
                     throw new ResourceConflictException("Failed to update followers/followings count");
                 }
+
+                eventPublisher.publishEvent(NewFollowerEvent.builder()
+                        .followeeName(followee.getName())
+                        .followeeEmail(followee.getEmail())
+                        .followerName(follower.getName())
+                        .followerUsername(follower.getUsername())
+                        .followerId(follower.getId())
+                        .build());
             }
         } else {
             if (followRepository.findByFollowerIdAndFollowingId(follower.getId(), followee.getId()).isPresent()) {

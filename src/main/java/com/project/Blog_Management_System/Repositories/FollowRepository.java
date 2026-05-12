@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,5 +62,8 @@ public interface FollowRepository extends JpaRepository<FollowEntity, UUID> {
 
     @ReadFast
     Optional<FollowEntity> findByFollowerIdAndFollowingId(UUID followerId, UUID followeeId);
+
+    @ReadFast
+    List<FollowEntity> findByFollowingId(UUID followingId);
 
 }

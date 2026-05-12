@@ -1,9 +1,11 @@
 package com.project.Blog_Management_System.Utils;
 
+import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -114,6 +116,18 @@ public class AppUtils {
                 post.setPublishAt(null);
             }
         }
+    }
+
+    /**
+     * Generates a snippet of the comment body, limited to 100 characters.
+     *
+     * @param comment The {@link CommentEntity} for which to generate the snippet.
+     * @return A string containing the first 100 characters of the comment body, followed by "..." if it exceeds 100 characters.
+     */
+    public static @NonNull String getCommentSnippet(CommentEntity comment) {
+        return comment.getBody().length() > 100
+                ? comment.getBody().substring(0, 100) + "..."
+                : comment.getBody();
     }
 
 }

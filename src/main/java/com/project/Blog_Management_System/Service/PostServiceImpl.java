@@ -4,6 +4,10 @@ import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
+import com.project.Blog_Management_System.Events.CommentAddedEvent;
+import com.project.Blog_Management_System.Events.CommentRepliedEvent;
+import com.project.Blog_Management_System.Events.NewPostPublishedEvent;
+import com.project.Blog_Management_System.Events.PostLikedEvent;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Repositories.*;
@@ -12,6 +16,7 @@ import com.project.Blog_Management_System.Service.Interfaces.RedisViewCountServi
 import com.project.Blog_Management_System.Specifications.PostFilterSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -39,6 +44,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final BookmarkRepository bookmarkRepository;
     private final RedisViewCountService redisViewCountService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -59,6 +65,17 @@ public class PostServiceImpl implements PostService {
         int rowsUpdated = userRepository.incrementPostCount(user.getId());
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to increment posts count of the user. Possible concurrent modification.");
+
+        if (PostStatus.PUBLISHED.equals(postRequestDTO.getStatus())) {
+            eventPublisher.publishEvent(NewPostPublishedEvent.builder()
+                    .postId(savedPost.getId())
+                    .postSlug(savedPost.getSlug())
+                    .postTitle(savedPost.getTitle())
+                    .authorId(user.getId())
+                    .authorName(user.getName())
+                    .build()
+            );
+        }
 
         return modelMapper.map(savedPost, PostResponseDTO.class);
     }
@@ -225,8 +242,24 @@ public class PostServiceImpl implements PostService {
         CommentEntity savedComment = commentRepository.saveAndFlush(comment);
 
         int rowsUpdated = postRepository.incrementCommentCount(postId);
-        if (rowsUpdated == 0)
+        if (rowsUpdated == 0) {
             throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
+        }
+
+        if (!post.getUser().equals(user)) {
+            String commentSnippet = getCommentSnippet(comment);
+
+            eventPublisher.publishEvent(CommentAddedEvent.builder()
+                    .authorName(post.getUser().getName())
+                    .authorEmail(post.getUser().getEmail())
+                    .commenterName(user.getName())
+                    .postTitle(post.getTitle())
+                    .postSlug(post.getSlug())
+                    .postId(post.getId())
+                    .commentSnippet(commentSnippet)
+                    .build()
+            );
+        }
 
         CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
         commentResponseDTO.setIsAuthor(true);
@@ -242,25 +275,57 @@ public class PostServiceImpl implements PostService {
         isInvalidPost(post, postSlug);
         isPublishedPost(post, user);
 
-        CommentEntity parent = commentRepository.findById(parentCommentId).orElse(null);
-        isInvalidComment(parent);
-        validateReplyDepth(parent);
+        CommentEntity parentComment = commentRepository.findById(parentCommentId).orElse(null);
+        isInvalidComment(parentComment);
+        validateReplyDepth(parentComment);
 
-        if (!parent.getPost().getId().equals(post.getId())) {
+        if (!parentComment.getPost().getId().equals(post.getId())) {
             throw new IllegalArgumentException("Parent comment does not belong to this post");
         }
 
         CommentEntity comment = modelMapper.map(commentRequestDTO, CommentEntity.class);
         comment.setUser(user);
         comment.setPost(post);
-        comment.setParent(parent);
-        comment.setDepth(parent.getDepth() + 1);
+        comment.setParent(parentComment);
+        comment.setDepth(parentComment.getDepth() + 1);
 
         CommentEntity savedComment = commentRepository.saveAndFlush(comment);
 
         int rowsUpdated = postRepository.incrementCommentCount(postId);
         if (rowsUpdated == 0)
             throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
+
+        if (!parentComment.getUser().equals(user)) {
+            String originalCommentSnippet = getCommentSnippet(parentComment);
+            String replyCommentSnippet = getCommentSnippet(comment);
+
+            eventPublisher.publishEvent(CommentRepliedEvent.builder()
+                    .parentCommenterName(parentComment.getUser().getName())
+                    .parentCommenterEmail(parentComment.getUser().getEmail())
+                    .childCommenterName(user.getName())
+                    .postTitle(post.getTitle())
+                    .postSlug(post.getSlug())
+                    .postId(post.getId())
+                    .originalCommentSnippet(originalCommentSnippet)
+                    .replyCommentSnippet(replyCommentSnippet)
+                    .build()
+            );
+        }
+
+        if (!post.getUser().equals(parentComment.getUser()) && !post.getUser().equals(user)) {
+            String replyCommentSnippet = getCommentSnippet(comment);
+
+            eventPublisher.publishEvent(CommentAddedEvent.builder()
+                    .authorName(post.getUser().getName())
+                    .authorEmail(post.getUser().getEmail())
+                    .commenterName(user.getName())
+                    .postTitle(post.getTitle())
+                    .postSlug(post.getSlug())
+                    .postId(post.getId())
+                    .commentSnippet(replyCommentSnippet)
+                    .build()
+            );
+        }
 
         CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
         commentResponseDTO.setIsAuthor(true);
@@ -346,8 +411,21 @@ public class PostServiceImpl implements PostService {
             if (likeRepository.findByUserIdAndPostId(user.getId(), postId).isEmpty()) {
                 likeRepository.saveAndFlush(like);
                 int rowsUpdated = postRepository.incrementLikeCount(postId);
-                if (rowsUpdated == 0)
+                if (rowsUpdated == 0) {
                     throw new ResourceConflictException("Failed to increment like count of the post. Possible concurrent modification or stale entity.");
+                }
+
+                if (!post.getUser().equals(user)) {
+                    eventPublisher.publishEvent(PostLikedEvent.builder()
+                            .authorName(post.getUser().getName())
+                            .authorEmail(post.getUser().getEmail())
+                            .likerName(user.getName())
+                            .postTitle(post.getTitle())
+                            .postSlug(post.getSlug())
+                            .postId(post.getId())
+                            .build()
+                    );
+                }
             }
         } else {
             if (likeRepository.findByUserIdAndPostId(user.getId(), postId).isPresent()) {
