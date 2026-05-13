@@ -8,15 +8,15 @@ import lombok.Data;
 public class LoginRequestDTO {
     @Pattern(
             regexp = "(^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$)|(^\\w{3,30}$)",
-            message = "Input must be a valid email or username (min 3 characters, max 30 characters, can be letters or numbers or underscore)"
+            message = "{validation.user.email_or_username}"
     )
-    @NotNull
+    @NotNull(message = "{validation.user.email_or_username.not_null}")
     private String emailOrUsername;
 
     @Pattern(
             regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
-            message = "Password must be 8-20 characters long, contain at least one digit, one lowercase letter, one uppercase letter, one special character, and have no whitespace"
+            message = "{validation.user.password}"
     )
-    @NotNull
+    @NotNull(message = "{validation.user.password.not_null}")
     private String password;
 }

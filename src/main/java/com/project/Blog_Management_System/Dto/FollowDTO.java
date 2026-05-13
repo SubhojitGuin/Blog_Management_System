@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class FollowDTO {
-    @NotNull
+    @NotNull(message = "{validation.follow.follow.not_null}")
     private Boolean follow;
 }

@@ -15,19 +15,19 @@ import java.time.LocalDate;
 
 @Data
 public class ProfileUpdateDTO {
-    @NotBlank
-    @Size(min = 2, max = 255)
+    @NotBlank(message = "{validation.user.name.not_blank}")
+    @Size(min = 2, max = 255, message = "{validation.user.name.size}")
     @JsonDeserialize(using = StringSanitizationDeserializer.class)
     private String name;
 
-    @Size(max = 255)
+    @Size(max = 255, message = "{validation.user.bio.size}")
     @JsonDeserialize(using = BasicHtmlSanitizationDeserializer.class)
     private String bio;
 
     private Gender gender;
 
-    @Past(message = "Date of birth must be in the past and in the format yyyy-MM-dd")
+    @Past(message = "{validation.user.dob}")
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-    @NotNull
+    @NotNull(message = "{validation.user.dob.not_null}")
     private LocalDate dateOfBirth;
 }

@@ -12,6 +12,12 @@ public class ApiError {
 
     private HttpStatus status;
     private String message;
-    private List<String> subErrors;
+    private List<FieldError> subErrors;
 
+    @Data
+    @Builder
+    public static class FieldError {
+        private String field;
+        private String message;
+    }
 }

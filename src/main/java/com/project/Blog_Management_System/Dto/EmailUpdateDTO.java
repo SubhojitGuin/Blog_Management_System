@@ -7,8 +7,8 @@ import lombok.Data;
 
 @Data
 public class EmailUpdateDTO {
-    @Email
-    @NotBlank
-    @Size(min = 6, max = 320)
+    @Email(message = "{validation.user.email.invalid}")
+    @NotBlank(message = "{validation.user.email.not_blank}")
+    @Size(min = 6, max = 320, message = "{validation.user.email.size}")
     private String email;
 }

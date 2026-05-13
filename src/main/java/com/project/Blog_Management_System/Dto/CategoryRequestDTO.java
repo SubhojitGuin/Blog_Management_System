@@ -11,13 +11,13 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 @Data
 @AllArgsConstructor
 public class CategoryRequestDTO {
-    @NotBlank
-    @Pattern(regexp = "^[a-zA-Z0-9\\s.-]+$", message = "Only letters, numbers, spaces, dots, and hyphens allowed")
-    @Size(min = 2, max = 100)
+    @NotBlank(message = "{validation.category.name.not_blank}")
+    @Pattern(regexp = "^[a-zA-Z0-9\\s.-]+$", message = "{validation.category.name}")
+    @Size(min = 2, max = 100, message = "{validation.category.name.size}")
     private String name;
 
-    @NotBlank
-    @Size(min = 10, max = 500)
+    @NotBlank(message = "{validation.category.description.not_blank}")
+    @Size(min = 10, max = 500, message = "{validation.category.description.size}")
     @JsonDeserialize(using = BasicHtmlSanitizationDeserializer.class)
     private String description;
 }

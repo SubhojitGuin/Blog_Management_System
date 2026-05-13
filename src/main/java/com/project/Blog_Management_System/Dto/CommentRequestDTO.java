@@ -8,8 +8,8 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 
 @Data
 public class CommentRequestDTO {
-    @NotBlank
-    @Size(min = 2, max = 1000)
+    @NotBlank(message = "{validation.comment.body.not_blank}")
+    @Size(min = 2, max = 1000, message = "{validation.comment.body.size}")
     @JsonDeserialize(using = BasicHtmlSanitizationDeserializer.class)
     private String body;
 }

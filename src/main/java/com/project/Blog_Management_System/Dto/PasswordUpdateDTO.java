@@ -6,15 +6,15 @@ import lombok.Data;
 
 @Data
 public class PasswordUpdateDTO {
-    @NotNull
+    @NotNull(message = "{validation.user.password.not_null}")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
-            message = "Password must be 8-20 characters long, contain at least one digit, one lowercase letter, one uppercase letter, one special character, and have no whitespace"
+            message = "{validation.user.password}"
     )
     private String oldPassword;
 
-    @NotNull
+    @NotNull(message = "{validation.user.password.not_null}")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
-            message = "Password must be 8-20 characters long, contain at least one digit, one lowercase letter, one uppercase letter, one special character, and have no whitespace"
+            message = "{validation.user.password}"
     )
     private String newPassword;
 }

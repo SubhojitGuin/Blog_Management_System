@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class BookmarkDTO {
-    @NotNull
+    @NotNull(message = "{validation.bookmark.bookmark.not_null}")
     private Boolean bookmark;
 }

@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class LikeDTO {
-    @NotNull
+    @NotNull(message = "{validation.like.like.not_null}")
     private Boolean like;
 }

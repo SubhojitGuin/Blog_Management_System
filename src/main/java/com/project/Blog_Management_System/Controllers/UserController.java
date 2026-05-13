@@ -76,7 +76,7 @@ public class UserController {
     @Operation(summary = "Follow or Unfollow User", description = "follow or unfollow a user by username and id.")
     public ResponseEntity<Void> followOrUnfollowUser(@PathVariable String username,
                                                      @PathVariable UUID user_id,
-                                                     @RequestBody FollowDTO followDTO) {
+                                                     @Valid @RequestBody FollowDTO followDTO) {
         userService.followOrUnfollowUser(username, user_id, followDTO);
         return ResponseEntity.noContent().build();
     }

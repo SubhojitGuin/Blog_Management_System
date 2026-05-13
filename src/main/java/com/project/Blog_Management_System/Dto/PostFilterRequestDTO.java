@@ -7,16 +7,16 @@ import lombok.Data;
 
 @Data
 public class PostFilterRequestDTO {
-    @Pattern(regexp = "^[a-z0-9]+(?:-[a-z0-9]+)*$", message = "Slug must be lowercase alphanumeric with hyphens only")
-    @Size(min = 2, max = 100)
+    @Pattern(regexp = "^[a-z0-9]+(?:-[a-z0-9]+)*$", message = "{validation.category.slug}")
+    @Size(min = 2, max = 100, message = "{validation.category.slug.size}")
     private String categorySlug;
 
-    @Size(min = 1, max = 100)
+    @Size(min = 1, max = 100, message = "{validation.post.title.size}")
     private String title;
 
-    @PositiveOrZero
+    @PositiveOrZero(message = "{validation.post.reading_time.positive_or_zero}")
     private Integer maxReadingTime;
 
-    @PositiveOrZero
+    @PositiveOrZero(message = "{validation.post.reading_time.positive_or_zero}")
     private Integer minReadingTime;
 }

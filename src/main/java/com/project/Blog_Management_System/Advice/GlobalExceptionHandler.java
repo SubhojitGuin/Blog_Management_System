@@ -3,7 +3,9 @@ package com.project.Blog_Management_System.Advice;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
+import com.project.Blog_Management_System.Utils.MessageService;
 import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +20,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.List;
+
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageService messageService;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<?>> handleResourceNotFoundException(ResourceNotFoundException exception) {
@@ -59,13 +66,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        List<ApiError.FieldError> fieldErrors = exception.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> ApiError.FieldError.builder()
+                        .field(error.getField())
+                        .message(error.getDefaultMessage())
+                        .build())
+                .toList();
+
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.BAD_REQUEST)
-                .message(exception.getBindingResult().getFieldErrors().stream()
-                        .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                        .reduce((msg1, msg2) -> msg1 + "; " + msg2)
-                        .orElse("Validation failed"))
+                .message(messageService.get("exception.validation.failed"))
+                .subErrors(fieldErrors)
                 .build();
+
         return buildErrorResponseEntity(apiError);
     }
 
