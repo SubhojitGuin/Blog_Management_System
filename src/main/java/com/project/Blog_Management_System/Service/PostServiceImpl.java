@@ -303,6 +303,7 @@ public class PostServiceImpl implements PostService {
                     .parentCommenterName(parentComment.getUser().getName())
                     .parentCommenterEmail(parentComment.getUser().getEmail())
                     .childCommenterName(user.getName())
+                    .authorName(post.getUser().getName())
                     .postTitle(post.getTitle())
                     .postSlug(post.getSlug())
                     .postId(post.getId())

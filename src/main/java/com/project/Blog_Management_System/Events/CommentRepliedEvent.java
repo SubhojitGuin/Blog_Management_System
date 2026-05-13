@@ -9,6 +9,7 @@ public record CommentRepliedEvent(
         String parentCommenterName,
         String parentCommenterEmail,
         String childCommenterName,
+        String authorName,
         String postTitle,
         String postSlug,
         UUID postId,
