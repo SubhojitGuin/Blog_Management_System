@@ -14,6 +14,9 @@ import com.project.Blog_Management_System.Repositories.*;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
 import com.project.Blog_Management_System.Service.Interfaces.RedisViewCountService;
 import com.project.Blog_Management_System.Specifications.PostFilterSpecification;
+import com.project.Blog_Management_System.Utils.AppUtils;
+import com.project.Blog_Management_System.Utils.MessageService;
+import com.project.Blog_Management_System.Utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,7 +33,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.project.Blog_Management_System.Utils.AppUtils.*;
-import static com.project.Blog_Management_System.Utils.ValidationUtils.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +47,9 @@ public class PostServiceImpl implements PostService {
     private final BookmarkRepository bookmarkRepository;
     private final RedisViewCountService redisViewCountService;
     private final ApplicationEventPublisher eventPublisher;
+    private final ValidationUtils validationUtils;
+    private final AppUtils appUtils;
+    private final MessageService messageService;
 
     @Override
     @Transactional
@@ -53,18 +58,18 @@ public class PostServiceImpl implements PostService {
 
         String slug = postRequestDTO.getCategorySlug();
         CategoryEntity category = categoryRepository.findBySlug(slug).orElse(null);
-        isInvalidCategory(category, slug);
+        validationUtils.isInvalidCategory(category, slug);
 
         PostEntity post = modelMapper.map(postRequestDTO, PostEntity.class);
         post.setUser(user);
         post.setSlug(generateSlug(postRequestDTO.getTitle()));
         post.setCategory(category);
-        applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
+        appUtils.applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
         PostEntity savedPost = postRepository.saveAndFlush(post);
 
         int rowsUpdated = userRepository.incrementPostCount(user.getId());
         if (rowsUpdated == 0)
-            throw new ResourceConflictException("Failed to increment posts count of the user. Possible concurrent modification.");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "increment", "posts", "user"));
 
         if (PostStatus.PUBLISHED.equals(postRequestDTO.getStatus())) {
             eventPublisher.publishEvent(NewPostPublishedEvent.builder()
@@ -107,7 +112,7 @@ public class PostServiceImpl implements PostService {
         );
 
         Specification<PostEntity> spec = PostFilterSpecification.buildSpecification(postFilterRequestDTO);
-        return postRepository.findAll(spec, PageRequest.of(page, size, convertToSort(sort, ALLOWED_SORT_FIELDS)))
+        return postRepository.findAll(spec, PageRequest.of(page, size, appUtils.convertToSort(sort, ALLOWED_SORT_FIELDS)))
                 .map(post -> modelMapper.map(post, PostInfoDTO.class));
     }
 
@@ -123,10 +128,10 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
+        validationUtils.isInvalidPost(post, postSlug);
 
         if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
-            throw new ResourceNotFoundException("Post not found");
+            throw new ResourceNotFoundException(messageService.get("exception.resource.not_found", "Post"));
         }
 
         PostResponseDTO postResponseDTO = modelMapper.map(post, PostResponseDTO.class);
@@ -144,26 +149,26 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
+        validationUtils.isInvalidPost(post, postSlug);
 
         if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
-            throw new ResourceNotFoundException("Post not found");
+            throw new ResourceNotFoundException(messageService.get("exception.resource.not_found", "Post"));
         }
 
         if (!post.getUser().equals(user)) {
-            throw new AccessDeniedException("You are not authorized to update this post");
+            throw new AccessDeniedException(messageService.get("exception.auth.access.denied", "update", "post"));
         }
 
         String categorySlug = postRequestDTO.getCategorySlug();
         CategoryEntity category = categoryRepository.findBySlug(categorySlug).orElse(null);
-        isInvalidCategory(category, categorySlug);
+        validationUtils.isInvalidCategory(category, categorySlug);
 
         post.setTitle(postRequestDTO.getTitle());
         post.setDescription(postRequestDTO.getDescription());
         post.setContent(postRequestDTO.getContent());
         post.setSlug(generateSlug(postRequestDTO.getTitle()));
         post.setCategory(category);
-        applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
+        appUtils.applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
 
         postRepository.saveAndFlush(post);
 
@@ -176,21 +181,21 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
+        validationUtils.isInvalidPost(post, postSlug);
 
         if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
-            throw new ResourceNotFoundException("Post not found");
+            throw new ResourceNotFoundException(messageService.get("exception.resource.not_found", "Post"));
         }
 
         if (!post.getUser().equals(user) && !(hasRole(Role.ADMIN))) {
-            throw new AccessDeniedException("You are not authorized to delete this post");
+            throw new AccessDeniedException(messageService.get("exception.auth.access.denied", "delete", "post"));
         }
 
         postRepository.delete(post);
 
         int rowsUpdated = userRepository.decrementPostCount(post.getUser().getId());
         if (rowsUpdated == 0)
-            throw new ResourceConflictException("Failed to decrement posts count of the user. Possible concurrent modification.");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "decrement", "posts", "user"));
     }
 
     @Override
@@ -198,9 +203,9 @@ public class PostServiceImpl implements PostService {
     public Slice<CommentResponseDTO> getTopLevelCommentsOfPost(String postSlug, UUID postId, UUID commentCursor, int size) {
         UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
+        validationUtils.isInvalidPost(post, postSlug);
         if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
-            throw new ResourceNotFoundException("Post not found");
+            throw new ResourceNotFoundException(messageService.get("exception.resource.not_found", "Post"));
         }
 
         return commentRepository.findTopLevelByPost(postId, commentCursor, user.getId(), PageRequest.of(0, size));
@@ -211,17 +216,17 @@ public class PostServiceImpl implements PostService {
     public Slice<CommentResponseDTO> getRepliesOfComment(String postSlug, UUID postId, UUID parentCommentId, UUID commentCursor, int size) {
         UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
+        validationUtils.isInvalidPost(post, postSlug);
 
         if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
-            throw new ResourceNotFoundException("Post not found");
+            throw new ResourceNotFoundException(messageService.get("exception.resource.not_found", "Post"));
         }
 
         CommentEntity parent = commentRepository.findById(parentCommentId).orElse(null);
-        isInvalidComment(parent);
+        validationUtils.isInvalidComment(parent);
 
         if (!parent.getPost().getId().equals(post.getId())) {
-            throw new IllegalArgumentException("Parent comment does not belong to this post");
+            throw new IllegalArgumentException(messageService.get("exception.illegal.argument.parent_comment_post_mismatch"));
         }
 
         return commentRepository.findRepliesByParentId(parentCommentId, commentCursor, user.getId(), PageRequest.of(0, size));
@@ -233,8 +238,8 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
-        isPublishedPost(post, user);
+        validationUtils.isInvalidPost(post, postSlug);
+        validationUtils.isPublishedPost(post, user);
 
         CommentEntity comment = modelMapper.map(commentRequestDTO, CommentEntity.class);
         comment.setUser(user);
@@ -243,7 +248,7 @@ public class PostServiceImpl implements PostService {
 
         int rowsUpdated = postRepository.incrementCommentCount(postId);
         if (rowsUpdated == 0) {
-            throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "increment", "comment", "post"));
         }
 
         if (!post.getUser().equals(user)) {
@@ -272,15 +277,15 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
-        isPublishedPost(post, user);
+        validationUtils.isInvalidPost(post, postSlug);
+        validationUtils.isPublishedPost(post, user);
 
         CommentEntity parentComment = commentRepository.findById(parentCommentId).orElse(null);
-        isInvalidComment(parentComment);
-        validateReplyDepth(parentComment);
+        validationUtils.isInvalidComment(parentComment);
+        validationUtils.validateReplyDepth(parentComment);
 
         if (!parentComment.getPost().getId().equals(post.getId())) {
-            throw new IllegalArgumentException("Parent comment does not belong to this post");
+            throw new IllegalArgumentException(messageService.get("exception.illegal.argument.parent_comment_post_mismatch"));
         }
 
         CommentEntity comment = modelMapper.map(commentRequestDTO, CommentEntity.class);
@@ -293,7 +298,7 @@ public class PostServiceImpl implements PostService {
 
         int rowsUpdated = postRepository.incrementCommentCount(postId);
         if (rowsUpdated == 0)
-            throw new ResourceConflictException("Failed to increment comment count of the post. Possible concurrent modification or stale entity.");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "increment", "comment", "post"));
 
         if (!parentComment.getUser().equals(user)) {
             String originalCommentSnippet = getCommentSnippet(parentComment);
@@ -339,14 +344,14 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
-        isPublishedPost(post, user);
+        validationUtils.isInvalidPost(post, postSlug);
+        validationUtils.isPublishedPost(post, user);
 
         CommentEntity comment = commentRepository.findById(commentId).orElse(null);
-        isInvalidComment(comment);
+        validationUtils.isInvalidComment(comment);
 
         if (!comment.getUser().equals(user)) {
-            throw new AccessDeniedException("You are not authorized to update this comment");
+            throw new AccessDeniedException(messageService.get("exception.auth.access.denied", "update", "comment"));
         }
 
         modelMapper.map(commentRequestDTO, comment);
@@ -363,21 +368,21 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
-        isPublishedPost(post, user);
+        validationUtils.isInvalidPost(post, postSlug);
+        validationUtils.isPublishedPost(post, user);
 
         CommentEntity comment = commentRepository.findById(commentId).orElse(null);
-        isInvalidComment(comment);
+        validationUtils.isInvalidComment(comment);
 
         if (!comment.getUser().equals(user) && !hasRole(Role.ADMIN)) {
-            throw new AccessDeniedException("You are not authorized to delete this comment");
+            throw new AccessDeniedException(messageService.get("exception.auth.access.denied", "delete", "comment"));
         }
 
         commentRepository.delete(comment);
 
         int rowsUpdated = postRepository.decrementCommentCount(postId);
         if (rowsUpdated == 0)
-            throw new ResourceConflictException("Failed to decrement comment count of the post. Possible concurrent modification or stale entity.");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "decrement", "comment", "post"));
     }
 
     @Override
@@ -385,10 +390,10 @@ public class PostServiceImpl implements PostService {
     public Slice<LikeInfoDTO> getLikesOfPost(String postSlug, UUID postId, UUID likeCursor, int size) {
         UserEntity user = getCurrentUser();
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
+        validationUtils.isInvalidPost(post, postSlug);
 
         if (post.getStatus() != PostStatus.PUBLISHED && !post.getUser().equals(user)) {
-            throw new ResourceNotFoundException("Post not found");
+            throw new ResourceNotFoundException(messageService.get("exception.resource.not_found", "Post"));
         }
 
         return likeRepository.findLikesOfPost(postId, likeCursor, PageRequest.of(0, size));
@@ -400,8 +405,8 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
-        isPublishedPost(post, user);
+        validationUtils.isInvalidPost(post, postSlug);
+        validationUtils.isPublishedPost(post, user);
 
         LikeEntity like = LikeEntity.builder()
                 .user(user)
@@ -413,7 +418,7 @@ public class PostServiceImpl implements PostService {
                 likeRepository.saveAndFlush(like);
                 int rowsUpdated = postRepository.incrementLikeCount(postId);
                 if (rowsUpdated == 0) {
-                    throw new ResourceConflictException("Failed to increment like count of the post. Possible concurrent modification or stale entity.");
+                    throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "increment", "like", "post"));
                 }
 
                 if (!post.getUser().equals(user)) {
@@ -433,7 +438,7 @@ public class PostServiceImpl implements PostService {
                 likeRepository.deleteByUserIdAndPostId(user.getId(), postId);
                 int rowsUpdated = postRepository.decrementLikeCount(postId);
                 if (rowsUpdated == 0)
-                    throw new ResourceConflictException("Failed to decrement like count of the post. Possible concurrent modification or stale entity.");
+                    throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "decrement", "like", "post"));
             }
         }
     }
@@ -444,8 +449,8 @@ public class PostServiceImpl implements PostService {
         UserEntity user = getCurrentUser();
 
         PostEntity post = postRepository.findById(postId).orElse(null);
-        isInvalidPost(post, postSlug);
-        isPublishedPost(post, user);
+        validationUtils.isInvalidPost(post, postSlug);
+        validationUtils.isPublishedPost(post, user);
 
         BookmarkEntity bookmark = BookmarkEntity.builder()
                 .user(user)

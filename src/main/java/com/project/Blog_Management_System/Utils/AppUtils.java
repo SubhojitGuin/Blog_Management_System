@@ -5,9 +5,11 @@ import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +17,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+@Component
+@RequiredArgsConstructor
 public class AppUtils {
+
+    private final MessageService messageService;
 
     /**
      * Retrieves the currently authenticated user from the security context.
@@ -58,7 +64,7 @@ public class AppUtils {
      * @return A {@link Sort} object representing the sorting criteria.
      * @throws IllegalArgumentException if any of the sort fields are invalid.
      */
-    public static Sort convertToSort(List<String> sortFields, Set<String> ALLOWED_SORT_FIELDS) {
+    public Sort convertToSort(List<String> sortFields, Set<String> ALLOWED_SORT_FIELDS) {
         List<Sort.Order> orders = new ArrayList<>();
 
         for (String field : sortFields) {
@@ -66,7 +72,7 @@ public class AppUtils {
             String property = propertyAndDirection[0];
 
             if (!ALLOWED_SORT_FIELDS.contains(property)) {
-                throw new IllegalArgumentException("Invalid sort field: " + property);
+                throw new IllegalArgumentException(messageService.get("exception.illegal.argument.invalid_sort_field", property));
             }
 
             Sort.Direction direction = Sort.DEFAULT_DIRECTION;
@@ -91,7 +97,7 @@ public class AppUtils {
      * @param publishAt The desired publishing date and time for the post. Required if status is SCHEDULED.
      * @throws IllegalArgumentException if publishAt is null when status is SCHEDULED.
      */
-    public static void applyStatusAndPublishAt(PostEntity post,
+    public void applyStatusAndPublishAt(PostEntity post,
                                          PostStatus status,
                                          LocalDateTime publishAt) {
         if (status == null) {
@@ -101,7 +107,7 @@ public class AppUtils {
         switch (status) {
             case SCHEDULED -> {
                 if (publishAt == null) {
-                    throw new IllegalArgumentException("publishAt is required when status is SCHEDULED");
+                    throw new IllegalArgumentException(messageService.get("exception.illegal.argument.publish_at_required_for_scheduled_status"));
                 }
 
                 post.setStatus(PostStatus.SCHEDULED);

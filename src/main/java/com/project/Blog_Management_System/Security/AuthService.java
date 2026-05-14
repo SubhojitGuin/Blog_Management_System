@@ -7,6 +7,7 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
+import com.project.Blog_Management_System.Utils.MessageService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,12 +30,13 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+    private final MessageService messageService;
 
     public UserDTO signUp(SignUpRequestDTO signUpRequestDto) {
 
         UserEntity user = userService.getUserByUsernameOrEmail(signUpRequestDto.getUsername(), signUpRequestDto.getEmail());
         if (user != null) {
-            throw new ResourceConflictException("User is already present with same email id or username");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Username/Email"));
         }
 
         UserEntity newUser = modelMapper.map(signUpRequestDto, UserEntity.class);
@@ -50,7 +52,7 @@ public class AuthService {
 
         UserEntity loginUser = userService.getUserByUsernameOrEmail(username, username);
         if (loginUser == null) {
-            throw new UsernameNotFoundException("User not found with email or username: " + username);
+            throw new UsernameNotFoundException(messageService.get("exception.auth.username_not_found", username));
         }
         username = loginUser.getUsername();
 
@@ -78,7 +80,7 @@ public class AuthService {
         UserEntity user = userService.getUserById(id);
 
         if (!user.getTokenVersion().equals(tokenVersion)) {
-            throw new JwtException("Invalid refresh token");
+            throw new JwtException(messageService.get("exception.auth.jwt_invalid_refresh_token"));
         }
 
         String[] arr = new String[2];

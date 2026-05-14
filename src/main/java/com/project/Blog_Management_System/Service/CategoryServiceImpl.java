@@ -10,6 +10,8 @@ import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
+import com.project.Blog_Management_System.Utils.MessageService;
+import com.project.Blog_Management_System.Utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -23,7 +25,6 @@ import java.util.UUID;
 
 import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
 import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
-import static com.project.Blog_Management_System.Utils.ValidationUtils.isInvalidCategory;
 
 @Slf4j
 @Service
@@ -33,6 +34,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
+    private final ValidationUtils validationUtils;
+    private final MessageService messageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -40,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
         UserEntity user = getCurrentUser();
 
         CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
-        isInvalidCategory(category, categorySlug);
+        validationUtils.isInvalidCategory(category, categorySlug);
 
         return postRepository.findPostsByCategory(categoryId, postCursor, user.getId(), PageRequest.of(0, size));
     }
@@ -57,7 +60,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponseDTO getCategoryDetails(String categorySlug, UUID categoryId) {
         CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
-        isInvalidCategory(category, categorySlug);
+        validationUtils.isInvalidCategory(category, categorySlug);
 
         return modelMapper.map(category, CategoryResponseDTO.class);
     }
@@ -68,7 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
         String slug = generateSlug(categoryRequestDTO.getName());
 
         if (categoryRepository.findBySlug(slug).isPresent()) {
-            throw new ResourceConflictException("Category already exists");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Category"));
         }
 
         CategoryEntity category = modelMapper.map(categoryRequestDTO, CategoryEntity.class);
@@ -85,11 +88,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryResponseDTO updateCategory(String categorySlug, UUID categoryId, CategoryRequestDTO categoryRequestDTO) {
         CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
-        isInvalidCategory(category, categorySlug);
+        validationUtils.isInvalidCategory(category, categorySlug);
 
         String newSlug = generateSlug(categoryRequestDTO.getName());
         if (categoryRepository.findBySlug(newSlug).isPresent()) {
-            throw new ResourceConflictException("Category already exists");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Category"));
         }
 
         modelMapper.map(categoryRequestDTO, category);
@@ -105,14 +108,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void deleteCategory(String oldSlug, UUID categoryId, String newSlug) {
         if (oldSlug.equals("uncategorised")) {
-            throw new InvalidActionException("Uncategorised category can't be deleted");
+            throw new InvalidActionException(messageService.get("exception.invalid.action.uncategorised_category_deletion"));
         }
 
         CategoryEntity oldCategory = categoryRepository.findById(categoryId).orElse(null);
-        isInvalidCategory(oldCategory, oldSlug);
+        validationUtils.isInvalidCategory(oldCategory, oldSlug);
 
         CategoryEntity newCategory = categoryRepository.findBySlug(newSlug).orElse(null);
-        isInvalidCategory(newCategory, newSlug);
+        validationUtils.isInvalidCategory(newCategory, newSlug);
 
         postRepository.updatePostsCategory(oldCategory, newCategory);
         log.info("ADMIN DELETED OLD CATEGORY: {} AND UPDATED WITH NEW CATEGORY: {}", oldCategory.getName(), newCategory.getName());

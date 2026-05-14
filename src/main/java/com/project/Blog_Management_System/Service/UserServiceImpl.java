@@ -12,6 +12,8 @@ import com.project.Blog_Management_System.Repositories.FollowRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
+import com.project.Blog_Management_System.Utils.MessageService;
+import com.project.Blog_Management_System.Utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,7 +31,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
-import static com.project.Blog_Management_System.Utils.ValidationUtils.isInvalidUser;
 
 @Service
 @RequiredArgsConstructor
@@ -42,11 +43,13 @@ public class UserServiceImpl implements UserService {
     private final PostRepository postRepository;
     private final BookmarkRepository bookmarkRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ValidationUtils validationUtils;
+    private final MessageService messageService;
 
     @Override
     @Transactional(readOnly = true)
     public UserEntity getUserById(UUID userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(messageService.get("exception.resource.not_found", "User")));
     }
 
     @Override
@@ -75,7 +78,7 @@ public class UserServiceImpl implements UserService {
     public void updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
         UserEntity user = getCurrentUser();
         if (!passwordEncoder.matches(passwordUpdateDTO.getOldPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Old password is incorrect");
+            throw new BadCredentialsException(messageService.get("exception.auth.bad_credentials", "Old password"));
         }
         user.setPassword(passwordEncoder.encode(passwordUpdateDTO.getNewPassword()));
         user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
@@ -87,7 +90,7 @@ public class UserServiceImpl implements UserService {
     public void updateUserName(UsernameUpdateDTO usernameUpdateDTO) {
         UserEntity user = getCurrentUser();
         if (userRepository.findByUsernameIgnoreCase(usernameUpdateDTO.getUsername()).isPresent()) {
-            throw new ResourceConflictException("Username is already taken");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Username"));
         }
         user.setUsername(usernameUpdateDTO.getUsername());
         user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
@@ -99,7 +102,7 @@ public class UserServiceImpl implements UserService {
     public void updateEmail(EmailUpdateDTO emailUpdateDTO) {
         UserEntity user = getCurrentUser();
         if (userRepository.findByEmailIgnoreCase(emailUpdateDTO.getEmail()).isPresent()) {
-            throw new ResourceConflictException("Email is already taken");
+            throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Email"));
         }
         user.setEmail(emailUpdateDTO.getEmail());
         user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
@@ -112,7 +115,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = getCurrentUser();
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
 
-        isInvalidUser(retrievedUser, username);
+        validationUtils.isInvalidUser(retrievedUser, username);
 
         UserDTO retrievedUserDTO = modelMapper.map(retrievedUser, UserDTO.class);
         retrievedUserDTO.setIsCurrentUser(user.equals(retrievedUser));
@@ -132,10 +135,10 @@ public class UserServiceImpl implements UserService {
         UserEntity follower = getCurrentUser();
         UserEntity followee = userRepository.findById(userId).orElse(null);
 
-        isInvalidUser(followee, username);
+        validationUtils.isInvalidUser(followee, username);
 
         if (follower.equals(followee)) {
-            throw new InvalidActionException("User cannot follow/unfollow themselves");
+            throw new InvalidActionException(messageService.get("exception.invalid.action.self_follow"));
         }
 
         FollowEntity followEntity = FollowEntity.builder()
@@ -150,7 +153,7 @@ public class UserServiceImpl implements UserService {
                 int followingsRowsUpdated = userRepository.incrementFollowingsCount(follower.getId());
 
                 if (followerRowsUpdated == 0 || followingsRowsUpdated == 0) {
-                    throw new ResourceConflictException("Failed to update followers/followings count");
+                    throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "increment", "followers/followings", "user"));
                 }
 
                 eventPublisher.publishEvent(NewFollowerEvent.builder()
@@ -168,7 +171,7 @@ public class UserServiceImpl implements UserService {
                 int followingsRowsUpdated = userRepository.decrementFollowingsCount(follower.getId());
 
                 if (followerRowsUpdated == 0 || followingsRowsUpdated == 0) {
-                    throw new ResourceConflictException("Failed to update followers/followings count");
+                    throw new ResourceConflictException(messageService.get("exception.resource.conflict.count_update_failure", "decrement", "followers/followings count", "user"));
                 }
             }
         }
@@ -178,7 +181,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Slice<FollowInfoDTO> getFollowers(String username, UUID userId, UUID followCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
-        isInvalidUser(retrievedUser, username);
+        validationUtils.isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(0, size);
         return followRepository.findFollowers(userId, followCursor, pageable);
     }
@@ -187,7 +190,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Slice<FollowInfoDTO> getFollowings(String username, UUID userId, UUID followCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
-        isInvalidUser(retrievedUser, username);
+        validationUtils.isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(0, size);
         return followRepository.findFollowing(userId, followCursor, pageable);
     }
@@ -204,7 +207,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Slice<PostInfoDTO> getUserPosts(String username, UUID userId, UUID postCursor, int size) {
         UserEntity retrievedUser = userRepository.findById(userId).orElse(null);
-        isInvalidUser(retrievedUser, username);
+        validationUtils.isInvalidUser(retrievedUser, username);
         Pageable pageable = PageRequest.of(0, size);
         return postRepository.findPostsByUser(userId, postCursor, pageable);
     }

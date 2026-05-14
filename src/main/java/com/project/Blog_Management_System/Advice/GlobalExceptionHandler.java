@@ -6,6 +6,7 @@ import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Utils.MessageService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,11 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
@@ -33,6 +36,15 @@ public class GlobalExceptionHandler {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.NOT_FOUND)
                 .message(exception.getMessage())
+                .build();
+        return buildErrorResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<?>> handleNoResourceFoundException(NoResourceFoundException ex) {
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.NOT_FOUND)
+                .message(ex.getMessage())
                 .build();
         return buildErrorResponseEntity(apiError);
     }
@@ -116,7 +128,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleJwtException(JwtException ex) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.UNAUTHORIZED)
-                .message(ex.getMessage())
+                .message(messageService.get("exception.auth.jwt_invalid"))
                 .build();
         return buildErrorResponseEntity(apiError);
     }
@@ -167,10 +179,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception) {
+    public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception ex) {
+        log.error("Unhandled exception occurred: ", ex);
+        ex.printStackTrace();
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .message(exception.getMessage())
+                .message(messageService.get("exception.internal_server_error"))
                 .build();
         return buildErrorResponseEntity(apiError);
     }
