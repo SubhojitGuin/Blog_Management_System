@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Dto;
 
+import com.project.Blog_Management_System.Constants.RegexConstants;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
@@ -7,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class PostFilterRequestDTO {
-    @Pattern(regexp = "^[a-z0-9]+(?:-[a-z0-9]+)*$", message = "{validation.category.slug}")
+    @Pattern(regexp = RegexConstants.CATEGORY_SLUG, message = "{validation.category.slug}")
     @Size(min = 2, max = 100, message = "{validation.category.slug.size}")
     private String categorySlug;
 

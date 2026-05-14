@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Dto;
 
+import com.project.Blog_Management_System.Constants.RegexConstants;
 import com.project.Blog_Management_System.Deserializers.BasicHtmlSanitizationDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -12,7 +13,7 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 @AllArgsConstructor
 public class CategoryRequestDTO {
     @NotBlank(message = "{validation.category.name.not_blank}")
-    @Pattern(regexp = "^[a-zA-Z0-9\\s.-]+$", message = "{validation.category.name}")
+    @Pattern(regexp = RegexConstants.CATEGORY_NAME, message = "{validation.category.name}")
     @Size(min = 2, max = 100, message = "{validation.category.name.size}")
     private String name;
 

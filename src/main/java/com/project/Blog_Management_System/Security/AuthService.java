@@ -52,7 +52,7 @@ public class AuthService {
 
         UserEntity loginUser = userService.getUserByUsernameOrEmail(username, username);
         if (loginUser == null) {
-            throw new UsernameNotFoundException(messageService.get("exception.auth.username_not_found", username));
+            throw new UsernameNotFoundException(messageService.get("exception.auth.username_or_email_not_found"));
         }
         username = loginUser.getUsername();
 

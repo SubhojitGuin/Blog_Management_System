@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Constants;
 
-public class ApiRoutes {
+public final class ApiRoutes {
 
     // Regex Patterns
     private static final String UUID_REGEX = "[0-9a-fA-F\\-]{36}";

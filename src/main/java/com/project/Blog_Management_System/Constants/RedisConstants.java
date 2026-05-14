@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Constants;
 
-public class RedisConstants {
+public final class RedisConstants {
 
     public static final String VIEW_KEY = "post:view:count:";
     public static final String UNIQUE_VIEW_KEY = "post:view:unique:";

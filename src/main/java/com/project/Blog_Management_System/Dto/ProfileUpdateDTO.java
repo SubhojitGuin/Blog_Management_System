@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.project.Blog_Management_System.Constants.RegexConstants;
 import com.project.Blog_Management_System.Deserializers.BasicHtmlSanitizationDeserializer;
 import com.project.Blog_Management_System.Deserializers.StringSanitizationDeserializer;
 import com.project.Blog_Management_System.Enums.Gender;
@@ -27,7 +28,7 @@ public class ProfileUpdateDTO {
     private Gender gender;
 
     @Past(message = "{validation.user.dob}")
-    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+    @JsonFormat(pattern = RegexConstants.DOB, shape = JsonFormat.Shape.STRING)
     @NotNull(message = "{validation.user.dob.not_null}")
     private LocalDate dateOfBirth;
 }

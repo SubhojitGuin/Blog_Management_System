@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.project.Blog_Management_System.Constants.RegexConstants;
 import com.project.Blog_Management_System.Deserializers.BasicHtmlSanitizationDeserializer;
 import com.project.Blog_Management_System.Deserializers.StringSanitizationDeserializer;
 import com.project.Blog_Management_System.Enums.Gender;
@@ -18,7 +19,7 @@ public class SignUpRequestDTO {
     private String name;
 
     @Pattern(
-            regexp = "^\\w{3,30}$",
+            regexp = RegexConstants.USERNAME,
             message = "{validation.user.username}"
     )
     @NotBlank(message = "{validation.user.username.not_blank}")
@@ -29,7 +30,7 @@ public class SignUpRequestDTO {
     @Size(min = 6, max = 320, message = "{validation.user.email.size}")
     private String email;
 
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
+    @Pattern(regexp = RegexConstants.PASSWORD,
             message = "{validation.user.password}"
     )
     @NotNull(message = "{validation.user.password.not_null}")
@@ -42,7 +43,7 @@ public class SignUpRequestDTO {
     private String bio;
 
     @Past(message = "{validation.user.dob}")
-    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+    @JsonFormat(pattern = RegexConstants.DOB, shape = JsonFormat.Shape.STRING)
     @NotNull(message = "{validation.user.dob.not_null}")
     private LocalDate dateOfBirth;
 }
