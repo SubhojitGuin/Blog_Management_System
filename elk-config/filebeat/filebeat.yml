@@ -1,0 +1,41 @@
+# $schema: https://raw.githubusercontent.com/elastic/beats/master/filebeat/filebeat.reference.yml
+filebeat.inputs:
+  - type: log
+    enabled: true
+
+    paths:
+      - /usr/share/filebeat/app-logs/*.log
+
+    fields:
+      service: blog-app
+
+    fields_under_root: true
+
+    # --- Structured JSON Engine ---
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: message
+
+    close_inactive: 5m
+    ignore_older: 48h
+    clean_inactive: 72h
+    clean_removed: true
+
+# --- High Performance Memory Pipeline ---
+#queue.mem:
+#  events: 4096
+#  flush.min_events: 512
+#  flush.timeout: 1s
+
+output.logstash:
+  hosts: [ "logstash:5044" ]
+
+harvester_buffer_size: 16384
+
+filebeat.registry.path: /usr/share/filebeat/data/registry
+
+logging.level: info
+logging.to_files: false
+
+setup.ilm.enabled: false
+index_patterns: []
