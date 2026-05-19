@@ -1,12 +1,9 @@
-version: "3.9"
-
 networks:
   blog-net:
     driver: bridge
 
 volumes:
   es-data:
-  app-logs:
   filebeat-data:
   pg-data:
   redis-data:
@@ -30,8 +27,6 @@ services:
     networks:
       - blog-net
 
-    restart: unless-stopped
-
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${RDS_USERNAME} -d ${RDS_DB_NAME}" ]
       interval: 10s
@@ -53,8 +48,6 @@ services:
     networks:
       - blog-net
 
-    restart: unless-stopped
-
     healthcheck:
       test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping" ]
       interval: 10s
@@ -67,11 +60,10 @@ services:
 
     environment:
       - discovery.type=single-node
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=false
-      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.enabled=false
+#      - xpack.security.http.ssl.enabled=false
+#      - xpack.security.transport.ssl.enabled=false
 
     ports:
       - "9200:9200"
@@ -81,8 +73,6 @@ services:
 
     networks:
       - blog-net
-
-    restart: unless-stopped
 
     healthcheck:
       test:
@@ -95,47 +85,32 @@ services:
       retries: 10
       start_period: 60s
 
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.0
     container_name: kibana
 
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.enabled=false
 
     ports:
       - "5601:5601"
-
-    networks:
-      - blog-net
-
-    restart: unless-stopped
 
     depends_on:
       elasticsearch:
         condition: service_healthy
 
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    networks:
+      - blog-net
+
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.13.0
     container_name: logstash
 
     environment:
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - LS_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.monitoring.enabled=true
 
     volumes:
       - ./elk-config/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
@@ -144,27 +119,18 @@ services:
       - "5044:5044"
       - "9600:9600"
 
-    networks:
-      - blog-net
-
-    restart: unless-stopped
-
     depends_on:
       elasticsearch:
         condition: service_healthy
+
+    networks:
+      - blog-net
 
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9600 || exit 1"]
       interval: 20s
       timeout: 10s
       retries: 10
-
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.13.0
@@ -175,24 +141,24 @@ services:
     command: ["filebeat", "-e", "--strict.perms=false"]
 
     volumes:
+      # Filebeat config
       - ./elk-config/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - app-logs:/usr/share/filebeat/app-logs:ro
+
+      # Docker container logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+
+      # Docker socket metadata
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+      # Filebeat registry
       - filebeat-data:/usr/share/filebeat/data
-
-    networks:
-      - blog-net
-
-    restart: unless-stopped
 
     depends_on:
       logstash:
         condition: service_healthy
 
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
+    networks:
+      - blog-net
 
   blog-app:
     build:
@@ -221,14 +187,6 @@ services:
     ports:
       - "8080:8080"
 
-    volumes:
-      - app-logs:/app/logs
-
-    networks:
-      - blog-net
-
-    restart: unless-stopped
-
     depends_on:
       postgres:
         condition: service_healthy
@@ -239,8 +197,12 @@ services:
       logstash:
         condition: service_healthy
 
+    networks:
+      - blog-net
+
     logging:
       driver: json-file
+
       options:
         max-size: "10m"
         max-file: "3"

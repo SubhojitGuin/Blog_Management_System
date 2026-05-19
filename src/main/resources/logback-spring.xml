@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <!-- ========================================================= -->
+    <!-- APPLICATION METADATA -->
+    <!-- ========================================================= -->
+
+    <property name="APP_NAME" value="blog-management-system"/>
+
+    <!-- ========================================================= -->
+    <!-- JSON CONSOLE APPENDER -->
+    <!-- ========================================================= -->
+
+    <appender name="JSON_CONSOLE"
+              class="ch.qos.logback.core.ConsoleAppender">
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+
+            <!-- Static metadata -->
+            <customFields>
+                {
+                "service":"${APP_NAME}"
+                }
+            </customFields>
+
+            <!-- Force UTC timestamps -->
+            <timeZone>UTC</timeZone>
+
+            <!-- MDC fields -->
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>userEmail</includeMdcKeyName>
+            <includeMdcKeyName>httpMethod</includeMdcKeyName>
+            <includeMdcKeyName>requestUri</includeMdcKeyName>
+
+            <!-- Shortened stack traces -->
+            <throwableConverter
+                    class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                <maxLength>4096</maxLength>
+                <shortenedClassNameLength>20</shortenedClassNameLength>
+
+            </throwableConverter>
+
+        </encoder>
+
+    </appender>
+
+    <!-- ========================================================= -->
+    <!-- ASYNC APPENDER -->
+    <!-- ========================================================= -->
+
+    <appender name="ASYNC"
+              class="ch.qos.logback.classic.AsyncAppender">
+
+        <appender-ref ref="JSON_CONSOLE"/>
+
+        <queueSize>8192</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>false</neverBlock>
+
+    </appender>
+
+    <!-- ========================================================= -->
+    <!-- SHUTDOWN HOOK TO FLUSH LOGS -->
+    <!-- ========================================================= -->
+
+    <shutdownHook class="ch.qos.logback.core.hook.DefaultShutdownHook"/>
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    <!-- ========================================================= -->
+    <!-- APPLICATION LOGGER -->
+    <!-- ========================================================= -->
+
+    <logger name="com.project.Blog_Management_System"
+            level="INFO"
+            additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </logger>
+
+    <!-- Security -->
+    <logger name="org.springframework.security"
+            level="WARN"
+            additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </logger>
+
+    <!-- Hibernate -->
+    <logger name="org.hibernate.SQL"
+            level="WARN"
+            additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </logger>
+
+    <!-- Spring Web: request mapping -->
+    <Logger name="org.springframework.web"
+            level="INFO"
+            additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </Logger>
+
+    <!-- Redis -->
+    <Logger name="io.lettuce"
+            level="WARN"
+            additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </Logger>
+
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver"
+            level="WARN"
+            additivity="false">
+        <appender-ref ref="ASYNC"/>
+    </logger>
+
+
+    <!-- ========================================================= -->
+    <!-- ROOT LOGGER -->
+    <!-- ========================================================= -->
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC"/>
+    </root>
+
+</configuration>
