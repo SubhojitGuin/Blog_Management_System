@@ -5,6 +5,9 @@ import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,17 @@ public class CategoryController {
 
     @GetMapping(ApiRoutes.CATEGORY_POSTS)
     @Operation(summary = "Get Posts by Category", description = "Retrieves a paginated list of posts belonging to a specific category identified by its slug and ID.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Success"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Category not found",
+                    content = @Content
+            )
+    })
     public ResponseEntity<Slice<PostResponseDTO>> getPostsByCategory(@PathVariable String category_slug,
                                                                      @PathVariable UUID category_id,
                                                                      @RequestParam(required = false) UUID post_cursor,
@@ -36,12 +50,27 @@ public class CategoryController {
 
     @GetMapping
     @Operation(summary = "Get All Categories", description = "Retrieves a list of all available categories.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Success"
+    )
     public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
         return new ResponseEntity<>(categoryService.getAllCategories(), HttpStatus.OK);
     }
 
     @GetMapping(ApiRoutes.CATEGORY_PATH_VARIABLE)
     @Operation(summary = "Get Category Details", description = "Retrieves the details of a specific category by its slug and ID.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Success"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Category not found",
+                    content = @Content
+            )
+    })
     public ResponseEntity<CategoryResponseDTO> getCategoryDetails(@PathVariable String category_slug,
                                                                   @PathVariable UUID category_id) {
         return new ResponseEntity<>(categoryService.getCategoryDetails(category_slug, category_id), HttpStatus.OK);
