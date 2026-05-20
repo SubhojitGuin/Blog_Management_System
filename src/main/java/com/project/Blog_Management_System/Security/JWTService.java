@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Security;
 
 import com.project.Blog_Management_System.Entities.UserEntity;
+import com.project.Blog_Management_System.Logging.LogExecution;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Service
+@LogExecution(logArgs = false, logResult = false)
 public class JWTService {
 
     @Value("${jwt.secretKey}")

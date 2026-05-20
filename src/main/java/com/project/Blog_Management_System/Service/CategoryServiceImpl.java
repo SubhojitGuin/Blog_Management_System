@@ -7,6 +7,7 @@ import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
+import com.project.Blog_Management_System.Logging.LogExecution;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
@@ -29,6 +30,7 @@ import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@LogExecution(logArgs = true, logResult = true)
 public class CategoryServiceImpl implements CategoryService {
 
     private final PostRepository postRepository;

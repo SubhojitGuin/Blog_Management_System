@@ -32,6 +32,7 @@
             <includeMdcKeyName>userEmail</includeMdcKeyName>
             <includeMdcKeyName>httpMethod</includeMdcKeyName>
             <includeMdcKeyName>requestUri</includeMdcKeyName>
+            <includeMdcKeyName>operation</includeMdcKeyName>
 
             <!-- Shortened stack traces -->
             <throwableConverter

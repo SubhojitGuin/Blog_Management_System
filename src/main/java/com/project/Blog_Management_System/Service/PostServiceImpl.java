@@ -10,6 +10,7 @@ import com.project.Blog_Management_System.Events.NewPostPublishedEvent;
 import com.project.Blog_Management_System.Events.PostLikedEvent;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
+import com.project.Blog_Management_System.Logging.LogExecution;
 import com.project.Blog_Management_System.Repositories.*;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
 import com.project.Blog_Management_System.Service.Interfaces.RedisViewCountService;
@@ -36,6 +37,7 @@ import static com.project.Blog_Management_System.Utils.AppUtils.*;
 
 @Service
 @RequiredArgsConstructor
+@LogExecution(logArgs = true, logResult = true)
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;

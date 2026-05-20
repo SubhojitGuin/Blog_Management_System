@@ -7,6 +7,7 @@ import com.project.Blog_Management_System.Events.NewFollowerEvent;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
+import com.project.Blog_Management_System.Logging.LogExecution;
 import com.project.Blog_Management_System.Repositories.BookmarkRepository;
 import com.project.Blog_Management_System.Repositories.FollowRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
@@ -34,6 +35,7 @@ import static com.project.Blog_Management_System.Utils.AppUtils.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor
+@LogExecution(logArgs = true, logResult = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -75,6 +77,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @LogExecution(logArgs = false, logResult = false)
     public void updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
         UserEntity user = getCurrentUser();
         if (!passwordEncoder.matches(passwordUpdateDTO.getOldPassword(), user.getPassword())) {
