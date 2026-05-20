@@ -78,7 +78,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -s -u elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"
+          "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"' || exit 1"
         ]
       interval: 20s
       timeout: 10s
@@ -103,6 +103,16 @@ services:
     networks:
       - blog-net
 
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:5601/api/status | grep -q 'HTTP/1.1 200 OK' || exit 1"
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.13.0
@@ -127,7 +137,11 @@ services:
       - blog-net
 
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9600 || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:9600 || exit 1"
+        ]
       interval: 20s
       timeout: 10s
       retries: 10
@@ -159,6 +173,17 @@ services:
 
     networks:
       - blog-net
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "filebeat test output -c /usr/share/filebeat/filebeat.yml --strict.perms=false"
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
   blog-app:
     build:
@@ -199,6 +224,16 @@ services:
 
     networks:
       - blog-net
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s http://localhost:8080/api/v1/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"
+        ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
 
     logging:
       driver: json-file
