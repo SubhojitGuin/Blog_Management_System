@@ -22,7 +22,7 @@ import java.util.UUID;
 @Table(name = "posts", indexes = {
         @Index(name = "idx_posts_user_created_at", columnList = "user_id, created_at DESC"),
         @Index(name = "idx_posts_category_created_at", columnList = "category_id, created_at DESC"),
-        @Index(name = "idx_posts_status_publish_at", columnList = "status, publish_at ASC")
+        @Index(name = "idx_posts_status_publish_at", columnList = "status, publish_at")
 })
 public class PostEntity {
 

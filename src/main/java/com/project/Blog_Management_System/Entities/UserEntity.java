@@ -23,7 +23,9 @@ import java.util.stream.Collectors;
 @Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users_deleted_active", columnList = "is_deleted, active")
+})
 public class UserEntity implements UserDetails {
 
     @Id
