@@ -47,7 +47,7 @@ public class EmailServiceImpl implements EmailService {
      * Recovery method for MailException. This method will be called after all retry attempts have been exhausted. It logs the failure and the exception message for further analysis.
      */
     @Recover
-    private void recoverMailException(MailException ex, String toEmail, String subject, String body) {
+    public void recoverMailException(MailException ex, String toEmail, String subject, String body) {
         log.error("Could not send email to {} due to: {}", toEmail, ex.getMessage());
     }
 
@@ -55,7 +55,7 @@ public class EmailServiceImpl implements EmailService {
      * Recovery method for MessagingException. Since MessagingException is not retriable, this method will be called immediately when such an exception is thrown. It rethrows the exception to be handled by the caller.
      */
     @Recover
-    private void recoverMessagingException(MessagingException ex, String toEmail, String subject, String body) throws MessagingException {
+    public void recoverMessagingException(MessagingException ex, String toEmail, String subject, String body) throws MessagingException {
         throw ex;
     }
 }
