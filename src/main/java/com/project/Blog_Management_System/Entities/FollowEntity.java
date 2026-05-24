@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Entities;
 
-import com.project.Blog_Management_System.Entities.uuidV7.GeneratedUuidV7;
+import com.project.Blog_Management_System.Annotations.uuidV7.GeneratedUuidV7;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

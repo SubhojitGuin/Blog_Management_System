@@ -1,4 +1,4 @@
-package com.project.Blog_Management_System.Email.TemplateModels;
+package com.project.Blog_Management_System.TemplateModels;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

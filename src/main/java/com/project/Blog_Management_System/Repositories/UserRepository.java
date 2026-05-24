@@ -1,8 +1,8 @@
 package com.project.Blog_Management_System.Repositories;
 
+import com.project.Blog_Management_System.Annotations.ReadFast;
 import com.project.Blog_Management_System.Dto.UserInfoDTO;
 import com.project.Blog_Management_System.Entities.UserEntity;
-import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;

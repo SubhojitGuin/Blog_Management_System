@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.Annotations.LogExecution;
 import com.project.Blog_Management_System.Dto.CategoryRequestDTO;
 import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
@@ -7,7 +8,6 @@ import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
-import com.project.Blog_Management_System.Logging.LogExecution;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;

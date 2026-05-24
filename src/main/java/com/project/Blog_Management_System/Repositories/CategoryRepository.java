@@ -1,7 +1,7 @@
 package com.project.Blog_Management_System.Repositories;
 
+import com.project.Blog_Management_System.Annotations.ReadFast;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
-import com.project.Blog_Management_System.Repositories.annotations.ReadFast;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

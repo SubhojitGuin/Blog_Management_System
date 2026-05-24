@@ -1,4 +1,4 @@
-package com.project.Blog_Management_System.Entities.uuidV7;
+package com.project.Blog_Management_System.Annotations.uuidV7;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;

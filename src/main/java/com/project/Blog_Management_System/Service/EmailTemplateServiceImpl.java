@@ -1,7 +1,8 @@
-package com.project.Blog_Management_System.Email;
+package com.project.Blog_Management_System.Service;
 
 import com.project.Blog_Management_System.Dto.EmailMessageDTO;
-import com.project.Blog_Management_System.Email.TemplateModels.*;
+import com.project.Blog_Management_System.Service.Interfaces.EmailTemplateService;
+import com.project.Blog_Management_System.TemplateModels.*;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +12,14 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 @Service
 @RequiredArgsConstructor
-public class EmailTemplateService {
+public class EmailTemplateServiceImpl implements EmailTemplateService {
 
     @Value("${spring.application.name}")
     private String appName;
 
     private final Configuration freemarkerConfig;
 
+    @Override
     public EmailMessageDTO buildNewPostByAuthor(String followerName, String authorName, String postTitle, String postUrl) throws Exception {
 
         String subject = "New post published by %s".formatted(authorName);
@@ -37,6 +39,7 @@ public class EmailTemplateService {
                 .build();
     }
 
+    @Override
     public EmailMessageDTO buildPostPublished(String authorName, String postTitle, String postUrl) throws Exception {
 
         String subject = "Scheduled Post: \"%s\" is published".formatted(postTitle);
@@ -55,6 +58,7 @@ public class EmailTemplateService {
                 .build();
     }
 
+    @Override
     public EmailMessageDTO buildPostCommented(String authorName, String commenterName, String postTitle, String postUrl, String commentSnippet) throws Exception {
 
         String subject = "%s commented on your post \"%s\"".formatted(commenterName, postTitle);
@@ -75,6 +79,7 @@ public class EmailTemplateService {
                 .build();
     }
 
+    @Override
     public EmailMessageDTO buildCommentReplied(String parentCommenterName, String childCommenterName, String authorName, String postTitle, String originalComment, String replySnippet, String postUrl) throws Exception {
 
         String subject = "%s replied to your comment on %s".formatted(childCommenterName, postTitle);
@@ -97,6 +102,7 @@ public class EmailTemplateService {
                 .build();
     }
 
+    @Override
     public EmailMessageDTO buildPostLiked(String authorName, String likerName, String postTitle, String postUrl) throws Exception {
 
         String  subject = "%s liked your post \"%s\"".formatted(likerName, postTitle);
@@ -116,6 +122,7 @@ public class EmailTemplateService {
                 .build();
     }
 
+    @Override
     public EmailMessageDTO buildNewFollower(String followeeName, String followerName, String followerProfileUrl) throws Exception {
 
         String subject = "%s started following you".formatted(followerName);

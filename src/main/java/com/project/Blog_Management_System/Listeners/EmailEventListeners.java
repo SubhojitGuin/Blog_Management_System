@@ -1,9 +1,11 @@
-package com.project.Blog_Management_System.Email;
+package com.project.Blog_Management_System.Listeners;
 
 import com.project.Blog_Management_System.Dto.EmailMessageDTO;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Events.*;
 import com.project.Blog_Management_System.Repositories.FollowRepository;
+import com.project.Blog_Management_System.Service.Interfaces.EmailService;
+import com.project.Blog_Management_System.Service.Interfaces.EmailTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

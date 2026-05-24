@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.Annotations.LogExecution;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
@@ -7,7 +8,6 @@ import com.project.Blog_Management_System.Events.NewFollowerEvent;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
-import com.project.Blog_Management_System.Logging.LogExecution;
 import com.project.Blog_Management_System.Repositories.BookmarkRepository;
 import com.project.Blog_Management_System.Repositories.FollowRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;

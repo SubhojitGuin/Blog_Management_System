@@ -1,7 +1,7 @@
 package com.project.Blog_Management_System.Entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.project.Blog_Management_System.Entities.uuidV7.GeneratedUuidV7;
+import com.project.Blog_Management_System.Annotations.uuidV7.GeneratedUuidV7;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Utils.ReadingTimeUtils;
 import jakarta.persistence.*;

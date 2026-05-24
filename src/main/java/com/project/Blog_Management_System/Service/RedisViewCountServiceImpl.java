@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Service;
 
-import com.project.Blog_Management_System.Logging.LogExecution;
+import com.project.Blog_Management_System.Annotations.LogExecution;
 import com.project.Blog_Management_System.Service.Interfaces.RedisViewCountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

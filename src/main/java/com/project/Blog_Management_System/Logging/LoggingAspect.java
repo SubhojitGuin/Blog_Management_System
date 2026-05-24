@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Logging;
 
+import com.project.Blog_Management_System.Annotations.LogExecution;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -19,8 +20,8 @@ public class LoggingAspect {
 
     private static final String MDC_OPERATION = "operation";
 
-    @Around("@annotation(com.project.Blog_Management_System.Logging.LogExecution) || " +
-            "@within(com.project.Blog_Management_System.Logging.LogExecution)")
+    @Around("@annotation(com.project.Blog_Management_System.Annotations.LogExecution) || " +
+            "@within(com.project.Blog_Management_System.Annotations.LogExecution)")
     public Object logMethodExecution(ProceedingJoinPoint joinPoint) throws Throwable {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();

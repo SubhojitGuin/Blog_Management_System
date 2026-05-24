@@ -1,6 +1,6 @@
 package com.project.Blog_Management_System.Entities;
 
-import com.project.Blog_Management_System.Entities.uuidV7.GeneratedUuidV7;
+import com.project.Blog_Management_System.Annotations.uuidV7.GeneratedUuidV7;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Enums.Role;
 import jakarta.persistence.*;

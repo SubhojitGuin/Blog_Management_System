@@ -1,13 +1,12 @@
-package com.project.Blog_Management_System.Email.TemplateModels;
+package com.project.Blog_Management_System.TemplateModels;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PostLikedModel {
+public class PostPublishedModel {
     String authorName;
-    String likerName;
     String postTitle;
     String postUrl;
     String appName;
