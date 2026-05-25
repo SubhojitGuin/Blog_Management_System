@@ -64,7 +64,6 @@ public class PostServiceImpl implements PostService {
 
         PostEntity post = modelMapper.map(postRequestDTO, PostEntity.class);
         post.setUser(user);
-        post.setSlug(generateSlug(postRequestDTO.getTitle()));
         post.setCategory(category);
         appUtils.applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
         PostEntity savedPost = postRepository.saveAndFlush(post);
@@ -168,7 +167,6 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postRequestDTO.getTitle());
         post.setDescription(postRequestDTO.getDescription());
         post.setContent(postRequestDTO.getContent());
-        post.setSlug(generateSlug(postRequestDTO.getTitle()));
         post.setCategory(category);
         appUtils.applyStatusAndPublishAt(post, postRequestDTO.getStatus(), postRequestDTO.getPublishAt());
 
@@ -380,7 +378,7 @@ public class PostServiceImpl implements PostService {
             throw new AccessDeniedException(messageService.get("exception.auth.access.denied", "delete", "comment"));
         }
 
-        commentRepository.delete(comment);
+        commentRepository.deleteById(comment.getId());
 
         int rowsUpdated = postRepository.decrementCommentCount(postId);
         if (rowsUpdated == 0)

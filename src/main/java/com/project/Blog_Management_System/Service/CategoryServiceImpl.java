@@ -77,8 +77,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         CategoryEntity category = modelMapper.map(categoryRequestDTO, CategoryEntity.class);
-        category.setSlug(slug);
-
         CategoryEntity savedCategory = categoryRepository.saveAndFlush(category);
 
         log.info("ADMIN CREATED CATEGORY {}", savedCategory.getName());
@@ -98,7 +96,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         modelMapper.map(categoryRequestDTO, category);
-        category.setSlug(newSlug);
         categoryRepository.saveAndFlush(category);
 
         log.info("ADMIN UPDATED CATEGORY: {}", category.getName());
@@ -121,7 +118,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         postRepository.updatePostsCategory(oldCategory, newCategory);
         log.info("ADMIN DELETED OLD CATEGORY: {} AND UPDATED WITH NEW CATEGORY: {}", oldCategory.getName(), newCategory.getName());
-        categoryRepository.delete(oldCategory);
+        categoryRepository.deleteById(oldCategory.getId());
     }
 
 }

@@ -11,6 +11,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
+
 @Entity
 @Getter
 @Setter
@@ -40,4 +42,10 @@ public class CategoryEntity {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    @PreUpdate
+    private void compute() {
+        this.slug = generateSlug(this.name);
+    }
 }

@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
+
 @Entity
 @Getter
 @Setter
@@ -44,12 +46,6 @@ public class PostEntity {
 
     @Column(name = "reading_time_minutes", nullable = false)
     private Integer readingTimeMinutes = 1;
-
-    @PrePersist
-    @PreUpdate
-    private void computeReadingTime() {
-        this.readingTimeMinutes = ReadingTimeUtils.estimate(this.content);
-    }
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
@@ -90,4 +86,11 @@ public class PostEntity {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @JsonIgnore
     private Set<CommentEntity> comments;
+
+    @PrePersist
+    @PreUpdate
+    private void compute() {
+        this.readingTimeMinutes = ReadingTimeUtils.estimate(this.content);
+        this.slug = generateSlug(this.title);
+    }
 }
