@@ -842,6 +842,45 @@ public class PostServiceImplTest {
         }
 
         @Test
+        @DisplayName("throws ResourceNotFoundException when requested post does not exist")
+        void throwsWhenRequestedPostDoesNotExist() {
+            String postSlug = "missing-post";
+            UUID missingPostId = UUID.randomUUID();
+
+            when(postRepository.findById(missingPostId)).thenReturn(Optional.empty());
+            doThrow(new ResourceNotFoundException("Post not found"))
+                    .when(validationUtils).isInvalidPost(null, postSlug);
+
+            assertThrows(ResourceNotFoundException.class,
+                    () -> postService.updatePost(postSlug, missingPostId, requestDTO));
+
+            verify(postRepository).findById(missingPostId);
+            verifyNoInteractions(categoryRepository);
+        }
+
+        @Test
+        @DisplayName("throws ResourceNotFoundException when updating a draft post owned by another user")
+        void throwsWhenUpdatingDraftPostOwnedByAnotherUser() {
+            String postSlug = "private-draft";
+            UUID postId = savedPost.getId();
+            savedPost.setStatus(PostStatus.DRAFT);
+
+            UserEntity otherUser = TestEntityFactory.testUser("other-draft-owner");
+            otherUser.setId(UUID.randomUUID());
+            savedPost.setUser(otherUser);
+
+            when(postRepository.findById(postId)).thenReturn(Optional.of(savedPost));
+            when(messageService.get("exception.resource.not_found", "Post")).thenReturn("Post not found");
+
+            assertThrows(ResourceNotFoundException.class,
+                    () -> postService.updatePost(postSlug, postId, requestDTO));
+
+            verify(postRepository).findById(postId);
+            verify(validationUtils).isInvalidPost(savedPost, postSlug);
+            verifyNoInteractions(categoryRepository);
+        }
+
+        @Test
         @DisplayName("updates post title, description, content and category")
         void updatesAllPostFields() {
             String postSlug = "test-post";
@@ -988,6 +1027,29 @@ public class PostServiceImplTest {
 
             verify(postRepository).findById(postId);
             verify(postRepository, never()).delete(any(PostEntity.class));
+        }
+
+        @Test
+        @DisplayName("throws ResourceNotFoundException when deleting a draft post owned by another user")
+        void throwsWhenDeletingDraftPostOwnedByAnotherUser() {
+            String postSlug = "other-draft";
+            UUID postId = savedPost.getId();
+            savedPost.setStatus(PostStatus.DRAFT);
+
+            UserEntity otherUser = TestEntityFactory.testUser("other-owner");
+            otherUser.setId(UUID.randomUUID());
+            savedPost.setUser(otherUser);
+
+            when(postRepository.findById(postId)).thenReturn(Optional.of(savedPost));
+            when(messageService.get("exception.resource.not_found", "Post")).thenReturn("Post not found");
+
+            assertThrows(ResourceNotFoundException.class,
+                    () -> postService.deletePost(postSlug, postId));
+
+            verify(postRepository).findById(postId);
+            verify(validationUtils).isInvalidPost(savedPost, postSlug);
+            verify(postRepository, never()).delete(any(PostEntity.class));
+            verify(userRepository, never()).decrementPostCount(any(UUID.class));
         }
     }
 
@@ -1842,6 +1904,30 @@ public class PostServiceImplTest {
 
             verify(likeRepository).saveAndFlush(any(LikeEntity.class));
             verify(eventPublisher, never()).publishEvent(any());
+        }
+
+        @Test
+        @DisplayName("throws ResourceConflictException when like count decrement fails during unlike")
+        void throwsWhenLikeCountDecrementFails() {
+            String postSlug = "test-post";
+            UUID postId = savedPost.getId();
+            savedPost.setStatus(PostStatus.PUBLISHED);
+
+            LikeDTO likeDTO = new LikeDTO();
+            likeDTO.setLike(false);
+
+            when(postRepository.findById(postId)).thenReturn(Optional.of(savedPost));
+            when(likeRepository.findByUserIdAndPostId(currentUser.getId(), postId)).thenReturn(Optional.of(new LikeEntity()));
+            when(postRepository.decrementLikeCount(postId)).thenReturn(0);
+            when(messageService.get("exception.resource.conflict.count_update_failure", "decrement", "like", "post"))
+                    .thenReturn("Failed to decrement like count");
+
+            assertThrows(ResourceConflictException.class,
+                    () -> postService.likeOrDislikePost(postSlug, postId, likeDTO));
+
+            verify(likeRepository).deleteByUserIdAndPostId(currentUser.getId(), postId);
+            verify(postRepository).decrementLikeCount(postId);
+            verifyNoInteractions(eventPublisher);
         }
     }
 
