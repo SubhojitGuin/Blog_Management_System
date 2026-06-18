@@ -51,7 +51,7 @@ public class AppUtils {
      * @return A slugified version of the input string.
      */
     public static String generateSlug(String name) {
-        return name.toLowerCase()
+        return name.toLowerCase().trim()
                 .replaceAll("[^a-z0-9\\s]", "")
                 .replaceAll("\\s+", "-");
     }

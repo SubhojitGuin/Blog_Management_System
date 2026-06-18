@@ -31,7 +31,7 @@ public class UserBatchScheduler {
         Slice<UserEntity> users;
         do {
             users = userRepository.findInactiveUsers(cutoff, PageRequest.of(page, size));
-
+            if(users.isEmpty()) break;
             for (UserEntity user : users) {
                 followRepository.deleteByFollowerIdOrFollowingId(user.getId(), user.getId());
                 user.setName("Deleted User");
