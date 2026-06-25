@@ -50,13 +50,14 @@ public class AuthService {
     }
 
     public String[] login(LoginRequestDTO loginRequestDTO) {
-        String username = loginRequestDTO.getEmailOrUsername();
+        String emailOrUsername = loginRequestDTO.getEmailOrUsername();
 
-        UserEntity loginUser = userService.getUserByUsernameOrEmail(username, username);
+        UserEntity loginUser = userService.getUserByUsernameOrEmail(emailOrUsername, emailOrUsername);
         if (loginUser == null) {
             throw new UsernameNotFoundException(messageService.get("exception.auth.username_or_email_not_found"));
         }
-        username = loginUser.getUsername();
+
+        String username = loginUser.getUsername();
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 username, loginRequestDTO.getPassword()

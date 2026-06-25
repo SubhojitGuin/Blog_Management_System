@@ -6,12 +6,18 @@ import com.project.Blog_Management_System.Deserializers.BasicHtmlSanitizationDes
 import com.project.Blog_Management_System.Deserializers.StringSanitizationDeserializer;
 import com.project.Blog_Management_System.Enums.Gender;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.LocalDate;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SignUpRequestDTO {
     @NotBlank(message = "{validation.user.name.not_blank}")
     @Size(min = 2, max = 255, message = "{validation.user.name.size}")
