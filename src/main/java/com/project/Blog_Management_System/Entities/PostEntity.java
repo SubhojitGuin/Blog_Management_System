@@ -5,8 +5,7 @@ import com.project.Blog_Management_System.Annotations.uuidV7.GeneratedUuidV7;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Utils.ReadingTimeUtils;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -21,6 +20,9 @@ import static com.project.Blog_Management_System.Utils.AppUtils.generateSlug;
 @Getter
 @Setter
 @FieldNameConstants
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "posts", indexes = {
         @Index(name = "idx_posts_user_created_at", columnList = "user_id, created_at DESC"),
         @Index(name = "idx_posts_category_created_at", columnList = "category_id, created_at DESC"),

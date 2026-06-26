@@ -137,12 +137,12 @@ public class PostServiceImplTest {
     }
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
-            "title",
-            "createdAt",
-            "updatedAt",
-            "likeCount",
-            "commentCount",
-            "readingTimeMinutes"
+            PostEntity.Fields.title,
+            PostEntity.Fields.createdAt,
+            PostEntity.Fields.updatedAt,
+            PostEntity.Fields.likeCount,
+            PostEntity.Fields.commentCount,
+            PostEntity.Fields.readingTimeMinutes
     );
 
     @Nested

@@ -119,7 +119,7 @@ class AppUtilsTest {
     @DisplayName("convertToSort()")
     class ConvertToSort {
 
-        private final Set<String> allowedFields = Set.of("title", "createdAt");
+        private final Set<String> allowedFields = Set.of(PostEntity.Fields.title, PostEntity.Fields.createdAt);
 
         @Test
         @DisplayName("successfully parses valid sort fields with direction parameters")
@@ -136,7 +136,7 @@ class AppUtilsTest {
         @Test
         @DisplayName("defaults sorting direction to ASC if direction parameter is omitted")
         void defaultsToAscIfDirectionIsOmitted() {
-            List<String> sortFields = List.of("title");
+            List<String> sortFields = List.of(PostEntity.Fields.title);
 
             Sort sort = appUtils.convertToSort(sortFields, allowedFields);
 
