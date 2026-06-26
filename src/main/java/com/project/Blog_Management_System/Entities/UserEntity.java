@@ -4,8 +4,7 @@ import com.project.Blog_Management_System.Annotations.uuidV7.GeneratedUuidV7;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,6 +22,9 @@ import java.util.stream.Collectors;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "users", indexes = {
         @Index(name = "idx_users_deleted_active", columnList = "is_deleted, active")
 })
