@@ -40,8 +40,8 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        category = categoryRepository.saveAndFlush(dataFactory.createCategory().build());
-        user = userRepository.saveAndFlush(dataFactory.createUser().username(USERNAME).build());
+        category = categoryRepository.saveAndFlush(testDataFactory.createCategory().build());
+        user = userRepository.saveAndFlush(testDataFactory.createUser().username(USERNAME).build());
     }
 
     @Nested
@@ -52,11 +52,11 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
 
         @BeforeEach
         void addPostsToCategory() {
-            post = postRepository.saveAndFlush(dataFactory.createCustomPost(user, category));
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
         }
 
         @Test
-        @DisplayName("Should return posts for a valid category")
+        @DisplayName("Should return 200 and posts for a valid category")
         @WithMockBlogUser(USERNAME)
         void shouldReturnPostsForValidCategory() throws Exception {
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_POSTS, category.getSlug(), category.getId())
@@ -82,7 +82,7 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
         }
 
         @Test
-        @DisplayName("Should return no posts for a category with no posts")
+        @DisplayName("Should return 200 and no posts for a category with no posts")
         @WithMockBlogUser(USERNAME)
         void shouldReturnNoPostsForValidCategory() throws Exception {
             CategoryEntity category = categoryRepository.saveAndFlush(CategoryEntity.builder()
@@ -111,11 +111,11 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
         }
 
         @Test
-        @DisplayName("Should return paginated slice of post when post cursor is used")
+        @DisplayName("Should return 200 and paginated slice of post when post cursor is used")
         @WithMockBlogUser(USERNAME)
         void shouldReturnPaginatedSlicesOfPostWhenPostCursorIsUsed() throws Exception {
-            PostEntity post2 = postRepository.saveAndFlush(dataFactory.createCustomPost(user, category));
-            PostEntity post3 = postRepository.saveAndFlush(dataFactory.createCustomPost(user, category));
+            PostEntity post2 = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+            PostEntity post3 = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
 
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_POSTS, category.getSlug(), category.getId())
                             .param("size", "1")
@@ -145,7 +145,7 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
     class GetAllCategories {
 
         @Test
-        @DisplayName("Should return all categories")
+        @DisplayName("Should return 200 and all categories")
         @WithMockBlogUser(USERNAME)
         void shouldReturnAllCategories() throws Exception {
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH))
@@ -171,7 +171,7 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
     class GetCategoryDetails {
 
         @Test
-        @DisplayName("Should return category details for a valid category")
+        @DisplayName("Should return 200 and category details for a valid category")
         @WithMockBlogUser(USERNAME)
         void shouldReturnCategoryDetailsForValidCategory() throws Exception {
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_PATH_VARIABLE, category.getSlug(), category.getId()))

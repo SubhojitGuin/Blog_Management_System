@@ -7,6 +7,7 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Security.JWTService;
+import com.project.Blog_Management_System.Utils.MessageService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,7 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -25,13 +25,16 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private MessageService messageService;
+
+    @Autowired
     private JWTService jwtService;
 
     private UserEntity user;
 
     @BeforeEach
     void setUp() {
-        user = userRepository.saveAndFlush(dataFactory.createUser().build());
+        user = userRepository.saveAndFlush(testDataFactory.createUser().build());
     }
 
     @Nested
@@ -53,7 +56,7 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
         }
 
         @Test
-        @DisplayName("Should successfully register a new user")
+        @DisplayName("Should return 201 and register a new user successfully")
         void shouldRegisterNewUser() throws Exception {
             mockMvc.perform(post(ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_SIGNUP)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -78,17 +81,56 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
         }
 
         @Test
-        @DisplayName("Should return 400 when registration input fails validation constraints")
-        void shouldReturn400WhenInputIsInvalid() throws Exception {
+        @DisplayName("Should return 400 when registration input is null")
+        void shouldReturn400WhenInputIsNull() throws Exception {
             SignUpRequestDTO invalidRequest = SignUpRequestDTO.builder()
-                    .username("")
-                    .email("invalid-email")
                     .build();
 
             mockMvc.perform(post(ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_SIGNUP)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidRequest)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
+                    .andExpect(jsonPath("$.error.subErrors", hasSize(5)))
+                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name", "username", "email", "password", "dateOfBirth")))
+                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
+                            messageService.get("validation.user.name.not_blank"),
+                            messageService.get("validation.user.username.not_blank"),
+                            messageService.get("validation.user.email.not_blank"),
+                            messageService.get("validation.user.password.not_null"),
+                            messageService.get("validation.user.dob.not_null")
+                    )));
+
+            Assertions.assertFalse(userRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(validSignUpRequest.getUsername(), validSignUpRequest.getEmail()).isPresent());
+        }
+
+        @Test
+        @DisplayName("Should return 400 when registration input fails validation constraints")
+        void shouldReturn400WhenInputIsInvalid() throws Exception {
+            SignUpRequestDTO invalidRequest = SignUpRequestDTO.builder()
+                    .name("i")
+                    .username("invalid-username")
+                    .email("invalid-email")
+                    .password("invalid-password")
+                    .dateOfBirth(LocalDate.now().plusDays(1))
+                    .build();
+
+            mockMvc.perform(post(ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_SIGNUP)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidRequest)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
+                    .andExpect(jsonPath("$.error.subErrors", hasSize(5)))
+                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name", "username", "email", "password", "dateOfBirth")))
+                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
+                            messageService.get("validation.user.name.size"),
+                            messageService.get("validation.user.username"),
+                            messageService.get("validation.user.email"),
+                            messageService.get("validation.user.password"),
+                            messageService.get("validation.user.dob")
+                    )));
+
+            Assertions.assertFalse(userRepository.findByUsernameIgnoreCaseOrEmailIgnoreCase(validSignUpRequest.getUsername(), validSignUpRequest.getEmail()).isPresent());
         }
     }
 
@@ -97,7 +139,7 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
     class LoginTests {
 
         @Test
-        @DisplayName("Should login successfully, return access token, and set refresh cookie")
+        @DisplayName("Should return 200 and login successfully, return access token, and set refresh cookie")
         void shouldLoginSuccessfully() throws Exception {
             LoginRequestDTO loginRequest = LoginRequestDTO.builder()
                     .emailOrUsername(user.getUsername())
@@ -126,6 +168,46 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
                             .content(objectMapper.writeValueAsString(wrongLoginRequest)))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @DisplayName("Should return 400 when login input is null")
+        void shouldReturn400WhenLoginInputIsNull() throws Exception {
+            LoginRequestDTO invalidLoginRequest = LoginRequestDTO.builder()
+                    .build();
+
+            mockMvc.perform(post(ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_LOGIN)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidLoginRequest)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
+                    .andExpect(jsonPath("$.error.subErrors", hasSize(2)))
+                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("emailOrUsername", "password")))
+                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
+                            messageService.get("validation.user.email_or_username.not_null"),
+                            messageService.get("validation.user.password.not_null")
+                    )));
+        }
+
+        @Test
+        @DisplayName("Should return 400 when login input fails validation constraints")
+        void shouldReturn400WhenLoginInputFailsValidationConstraints() throws Exception {
+            LoginRequestDTO invalidLoginRequest = LoginRequestDTO.builder()
+                    .emailOrUsername("invalid-email-format")
+                    .password("short")
+                    .build();
+
+            mockMvc.perform(post(ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_LOGIN)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(invalidLoginRequest)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
+                    .andExpect(jsonPath("$.error.subErrors", hasSize(2)))
+                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("emailOrUsername", "password")))
+                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
+                            messageService.get("validation.user.email_or_username"),
+                            messageService.get("validation.user.password")
+                    )));
+        }
     }
 
     @Nested
@@ -143,7 +225,7 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
         }
 
         @Test
-        @DisplayName("Should successfully issue a new access token using a valid cookie")
+        @DisplayName("Should return 200 and successfully issue a new access token using a valid cookie")
         void shouldRefreshTokensWithValidCookie() throws Exception {
             mockMvc.perform(post(ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_REFRESH)
                             .cookie(validRefreshTokenCookie))

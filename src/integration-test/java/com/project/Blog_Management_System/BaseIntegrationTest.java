@@ -39,7 +39,7 @@ public abstract class BaseIntegrationTest {
     }
 
     @Autowired
-    protected TestDataFactory dataFactory;
+    protected TestDataFactory testDataFactory;
 
     @Autowired
     protected MockMvc mockMvc;
