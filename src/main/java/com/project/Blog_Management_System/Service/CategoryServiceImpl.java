@@ -91,7 +91,7 @@ public class CategoryServiceImpl implements CategoryService {
         validationUtils.isInvalidCategory(category, categorySlug);
 
         String newSlug = generateSlug(categoryRequestDTO.getName());
-        if (categoryRepository.findBySlug(newSlug).isPresent()) {
+        if (!category.getSlug().equals(newSlug) && categoryRepository.findBySlug(newSlug).isPresent()) {
             throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Category"));
         }
 

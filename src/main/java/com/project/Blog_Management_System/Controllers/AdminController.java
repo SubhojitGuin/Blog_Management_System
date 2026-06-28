@@ -72,6 +72,11 @@ public class AdminController {
                     content = @Content
             ),
             @ApiResponse(
+                    responseCode = "404",
+                    description = "Category not found",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "403",
                     description = "Access Denied",
                     content = @Content

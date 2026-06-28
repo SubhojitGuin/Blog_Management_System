@@ -24,8 +24,8 @@ public final class TestDataFactory {
      */
     public CategoryEntity.CategoryEntityBuilder createCategory() {
         return CategoryEntity.builder()
-                .name("Default Category")
-                .description("Default test category description");
+                .name("Test Category")
+                .description("Test category description");
     }
 
     public CategoryEntity createCustomCategory(String name, String description) {

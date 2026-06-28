@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -13,6 +14,7 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class CategoryRequestDTO {
     @NotBlank(message = "{validation.category.name.not_blank}")
     @Pattern(regexp = RegexConstants.CATEGORY_NAME, message = "{validation.category.name}")
