@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class UserControllerIntegrationTest extends BaseIntegrationTest {
+public class UserControllerIT extends BaseIT {
 
     @Autowired
     private UserRepository userRepository;

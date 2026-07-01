@@ -22,7 +22,7 @@ import java.util.Objects;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("integration-test")
-public abstract class BaseIntegrationTest {
+public abstract class BaseIT {
 
 
     @ServiceConnection

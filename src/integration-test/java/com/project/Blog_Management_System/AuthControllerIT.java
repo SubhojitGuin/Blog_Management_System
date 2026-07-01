@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class AuthControllerIntegrationTest extends BaseIntegrationTest {
+public class AuthControllerIT extends BaseIT {
 
     @Autowired
     private UserRepository userRepository;
