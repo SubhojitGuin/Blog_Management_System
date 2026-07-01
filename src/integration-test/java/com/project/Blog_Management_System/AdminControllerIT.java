@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class AdminControllerIntegrationTest extends BaseIntegrationTest {
+public class AdminControllerIT extends BaseIT {
 
     @Autowired
     private CategoryRepository categoryRepository;

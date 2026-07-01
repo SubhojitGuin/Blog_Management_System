@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SmokeTest extends BaseIntegrationTest {
+public class SmokeIT extends BaseIT {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
