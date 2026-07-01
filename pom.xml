@@ -45,6 +45,8 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <skip.ut>false</skip.ut>
+        <skip.it>false</skip.it>
     </properties>
     <dependencies>
         <dependency>
