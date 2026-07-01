@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System;
 
+import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestDataFactory;
 import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +50,9 @@ public abstract class BaseIntegrationTest {
 
     @Autowired
     protected StringRedisTemplate redisTemplate;
+
+    @Autowired
+    protected MessageService messageService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate; // Introduced for fast truncation

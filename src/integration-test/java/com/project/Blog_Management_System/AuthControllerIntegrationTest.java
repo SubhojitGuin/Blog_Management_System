@@ -7,7 +7,6 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Security.JWTService;
-import com.project.Blog_Management_System.Utils.MessageService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +22,6 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private MessageService messageService;
 
     @Autowired
     private JWTService jwtService;
@@ -123,9 +119,11 @@ public class AuthControllerIntegrationTest extends BaseIntegrationTest {
                     .andExpect(jsonPath("$.error.subErrors", hasSize(5)))
                     .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name", "username", "email", "password", "dateOfBirth")))
                     .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.user.name.size"),
+                            messageService.get("validation.user.name.size")
+                                    .replace("{min}", "2")
+                                    .replace("{max}", "255"),
                             messageService.get("validation.user.username"),
-                            messageService.get("validation.user.email"),
+                            messageService.get("validation.user.email.invalid"),
                             messageService.get("validation.user.password"),
                             messageService.get("validation.user.dob")
                     )));

@@ -80,9 +80,11 @@ public class UserServiceImpl implements UserService {
     @LogExecution(logArgs = false, logResult = false)
     public void updatePassword(PasswordUpdateDTO passwordUpdateDTO) {
         UserEntity user = getCurrentUser();
+
         if (!passwordEncoder.matches(passwordUpdateDTO.getOldPassword(), user.getPassword())) {
             throw new BadCredentialsException(messageService.get("exception.auth.bad_credentials", "Old password"));
         }
+
         user.setPassword(passwordEncoder.encode(passwordUpdateDTO.getNewPassword()));
         user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
         userRepository.saveAndFlush(user);
@@ -92,9 +94,11 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUserName(UsernameUpdateDTO usernameUpdateDTO) {
         UserEntity user = getCurrentUser();
-        if (userRepository.findByUsernameIgnoreCase(usernameUpdateDTO.getUsername()).isPresent()) {
+
+        if (!user.getUsername().equalsIgnoreCase(usernameUpdateDTO.getUsername()) && userRepository.findByUsernameIgnoreCase(usernameUpdateDTO.getUsername()).isPresent()) {
             throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Username"));
         }
+
         user.setUsername(usernameUpdateDTO.getUsername());
         user.setTokenVersion(user.getTokenVersion() + 1); // Invalidate existing tokens
         userRepository.saveAndFlush(user);
@@ -104,7 +108,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateEmail(EmailUpdateDTO emailUpdateDTO) {
         UserEntity user = getCurrentUser();
-        if (userRepository.findByEmailIgnoreCase(emailUpdateDTO.getEmail()).isPresent()) {
+
+        if (!user.getEmail().equalsIgnoreCase(emailUpdateDTO.getEmail()) && userRepository.findByEmailIgnoreCase(emailUpdateDTO.getEmail()).isPresent()) {
             throw new ResourceConflictException(messageService.get("exception.resource.conflict", "Email"));
         }
         user.setEmail(emailUpdateDTO.getEmail());
