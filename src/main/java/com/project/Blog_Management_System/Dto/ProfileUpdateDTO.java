@@ -9,12 +9,18 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ProfileUpdateDTO {
     @NotBlank(message = "{validation.user.name.not_blank}")
     @Size(min = 2, max = 255, message = "{validation.user.name.size}")

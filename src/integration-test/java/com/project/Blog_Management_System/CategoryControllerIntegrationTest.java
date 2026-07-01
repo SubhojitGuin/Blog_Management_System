@@ -78,7 +78,7 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_POSTS, "non-existent-slug", UUID.randomUUID())
                             .param("size", "10"))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message", is("Category does not exist")));
+                    .andExpect(jsonPath("$.error.message", is(messageService.get("exception.resource.not_found", "Category"))));
         }
 
         @Test
@@ -107,7 +107,7 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_POSTS, "non-existent-slug", category.getId())
                             .param("size", "10"))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message", is("Category does not exist")));
+                    .andExpect(jsonPath("$.error.message", is(messageService.get("exception.resource.not_found", "Category"))));
         }
 
         @Test
@@ -188,7 +188,7 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
         void shouldReturn404ForNonExistentCategory() throws Exception {
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_PATH_VARIABLE, "non-existent-slug", UUID.randomUUID()))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message", is("Category does not exist")));
+                    .andExpect(jsonPath("$.error.message", is(messageService.get("exception.resource.not_found", "Category"))));
         }
 
         @Test
@@ -197,7 +197,7 @@ public class CategoryControllerIntegrationTest extends BaseIntegrationTest {
         void shouldReturn404WhenTheSlugAndIdBelongToTheSameCategory() throws Exception {
             mockMvc.perform(get(ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_PATH_VARIABLE, "non-existent-slug", category.getId()))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message", is("Category does not exist")));
+                    .andExpect(jsonPath("$.error.message", is(messageService.get("exception.resource.not_found", "Category"))));
         }
 
         @Test

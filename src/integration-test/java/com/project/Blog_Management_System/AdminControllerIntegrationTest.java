@@ -10,7 +10,6 @@ import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Repositories.UserRepository;
-import com.project.Blog_Management_System.Utils.MessageService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -33,9 +32,6 @@ public class AdminControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private PostRepository postRepository;
-
-    @Autowired
-    private MessageService  messageService;
 
     private CategoryEntity category;
 
