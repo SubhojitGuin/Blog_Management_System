@@ -79,13 +79,13 @@ public class PostController {
         return new ResponseEntity<>(postService.getAllPostsOfFollowings(post_cursor, size), HttpStatus.OK);
     }
 
-    @GetMapping(ApiRoutes.POST_UNPUBLISHED_PATH)
-    @Operation(summary = "Get Unpublished Posts", description = "Retrieves a paginated list of all unpublished posts created by the authenticated user.")
+    @GetMapping(ApiRoutes.POST_PERSONAL_PATH)
+    @Operation(summary = "Get Personal Posts", description = "Retrieves a paginated list of all personal posts created by the authenticated user.")
     @ApiResponse(
             responseCode = "200",
             description = "Success"
     )
-    public ResponseEntity<Slice<PostInfoDTO>> getAllUnpublishedPosts(@RequestParam PostStatus status,
+    public ResponseEntity<Slice<PostInfoDTO>> getPersonalPostsByStatus(@RequestParam PostStatus status,
                                                                     @RequestParam(required = false) UUID post_cursor,
                                                                     @RequestParam(defaultValue = "10") int size) {
         return new ResponseEntity<>(postService.getPostsByStatus(status, post_cursor, size), HttpStatus.OK);
@@ -93,10 +93,17 @@ public class PostController {
 
     @GetMapping(ApiRoutes.POST_SEARCH_PATH)
     @Operation(summary = "Search Posts", description = "Searches for posts based on the provided query string.")
-    @ApiResponse(
-            responseCode = "200",
-            description = "Success"
-    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Success"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid filter",
+                    content = @Content
+            )
+    })
     public ResponseEntity<Page<PostInfoDTO>> searchPosts(@Valid @ModelAttribute PostFilterRequestDTO postFilterRequestDTO,
                                                          @RequestParam(required = false) List<String> sort,
                                                          @RequestParam(defaultValue = "0") int page,
@@ -110,11 +117,6 @@ public class PostController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Success"
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid filter",
-                    content = @Content
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -313,13 +315,18 @@ public class PostController {
                     content = @Content
             ),
             @ApiResponse(
+                    responseCode = "403",
+                    description = "The authenticated user does not have permission to update this comment.",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "Post or Comment not found with the provided slug and ID.",
                     content = @Content
             ),
             @ApiResponse(
-                    responseCode = "403",
-                    description = "The authenticated user does not have permission to update this comment.",
+                    responseCode = "406",
+                    description = "The user does not have permission to edit comments of UNPUBLISHED post",
                     content = @Content
             ),
             @ApiResponse(
@@ -343,13 +350,18 @@ public class PostController {
                     description = "Comment deleted successfully"
             ),
             @ApiResponse(
+                    responseCode = "403",
+                    description = "The authenticated user does not have permission to update this comment.",
+                    content = @Content
+            ),
+            @ApiResponse(
                     responseCode = "404",
                     description = "Post or Comment not found with the provided slug and ID.",
                     content = @Content
             ),
             @ApiResponse(
-                    responseCode = "403",
-                    description = "The authenticated user does not have permission to update this comment.",
+                    responseCode = "406",
+                    description = "The user(post author) does not have permission to delete comments of UNPUBLISHED post",
                     content = @Content
             )
     })
@@ -384,7 +396,7 @@ public class PostController {
     @Operation(summary = "Like or Dislike a post", description = "Like or Dislike a post using the post slug and post ID. Set 'like' field to `true` for like and `false` for dislike in the request body.")
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "204",
                     description = "Success"
             ),
             @ApiResponse(

@@ -425,7 +425,7 @@ public class PostControllerTest {
 
             when(postService.getPostsByStatus(eq(PostStatus.DRAFT), any(), eq(10))).thenReturn(slice);
 
-            mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_UNPUBLISHED_PATH)
+            mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PERSONAL_PATH)
                             .param("status", PostStatus.DRAFT.name())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
@@ -437,7 +437,7 @@ public class PostControllerTest {
         @DisplayName("returns 400 Bad Request when status parameter is missing")
         @WithMockUser(username = "author")
         void returnsBadRequestWhenStatusMissing() throws Exception {
-            mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_UNPUBLISHED_PATH)
+            mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PERSONAL_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isBadRequest());
         }
@@ -450,7 +450,7 @@ public class PostControllerTest {
 
             when(postService.getPostsByStatus(eq(PostStatus.DRAFT), any(), eq(25))).thenReturn(slice);
 
-            mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_UNPUBLISHED_PATH)
+            mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PERSONAL_PATH)
                             .param("status", PostStatus.DRAFT.name())
                             .param("size", "25")
                             .contentType(MediaType.APPLICATION_JSON))

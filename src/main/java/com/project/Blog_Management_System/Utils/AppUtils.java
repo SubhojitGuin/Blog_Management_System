@@ -67,7 +67,11 @@ public class AppUtils {
     public Sort convertToSort(List<String> sortFields, Set<String> ALLOWED_SORT_FIELDS) {
         List<Sort.Order> orders = new ArrayList<>();
 
-        for (String field : sortFields) {
+        if (sortFields == null) {
+            return Sort.unsorted();
+        }
+
+        for (String field: sortFields) {
             String[] propertyAndDirection = field.split(":");
             String property = propertyAndDirection[0];
 
@@ -86,6 +90,7 @@ public class AppUtils {
             Sort.Order order = new Sort.Order(direction, property);
             orders.add(order);
         }
+
         return Sort.by(orders);
     }
 
