@@ -2,12 +2,14 @@ package com.project.Blog_Management_System;
 
 import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestDataFactory;
+import com.project.Blog_Management_System.Utils.TestResponseExtractor;
 import com.redis.testcontainers.RedisContainer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,8 +24,8 @@ import java.util.Objects;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("integration-test")
+@Import(TestResponseExtractor.class)
 public abstract class BaseIT {
-
 
     @ServiceConnection
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
@@ -55,7 +57,10 @@ public abstract class BaseIT {
     protected MessageService messageService;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate; // Introduced for fast truncation
+    protected TestResponseExtractor testResponseExtractor;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void resetTestEnvironmentState() {
@@ -75,8 +80,10 @@ public abstract class BaseIT {
      */
     private void truncateRelationalDatabase() {
         List<String> tables = jdbcTemplate.queryForList(
-            "SELECT table_name FROM information_schema.tables " +
-            "WHERE table_schema = 'public' AND table_name <> 'flyway_schema_history'",
+            """
+                SELECT table_name FROM information_schema.tables 
+                WHERE table_schema = 'public' AND table_name <> 'flyway_schema_history'
+            """,
             String.class
         );
 
@@ -88,7 +95,8 @@ public abstract class BaseIT {
                     INSERT INTO CATEGORIES(ID, DESCRIPTION, NAME, SLUG, CREATED_AT, UPDATED_AT)
                     VALUES ('019def21-0c08-71a0-94fa-7752a369d39a', 'Default category', 'Uncategorised', 'uncategorised',
                         CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-                    ON CONFLICT (ID) DO NOTHING""";
+                    ON CONFLICT (ID) DO NOTHING
+                """;
 
             jdbcTemplate.execute(addUncategorisedCategoryQuery);
         }
