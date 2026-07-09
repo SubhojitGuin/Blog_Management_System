@@ -44,7 +44,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
                 c.body,
                 new com.project.Blog_Management_System.Dto.UserInfoDTO(u.id, u.name, u.username, u.active),
                 c.parent.id,
-                CASE WHEN ((SELECT COUNT(rc) FROM CommentEntity rc WHERE rc.parent.id = c.id) > 0) THEN true ELSE false END,
+                false,
                 c.createdAt,
                 CASE WHEN u.id = :currentUserId THEN true ELSE false END
             )
@@ -60,5 +60,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
             @Param("currentUserId") UUID currentUserId,
             Pageable pageable
     );
+
+    Boolean existsByParentId(UUID parentId);
 
 }
