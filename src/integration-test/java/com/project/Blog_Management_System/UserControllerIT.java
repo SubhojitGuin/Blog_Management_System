@@ -1,22 +1,28 @@
 package com.project.Blog_Management_System;
 
+import com.project.Blog_Management_System.Advice.ApiError;
 import com.project.Blog_Management_System.Annotations.WithMockBlogUser;
 import com.project.Blog_Management_System.Constants.ApiRoutes;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Repositories.*;
-import org.junit.jupiter.api.*;
+import com.project.Blog_Management_System.Utils.TestSliceResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerIT extends BaseIT {
@@ -56,42 +62,56 @@ public class UserControllerIT extends BaseIT {
         @DisplayName("Should return 200, and update user profile")
         @WithMockBlogUser(USERNAME)
         void shouldReturn200AndUpdateUserProfile() throws Exception {
-            ProfileUpdateDTO profileUpdateDTO = ProfileUpdateDTO.builder()
+            ProfileUpdateDTO profileUpdateRequest = ProfileUpdateDTO.builder()
                     .name("Updated User Name")
                     .bio(user.getBio())
                     .gender(user.getGender())
                     .dateOfBirth(user.getDateOfBirth())
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
+            MvcResult response = mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(profileUpdateDTO)))
+                            .content(objectMapper.writeValueAsString(profileUpdateRequest)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.name").value("Updated User Name"));
+                    .andReturn();
 
-            Assertions.assertEquals("Updated User Name", userRepository.findById(user.getId()).get().getName());
+            ProfileUpdateDTO profileUpdateDTO = testResponseExtractor.extractPayload(response, ProfileUpdateDTO.class);
+            assertThat(profileUpdateDTO.getName()).isEqualTo("Updated User Name");
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(user -> assertThat(user.getName()).isEqualTo(profileUpdateDTO.getName()));
         }
 
         @Test
         @DisplayName("Should return 400 when name and dateOfBirth are null")
         @WithMockBlogUser(USERNAME)
         void shouldReturn400WhenNameAndDateOfBirthAreNull() throws Exception {
-            ProfileUpdateDTO profileUpdateDTO = ProfileUpdateDTO.builder()
+            ProfileUpdateDTO profileUpdateRequest = ProfileUpdateDTO.builder()
                     .bio("Updated Bio")
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
+            MvcResult response = mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(profileUpdateDTO)))
+                            .content(objectMapper.writeValueAsString(profileUpdateRequest)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(2)))
-                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name", "dateOfBirth")))
-                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.user.name.not_blank"),
-                            messageService.get("validation.user.dob.not_null")
-                    )));
+                    .andReturn();
 
-            Assertions.assertNotEquals("Updated Bio", userRepository.findById(user.getId()).get().getBio());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(2)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(
+                            tuple("name", messageService.get("validation.user.name.not_blank")),
+                            tuple("dateOfBirth", messageService.get("validation.user.dob.not_null"))
+                    );
+
+            assertThat(userRepository.findById(user.getId())).isPresent()
+                    .get()
+                    .satisfies(user -> assertThat(user.getBio()).isNotEqualTo(profileUpdateRequest.getBio()));
         }
 
 
@@ -105,17 +125,24 @@ public class UserControllerIT extends BaseIT {
                     .dateOfBirth(LocalDate.now().plusYears(2))
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
+            MvcResult response = mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(profileUpdateDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(1)))
-                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("dateOfBirth")))
-                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.user.dob")
-                    )));
+                    .andReturn();
 
-            Assertions.assertNotEquals("Updated User Name", userRepository.findById(user.getId()).get().getBio());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("dateOfBirth", messageService.get("validation.user.dob")));
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(user -> assertThat(user.getBio()).isNotEqualTo(profileUpdateDTO.getBio()));
         }
 
         @Test
@@ -128,13 +155,20 @@ public class UserControllerIT extends BaseIT {
                     .dateOfBirth(user.getDateOfBirth())
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
+            MvcResult response = mockMvc.perform(put(ApiRoutes.USERS_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(profileUpdateDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
 
-            Assertions.assertNotEquals("Updated User Name", userRepository.findById(user.getId()).get().getName());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(user -> assertThat(user.getName()).isNotEqualTo(profileUpdateDTO.getName()));
         }
     }
 
@@ -156,8 +190,13 @@ public class UserControllerIT extends BaseIT {
                             .content(objectMapper.writeValueAsString(passwordUpdateDTO)))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertTrue(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), userRepository.findById(user.getId()).get().getPassword()));
-            Assertions.assertEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                            assertThat(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), updatedUser.getPassword())).isTrue();
+                            assertThat(updatedUser.getTokenVersion()).isEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -169,19 +208,30 @@ public class UserControllerIT extends BaseIT {
                     .newPassword("newpassword")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_PASSWORD_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_PASSWORD_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(passwordUpdateDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(2)))
-                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("oldPassword", "newPassword")))
-                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.user.password"),
-                            messageService.get("validation.user.password")
-                    )));
+                    .andReturn();
 
-            Assertions.assertFalse(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), userRepository.findById(user.getId()).get().getPassword()));
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(2)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(
+                            tuple("oldPassword", messageService.get("validation.user.password")),
+                            tuple("newPassword", messageService.get("validation.user.password"))
+                    );
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                            assertThat(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), user.getPassword())).isFalse();
+                            assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -193,14 +243,22 @@ public class UserControllerIT extends BaseIT {
                     .newPassword("NewPassword@123")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_PASSWORD_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_PASSWORD_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(passwordUpdateDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.auth.bad_credentials", "Old password")));
+                    .andReturn();
 
-            Assertions.assertFalse(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), userRepository.findById(user.getId()).get().getPassword()));
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.auth.bad_credentials", "Old password"));
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                            assertThat(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), user.getPassword())).isFalse();
+                            assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -211,15 +269,22 @@ public class UserControllerIT extends BaseIT {
                     .newPassword("NewPassword@123")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_PASSWORD_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_PASSWORD_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(passwordUpdateDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
 
-            Assertions.assertFalse(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), userRepository.findById(user.getId()).get().getPassword()));
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
 
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                            assertThat(passwordEncoder.matches(passwordUpdateDTO.getNewPassword(), user.getPassword())).isFalse();
+                            assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
     }
 
@@ -240,8 +305,13 @@ public class UserControllerIT extends BaseIT {
                             .content(objectMapper.writeValueAsString(usernameUpdateDTO)))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertEquals(usernameUpdateDTO.getUsername(), userRepository.findById(user.getId()).get().getUsername());
-            Assertions.assertEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                            .satisfies(updatedUser -> {
+                                assertThat(updatedUser.getUsername()).isEqualTo(usernameUpdateDTO.getUsername());
+                                assertThat(updatedUser.getTokenVersion()).isEqualTo(user.getTokenVersion() + 1);
+                            });
         }
 
         @Test
@@ -252,16 +322,26 @@ public class UserControllerIT extends BaseIT {
                     .username("user-name")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(usernameUpdateDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(1)))
-                    .andExpect(jsonPath("$.error.subErrors[0].field").value("username"))
-                    .andExpect(jsonPath("$.error.subErrors[0].message").value(messageService.get("validation.user.username")));
+                    .andReturn();
 
-            Assertions.assertNotEquals(usernameUpdateDTO.getUsername(), userRepository.findById(user.getId()).get().getUsername());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("username", messageService.get("validation.user.username")));
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                            assertThat(updatedUser.getUsername()).isNotEqualTo(usernameUpdateDTO.getUsername());
+                            assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -271,16 +351,27 @@ public class UserControllerIT extends BaseIT {
             UsernameUpdateDTO usernameUpdateDTO = UsernameUpdateDTO.builder()
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(usernameUpdateDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(1)))
-                    .andExpect(jsonPath("$.error.subErrors[0].field").value("username"))
-                    .andExpect(jsonPath("$.error.subErrors[0].message").value(messageService.get("validation.user.username.not_blank")));
+                    .andReturn();
 
-            Assertions.assertNotEquals(usernameUpdateDTO.getUsername(), userRepository.findById(user.getId()).get().getUsername());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("username", messageService.get("validation.user.username.not_blank")));
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                        assertThat(updatedUser.getUsername()).isNotEqualTo(usernameUpdateDTO.getUsername());
+                        assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -290,14 +381,22 @@ public class UserControllerIT extends BaseIT {
                     .username("updatedUsername")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(usernameUpdateDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
 
-            Assertions.assertNotEquals(usernameUpdateDTO.getUsername(), userRepository.findById(user.getId()).get().getUsername());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                            assertThat(updatedUser.getUsername()).isNotEqualTo(usernameUpdateDTO.getUsername());
+                            assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -310,14 +409,22 @@ public class UserControllerIT extends BaseIT {
                     .username(existingUser.getUsername())
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(usernameUpdateDTO)))
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.conflict", "Username")));
+                    .andReturn();
 
-            Assertions.assertNotEquals(usernameUpdateDTO.getUsername(), userRepository.findById(user.getId()).get().getUsername());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.conflict", "Username"));
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                            assertThat(updatedUser.getUsername()).isNotEqualTo(usernameUpdateDTO.getUsername());
+                            assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
     }
 
@@ -333,13 +440,18 @@ public class UserControllerIT extends BaseIT {
                     .email("newemail@gmail.com")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
+           mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(emailUpdateDTO)))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertEquals(emailUpdateDTO.getEmail(), userRepository.findById(user.getId()).get().getEmail());
-            Assertions.assertEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+           assertThat(userRepository.findById(user.getId()))
+                   .isPresent()
+                   .get()
+                   .satisfies(updatedUser -> {
+                       assertThat(updatedUser.getEmail()).isEqualTo(emailUpdateDTO.getEmail());
+                       assertThat(updatedUser.getTokenVersion()).isEqualTo(user.getTokenVersion() + 1);
+                   });
         }
 
         @Test
@@ -349,16 +461,28 @@ public class UserControllerIT extends BaseIT {
             EmailUpdateDTO emailUpdateDTO = EmailUpdateDTO.builder()
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(emailUpdateDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(1)))
-                    .andExpect(jsonPath("$.error.subErrors[0].field").value("email"))
-                    .andExpect(jsonPath("$.error.subErrors[0].message").value(messageService.get("validation.user.email.not_blank")));
+                    .andReturn();
 
-            Assertions.assertNotEquals(emailUpdateDTO.getEmail(), userRepository.findById(user.getId()).get().getEmail());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(
+                            tuple("email", messageService.get("validation.user.email.not_blank"))
+                    );
+
+            assertThat(userRepository.findById(user.getId()))
+                   .isPresent()
+                   .get()
+                   .satisfies(updatedUser -> {
+                       assertThat(updatedUser.getEmail()).isNotEqualTo(emailUpdateDTO.getEmail());
+                       assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                   });
         }
 
         @Test
@@ -369,16 +493,26 @@ public class UserControllerIT extends BaseIT {
                     .email("invalid-email")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(emailUpdateDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(1)))
-                    .andExpect(jsonPath("$.error.subErrors[0].field").value("email"))
-                    .andExpect(jsonPath("$.error.subErrors[0].message").value(messageService.get("validation.user.email.invalid")));
+                    .andReturn();
 
-            Assertions.assertNotEquals(emailUpdateDTO.getEmail(), userRepository.findById(user.getId()).get().getEmail());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse =  testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("email", messageService.get("validation.user.email.invalid")));
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                        assertThat(updatedUser.getEmail()).isNotEqualTo(emailUpdateDTO.getEmail());
+                        assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -388,14 +522,22 @@ public class UserControllerIT extends BaseIT {
                     .email("newemail@gmail.com")
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(emailUpdateDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
 
-            Assertions.assertNotEquals(emailUpdateDTO.getEmail(), userRepository.findById(user.getId()).get().getEmail());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                        assertThat(updatedUser.getEmail()).isNotEqualTo(emailUpdateDTO.getEmail());
+                        assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
 
         @Test
@@ -408,55 +550,72 @@ public class UserControllerIT extends BaseIT {
                     .email(existingUser.getEmail())
                     .build();
 
-            mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
+            MvcResult response = mockMvc.perform(patch(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(emailUpdateDTO)))
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.conflict", "Email")));
+                    .andReturn();
 
-            Assertions.assertNotEquals(emailUpdateDTO.getEmail(), userRepository.findById(user.getId()).get().getEmail());
-            Assertions.assertNotEquals(user.getTokenVersion() + 1, userRepository.findById(user.getId()).get().getTokenVersion());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.conflict", "Email"));
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedUser -> {
+                        assertThat(updatedUser.getEmail()).isNotEqualTo(emailUpdateDTO.getEmail());
+                        assertThat(updatedUser.getTokenVersion()).isNotEqualTo(user.getTokenVersion() + 1);
+                    });
         }
     }
 
     @Nested
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE)
-    class GetUserProfile
-    {
+    class GetUserProfile {
         @Test
         @DisplayName("Should return 200, when user profile is returned.")
         @WithMockBlogUser(USERNAME)
         void shouldReturn200WhenUserProfileIsReturned() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE, user.getUsername(), user.getId())
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE, user.getUsername(), user.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.username").value(user.getUsername()))
-                    .andExpect(jsonPath("$.data.name").value(user.getName()))
-                    .andExpect(jsonPath("$.data.bio").value(user.getBio()))
-                    .andExpect(jsonPath("$.data.id").value(user.getId().toString()))
-                    .andExpect(jsonPath("$.data.noOfFollowers").value(user.getNoOfFollowers()))
-                    .andExpect(jsonPath("$.data.noOfFollowings").value(user.getNoOfFollowings()))
-                    .andExpect(jsonPath("$.data.isDeleted").value(false))
-                    .andExpect(jsonPath("$.data.isCurrentUser").value(true));
+                    .andReturn();
+
+            UserDTO userDTO = testResponseExtractor.extractPayload(response, UserDTO.class);
+
+            assertThat(userDTO.getUsername()).isEqualTo(user.getUsername());
+            assertThat(userDTO.getName()).isEqualTo(user.getName());
+            assertThat(userDTO.getBio()).isEqualTo(user.getBio());
+            assertThat(userDTO.getId()).isEqualTo(user.getId());
+            assertThat(userDTO.getNoOfFollowers()).isEqualTo(user.getNoOfFollowers());
+            assertThat(userDTO.getNoOfFollowings()).isEqualTo(user.getNoOfFollowings());
+            assertThat(userDTO.getIsDeleted()).isFalse();
+            assertThat(userDTO.getIsCurrentUser()).isTrue();
         }
 
         @Test
         @DisplayName("Should return 404, when the user profile is not found")
         @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenUserProfileIsNotFound() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE, "nonExistentUser", UUID.randomUUID())
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE, "nonExistentUser", UUID.randomUUID())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "User account")));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "User account"));
         }
 
         @Test
         @DisplayName("Should return 401, when the user is unauthenticated")
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE, user.getUsername(), user.getId())
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE, user.getUsername(), user.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -464,33 +623,35 @@ public class UserControllerIT extends BaseIT {
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
     class SearchUsers {
 
+        UserEntity user1, user2, user3, user4, user5;
+
         @BeforeEach
         void addUsers() {
-            userRepository.saveAndFlush(testDataFactory.createUser()
+            user1 = userRepository.saveAndFlush(testDataFactory.createUser()
                     .name("Search User1")
                     .username("SearchUser1")
                     .email("searchuser1@gmail.com")
                     .build());
 
-            userRepository.saveAndFlush(testDataFactory.createUser()
+            user2 = userRepository.saveAndFlush(testDataFactory.createUser()
                     .name("Search User2")
                     .username("SearchUser2")
                     .email("searchuser2@gmail.com")
                     .build());
 
-            userRepository.saveAndFlush(testDataFactory.createUser()
+            user3 = userRepository.saveAndFlush(testDataFactory.createUser()
                     .name("Search User3")
                     .username("SearchUser3")
                     .email("searchuser3@gmail.com")
                     .build());
 
-            userRepository.saveAndFlush(testDataFactory.createUser()
+            user4 = userRepository.saveAndFlush(testDataFactory.createUser()
                     .name("Search User4")
                     .username("SearchUser4")
                     .email("searchuser4@gmail.com")
                     .build());
 
-            userRepository.saveAndFlush(testDataFactory.createUser()
+            user5 = userRepository.saveAndFlush(testDataFactory.createUser()
                     .name("User5")
                     .username("User5")
                     .email("user5@gmail.com")
@@ -501,38 +662,49 @@ public class UserControllerIT extends BaseIT {
         @DisplayName("Should return 200, when a list of users are returned")
         @WithMockBlogUser(USERNAME)
         void shouldReturn200WhenAListOfUsersAreReturned() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
                             .param("query", "Search")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data", hasSize(4)))
-                    .andExpect(jsonPath("$.data[*].username", containsInAnyOrder(
-                            "SearchUser1",
-                            "SearchUser2",
-                            "SearchUser3",
-                            "SearchUser4"
-                    )));
+                    .andReturn();
+
+            List<UserInfoDTO> userList = testResponseExtractor.extractListPayload(response, UserInfoDTO.class);
+            assertThat(userList)
+                    .hasSize(4)
+                    .extracting(UserInfoDTO::getUsername)
+                    .containsExactlyInAnyOrder(
+                            user1.getUsername(),
+                            user2.getUsername(),
+                            user3.getUsername(),
+                            user4.getUsername()
+                    );
         }
 
         @Test
         @DisplayName("should return 200, and an empty list, when no user matches the search")
         @WithMockBlogUser(USERNAME)
         void shouldReturn200AndNoUsersAreReturnedWhenNoUserMatches() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
                             .param("query", "NonExistentUser")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data", hasSize(0)));
+                    .andReturn();
+
+            List<UserInfoDTO> userList = testResponseExtractor.extractListPayload(response, UserInfoDTO.class);
+            assertThat(userList).hasSize(0);
         }
 
         @Test
         @DisplayName("Should return 401, when the user is unauthenticated")
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
                             .param("query", "Search")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -562,7 +734,7 @@ public class UserControllerIT extends BaseIT {
                             .content(objectMapper.writeValueAsString(followDTO)))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertTrue(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId()).isPresent());
+            assertThat(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId())).isPresent();
         }
 
         @Test
@@ -581,7 +753,7 @@ public class UserControllerIT extends BaseIT {
                             .content(objectMapper.writeValueAsString(followDTO)))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertFalse(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId()).isPresent());
+            assertThat(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId())).isNotPresent();
         }
 
         @Test
@@ -600,7 +772,7 @@ public class UserControllerIT extends BaseIT {
                             .content(objectMapper.writeValueAsString(followDTO)))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertTrue(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId()).isPresent());
+            assertThat(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId())).isPresent();
         }
 
         @Test
@@ -614,7 +786,7 @@ public class UserControllerIT extends BaseIT {
                             .content(objectMapper.writeValueAsString(followDTO)))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertFalse(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId()).isPresent());
+            assertThat(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId())).isNotPresent();
         }
 
         @Test
@@ -623,12 +795,20 @@ public class UserControllerIT extends BaseIT {
         void shouldReturn400WhenFollowDataIsInvalid() throws Exception {
             FollowDTO followDTO = new FollowDTO(null);
 
-            mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, followee.getUsername(), followee.getId())
+            MvcResult response = mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, followee.getUsername(), followee.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(followDTO)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
 
-            Assertions.assertFalse(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId()).isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("follow", messageService.get("validation.follow.follow.not_null")));
+
+            assertThat(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId())).isNotPresent();
         }
 
         @Test
@@ -636,13 +816,16 @@ public class UserControllerIT extends BaseIT {
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
             FollowDTO followDTO = new FollowDTO(true);
 
-            mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, followee.getUsername(), followee.getId())
+            MvcResult response = mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, followee.getUsername(), followee.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(followDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
 
-            Assertions.assertFalse(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId()).isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(followRepository.findByFollowerIdAndFollowingId(user.getId(), followee.getId())).isNotPresent();
         }
 
         @Test
@@ -651,11 +834,14 @@ public class UserControllerIT extends BaseIT {
         void shouldReturn404WhenUserIsNotFound() throws Exception {
             FollowDTO followDTO = new FollowDTO(true);
 
-            mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, "nonexistentusername", UUID.randomUUID())
+            MvcResult response = mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, "nonexistentusername", UUID.randomUUID())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(followDTO)))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "User account")));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "User account"));
         }
 
         @Test
@@ -664,13 +850,16 @@ public class UserControllerIT extends BaseIT {
         void shouldReturn406WhenUserTriesToFollowOneself() throws Exception {
             FollowDTO followDTO = new FollowDTO(true);
 
-            mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, user.getUsername(), user.getId())
+            MvcResult response = mockMvc.perform(post(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH, user.getUsername(), user.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(followDTO)))
                     .andExpect(status().isNotAcceptable())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.invalid.action.self_follow")));
+                    .andReturn();
 
-            Assertions.assertFalse(followRepository.findByFollowerIdAndFollowingId(user.getId(), user.getId()).isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.self_follow"));
+
+            assertThat(followRepository.findByFollowerIdAndFollowingId(user.getId(), user.getId()).isPresent());
         }
     }
 
@@ -715,44 +904,63 @@ public class UserControllerIT extends BaseIT {
                     .following(user)
                     .build());
 
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, user.getUsername(), user.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, user.getUsername(), user.getId()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(3)))
-                    .andExpect(jsonPath("$.data.content[*].user.username", containsInAnyOrder(
-                            "Follower1",
-                            "Follower2",
-                            "Follower3"
-                    )));
+                    .andReturn();
+
+            TestSliceResponse<FollowInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, FollowInfoDTO.class);
+            assertThat(sliceResponse.getContent())
+                    .hasSize(3)
+                    .extracting(FollowInfoDTO::getUser)
+                    .extracting(UserInfoDTO::getUsername)
+                    .containsExactlyInAnyOrder(
+                            follower1.getUsername(),
+                            follower2.getUsername(),
+                            follower3.getUsername()
+                    );
+            assertThat(sliceResponse.isEmpty()).isFalse();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(3);
         }
 
         @Test
         @DisplayName("Should return 200, and empty list, when no followers exist")
         @WithMockBlogUser(USERNAME)
         void getShouldReturn200AndEmptyListWhenNoFollowersExist() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, user.getUsername(), user.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, user.getUsername(), user.getId()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(0)));
+                    .andReturn();
+
+            TestSliceResponse<FollowInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, FollowInfoDTO.class);
+            assertThat(sliceResponse.getContent()).isEmpty();
+            assertThat(sliceResponse.isEmpty()).isTrue();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(0);
         }
 
         @Test
         @DisplayName("Should return 404, when the user does not exist")
         @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenUserDoesNotExist() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, "NonExistentUser", UUID.randomUUID())
-                            .contentType(MediaType.APPLICATION_JSON))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, "NonExistentUser", UUID.randomUUID()))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "User account")));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "User account"));
         }
 
         @Test
         @DisplayName("Should return 401, when the user is unauthenticated")
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, user.getUsername(), user.getId())
-                            .contentType(MediaType.APPLICATION_JSON))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH, user.getUsername(), user.getId()))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -797,44 +1005,67 @@ public class UserControllerIT extends BaseIT {
                     .following(following3)
                     .build());
 
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, user.getUsername(), user.getId())
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, user.getUsername(), user.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(3)))
-                    .andExpect(jsonPath("$.data.content[*].user.username", containsInAnyOrder(
-                            "Following1",
-                            "Following2",
-                            "Following3"
-                    )));
+                    .andReturn();
+
+            TestSliceResponse<FollowInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, FollowInfoDTO.class);
+            assertThat(sliceResponse.getContent())
+                    .hasSize(3)
+                    .extracting(FollowInfoDTO::getUser)
+                    .extracting(UserInfoDTO::getUsername)
+                    .containsExactlyInAnyOrder(
+                            following1.getUsername(),
+                            following2.getUsername(),
+                            following3.getUsername()
+                    );
+            assertThat(sliceResponse.isEmpty()).isFalse();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(3);
         }
 
         @Test
         @DisplayName("Should return 200, and empty list, when no followings exist")
         @WithMockBlogUser(USERNAME)
         void getShouldReturn200AndEmptyListWhenNoFollowingsExist() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, user.getUsername(), user.getId())
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, user.getUsername(), user.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(0)));
+                    .andReturn();
+
+            TestSliceResponse<FollowInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, FollowInfoDTO.class);
+            assertThat(sliceResponse.getContent()).isEmpty();
+            assertThat(sliceResponse.isEmpty()).isTrue();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(0);
         }
 
         @Test
         @DisplayName("Should return 404, when the user does not exist")
         @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenUserDoesNotExist() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, "NonExistentUser",UUID.randomUUID())
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, "NonExistentUser",UUID.randomUUID())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "User account")));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "User account"));
         }
 
         @Test
         @DisplayName("Should return 401, when the user is unauthenticated")
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, user.getUsername(), user.getId())
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH, user.getUsername(), user.getId())
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -850,17 +1081,27 @@ public class UserControllerIT extends BaseIT {
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertFalse(userRepository.findById(user.getId()).get().getActive());
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(deletedUser -> assertThat(deletedUser.getActive()).isFalse());
         }
 
         @Test
         @DisplayName("Should return 401, when the user is unauthenticated")
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
-            mockMvc.perform(delete(ApiRoutes.USERS_BASE_PATH)
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.USERS_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
 
-            Assertions.assertTrue(userRepository.findById(user.getId()).get().getActive());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(userRepository.findById(user.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(deletedUser -> assertThat(deletedUser.getActive()).isTrue());
         }
     }
 
@@ -877,58 +1118,81 @@ public class UserControllerIT extends BaseIT {
                     .slug("test-category")
                     .build());
 
-            postRepository.saveAndFlush(testDataFactory.createPost()
+            PostEntity post1 = postRepository.saveAndFlush(testDataFactory.createPost()
                     .title("Test Post 1")
                     .user(user)
                     .category(category)
                     .build());
 
-            postRepository.saveAndFlush(testDataFactory.createPost()
+            PostEntity post2 = postRepository.saveAndFlush(testDataFactory.createPost()
                     .title("Test Post 2")
                     .user(user)
                     .category(category)
                     .build());
 
-            postRepository.saveAndFlush(testDataFactory.createPost()
+            PostEntity post3 = postRepository.saveAndFlush(testDataFactory.createPost()
                     .title("Test Post 3")
                     .user(user)
                     .category(category)
                     .build());
 
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, user.getUsername(), user.getId()))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, user.getUsername(), user.getId()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(3)))
-                    .andExpect(jsonPath("$.data.content[*].title", containsInAnyOrder(
-                            "Test Post 1",
-                            "Test Post 2",
-                            "Test Post 3"
-                    )));
+                    .andReturn();
+
+            TestSliceResponse<PostInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, PostInfoDTO.class);
+            assertThat(sliceResponse.getContent())
+                    .hasSize(3)
+                    .extracting(PostInfoDTO::getTitle)
+                    .containsExactlyInAnyOrder(
+                            post1.getTitle(),
+                            post2.getTitle(),
+                            post3.getTitle()
+                    );
+
+            assertThat(sliceResponse.isEmpty()).isFalse();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(3);
         }
 
         @Test
         @DisplayName("Should return 200, and empty post list, when no posts by the user")
         @WithMockBlogUser(USERNAME)
         void shouldReturn200AndEmptyPostListWhenNoPostsExist() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, user.getUsername(), user.getId()))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, user.getUsername(), user.getId()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(0)));
+                    .andReturn();
+
+            TestSliceResponse<PostInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, PostInfoDTO.class);
+            assertThat(sliceResponse.getContent()).isEmpty();
+            assertThat(sliceResponse.isEmpty()).isTrue();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(0);
         }
 
         @Test
         @DisplayName("Should return 404, when the user does not exist")
         @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenUserDoesNotExist() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, "nonexistentuser", UUID.randomUUID()))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, "nonexistentuser", UUID.randomUUID()))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "User account")));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "User account"));
         }
 
         @Test
         @DisplayName("Should return 401, when the user is unauthenticated")
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, user.getUsername(), user.getId()))
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH, user.getUsername(), user.getId()))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -967,33 +1231,53 @@ public class UserControllerIT extends BaseIT {
                     .post(post2)
                     .build());
 
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_BOOKMARKS_PATH)
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_BOOKMARKS_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(2)))
-                    .andExpect(jsonPath("$.data.content[*].post.title", containsInAnyOrder(
-                            "Test Post 1",
-                            "Test Post 2"
-                    )));
+                    .andReturn();
+
+            TestSliceResponse<BookmarkInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, BookmarkInfoDTO.class);
+            assertThat(sliceResponse.getContent())
+                    .hasSize(2)
+                    .extracting(BookmarkInfoDTO::getPost)
+                    .extracting(PostInfoDTO::getTitle)
+                    .containsExactlyInAnyOrder(
+                            post1.getTitle(),
+                            post2.getTitle()
+                    );
+            assertThat(sliceResponse.isEmpty()).isFalse();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(2);
         }
 
         @Test
         @DisplayName("Should return 200, and empty list, when no bookmark exists")
         @WithMockBlogUser(USERNAME)
         void shouldReturn200AndEmptyListWhenNoBookmarksExist() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_BOOKMARKS_PATH)
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_BOOKMARKS_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.content", hasSize(0)));
+                    .andReturn();
+
+            TestSliceResponse<BookmarkInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, BookmarkInfoDTO.class);
+            assertThat(sliceResponse.getContent()).hasSize(0);
+            assertThat(sliceResponse.isEmpty()).isTrue();
+            assertThat(sliceResponse.isFirst()).isTrue();
+            assertThat(sliceResponse.isLast()).isTrue();
+            assertThat(sliceResponse.getNumberOfElements()).isEqualTo(0);
         }
 
         @Test
         @DisplayName("Should return 401, when the user is unauthenticated")
         void shouldReturn401WhenUserIsUnauthenticated() throws Exception {
-            mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_BOOKMARKS_PATH)
+            MvcResult response = mockMvc.perform(get(ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_BOOKMARKS_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Utils;
 
 import com.project.Blog_Management_System.Entities.*;
+import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
 
 import java.util.Set;
@@ -33,6 +34,7 @@ public class TestEntityFactory {
         post.setContent("This is the content of post " + suffix + ".");
         post.setUser(user);
         post.setCategory(category);
+        post.setStatus(PostStatus.PUBLISHED);
         return post;
     }
 

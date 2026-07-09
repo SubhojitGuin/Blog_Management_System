@@ -1,8 +1,10 @@
 package com.project.Blog_Management_System;
 
+import com.project.Blog_Management_System.Advice.ApiError;
 import com.project.Blog_Management_System.Annotations.WithMockBlogUser;
 import com.project.Blog_Management_System.Constants.ApiRoutes;
 import com.project.Blog_Management_System.Dto.CategoryRequestDTO;
+import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
@@ -10,16 +12,20 @@ import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Repositories.UserRepository;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Set;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class AdminControllerIT extends BaseIT {
@@ -70,15 +76,25 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the new category.")
                     .build();
 
-            mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
+            MvcResult response = mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.data.name").value(categoryRequestDTO.getName()))
-                    .andExpect(jsonPath("$.data.description").value(categoryRequestDTO.getDescription()))
-                    .andExpect(jsonPath("$.data.slug").value("new-category"));
+                    .andReturn();
 
-            Assertions.assertTrue(categoryRepository.findBySlug("new-category").isPresent());
+            CategoryResponseDTO categoryResponse = testResponseExtractor.extractPayload(response, CategoryResponseDTO.class);
+
+            assertThat(categoryResponse.getName()).isEqualTo(categoryRequestDTO.getName());
+            assertThat(categoryResponse.getDescription()).isEqualTo(categoryRequestDTO.getDescription());
+            assertThat(categoryResponse.getSlug()).isEqualTo("new-category");
+
+            assertThat(categoryRepository.findBySlug("new-category")).isPresent()
+                    .get()
+                    .satisfies(newCategory -> {
+                        assertThat(newCategory.getName()).isEqualTo(categoryRequestDTO.getName());
+                        assertThat(newCategory.getDescription()).isEqualTo(categoryRequestDTO.getDescription());
+                        assertThat(newCategory.getSlug()).isEqualTo("new-category");
+                    });
         }
 
         @Test
@@ -90,11 +106,15 @@ public class AdminControllerIT extends BaseIT {
                     .description(category.getDescription())
                     .build();
 
-            mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
+            MvcResult response = mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.conflict", "Category")));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.conflict", "Category"));
         }
 
         @Test
@@ -104,17 +124,23 @@ public class AdminControllerIT extends BaseIT {
             CategoryRequestDTO categoryRequestDTO = CategoryRequestDTO.builder()
                     .build();
 
-            mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
+            MvcResult response = mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(2)))
-                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name", "description")))
-                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.category.name.not_blank"),
-                            messageService.get("validation.category.description.not_blank")
-                    )));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(2)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(
+                            tuple("name", messageService.get("validation.category.name.not_blank")),
+                            tuple("description", messageService.get("validation.category.description.not_blank"))
+                    );
+
+            assertThat(categoryRepository.findBySlug("new-category")).isNotPresent();
         }
 
         @Test
@@ -126,16 +152,20 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for invalid category.")
                     .build();
 
-            mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
+            MvcResult response = mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(1)))
-                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name")))
-                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.category.name")
-                    )));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("name", messageService.get("validation.category.name")));
+
+            assertThat(categoryRepository.findBySlug("invalid_category_name")).isNotPresent();
         }
 
         @Test
@@ -147,13 +177,16 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the new category.")
                     .build();
 
-            mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
+            MvcResult response = mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.error.message").value("Access Denied"));
+                    .andReturn();
 
-            Assertions.assertFalse(categoryRepository.findBySlug("new-category").isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Access Denied");
+
+            assertThat(categoryRepository.findBySlug("new-category")).isNotPresent();
         }
 
         @Test
@@ -164,13 +197,16 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the new category.")
                     .build();
 
-            mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
+            MvcResult response = mockMvc.perform(post(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message", is("Full authentication is required to access this resource")));
+                    .andReturn();
 
-            Assertions.assertFalse(categoryRepository.findBySlug("new-category").isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+            assertThat(categoryRepository.findBySlug("new-category")).isNotPresent();
         }
     }
 
@@ -187,15 +223,25 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the updated category.")
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
+            MvcResult result = mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.name").value(categoryRequestDTO.getName()))
-                    .andExpect(jsonPath("$.data.description").value(categoryRequestDTO.getDescription()))
-                    .andExpect(jsonPath("$.data.slug").value("updated-category-name"));
+                    .andReturn();
 
-            Assertions.assertTrue(categoryRepository.findBySlug("updated-category-name").isPresent());
+            CategoryResponseDTO categoryResponse = testResponseExtractor.extractPayload(result, CategoryResponseDTO.class);
+
+            assertThat(categoryResponse.getName()).isEqualTo(categoryRequestDTO.getName());
+            assertThat(categoryResponse.getDescription()).isEqualTo(categoryRequestDTO.getDescription());
+            assertThat(categoryResponse.getSlug()).isEqualTo("updated-category-name");
+
+            assertThat(categoryRepository.findBySlug("updated-category-name"))
+                    .isPresent()
+                    .get()
+                    .satisfies(updatedCategory -> {
+                        assertThat(updatedCategory.getName()).isEqualTo(categoryRequestDTO.getName());
+                        assertThat(updatedCategory.getDescription()).isEqualTo(categoryRequestDTO.getDescription());
+                    });
         }
 
         @Test
@@ -207,13 +253,16 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the updated category.")
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, "non-existent-slug", UUID.randomUUID())
+            MvcResult response = mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, "non-existent-slug", UUID.randomUUID())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "Category")));
+                    .andReturn();
 
-            Assertions.assertFalse(categoryRepository.findBySlug("updated-category-name").isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Category"));
+
+            assertThat(categoryRepository.findBySlug("updated-category-name")).isNotPresent();
         }
 
         @Test
@@ -223,17 +272,23 @@ public class AdminControllerIT extends BaseIT {
             CategoryRequestDTO categoryRequestDTO = CategoryRequestDTO.builder()
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
+            MvcResult response = mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(2)))
-                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name", "description")))
-                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.category.name.not_blank"),
-                            messageService.get("validation.category.description.not_blank")
-                    )));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(2)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(
+                            tuple("name", messageService.get("validation.category.name.not_blank")),
+                            tuple("description", messageService.get("validation.category.description.not_blank"))
+                    );
+
+            assertThat(categoryRepository.findBySlug("updated-category-name")).isNotPresent();
         }
 
         @Test
@@ -245,16 +300,20 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the updated category.")
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
+            MvcResult response = mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.validation.failed")))
-                    .andExpect(jsonPath("$.error.subErrors", hasSize(1)))
-                    .andExpect(jsonPath("$.error.subErrors[*].field", containsInAnyOrder("name")))
-                    .andExpect(jsonPath("$.error.subErrors[*].message", containsInAnyOrder(
-                            messageService.get("validation.category.name")
-                    )));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("name", messageService.get("validation.category.name")));
+
+            assertThat(categoryRepository.findBySlug("updated-category-name")).isNotPresent();
         }
 
         @Test
@@ -268,13 +327,21 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the updated category.")
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
+            MvcResult response = mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.conflict", "Category")));
+                    .andReturn();
 
-            Assertions.assertNotEquals( categoryRequestDTO.getDescription(), categoryRepository.findBySlug(category.getSlug()).get().getDescription());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.conflict", "Category"));
+
+            assertThat(categoryRepository.findBySlug(category.getSlug())).isPresent()
+                    .get()
+                    .satisfies(existingCategory -> {
+                        assertThat(existingCategory.getName()).isEqualTo(category.getName());
+                        assertThat(existingCategory.getDescription()).isEqualTo(category.getDescription());
+                    });
         }
 
         @Test
@@ -286,13 +353,16 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the updated category.")
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
+            MvcResult response = mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.error.message").value("Access Denied"));
+                    .andReturn();
 
-            Assertions.assertFalse(categoryRepository.findBySlug("updated-category-name").isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Access Denied");
+
+            assertThat(categoryRepository.findBySlug("updated-category-name")).isNotPresent();
         }
 
         @Test
@@ -303,13 +373,16 @@ public class AdminControllerIT extends BaseIT {
                     .description("This is a description for the updated category.")
                     .build();
 
-            mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
+            MvcResult response = mockMvc.perform(put(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(categoryRequestDTO)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
 
-            Assertions.assertFalse(categoryRepository.findBySlug("updated-category-name").isPresent());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(categoryRepository.findBySlug("updated-category-name")).isNotPresent();
         }
     }
 
@@ -334,7 +407,12 @@ public class AdminControllerIT extends BaseIT {
                             .param("newSlug", "new-category"))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertEquals("new-category", postRepository.findById(post.getId()).get().getCategory().getSlug());
+            assertThat(postRepository.findById(post.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(deletedPost -> {
+                        assertThat(deletedPost.getCategory().getSlug()).isEqualTo("new-category");
+                    });
         }
 
         @Test
@@ -344,51 +422,84 @@ public class AdminControllerIT extends BaseIT {
             mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId()))
                     .andExpect(status().isNoContent());
 
-            Assertions.assertEquals("uncategorised", postRepository.findById(post.getId()).get().getCategory().getSlug());
+            assertThat(postRepository.findById(post.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(deletedPost -> {
+                        assertThat(deletedPost.getCategory().getSlug()).isEqualTo("uncategorised");
+                    });
         }
 
         @Test
         @DisplayName("Should return 404 when the assigned category does not exist")
         @WithMockBlogUser(ADMIN_USERNAME)
         void shouldReturn404WhenTheAssignedCategoryDoesNotExist() throws Exception {
-            mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId())
                             .param("newSlug", "non-existent-category"))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "Category")));
+                    .andReturn();
 
-            Assertions.assertEquals(category.getSlug(), postRepository.findById(post.getId()).get().getCategory().getSlug());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Category"));
+
+            assertThat(postRepository.findById(post.getId())).isPresent()
+                    .get()
+                    .satisfies(deletedPost -> {
+                        assertThat(deletedPost.getCategory().getSlug()).isEqualTo(category.getSlug());
+                    });
         }
 
         @Test
         @DisplayName("Should return 404 when category doesn't exist")
         @WithMockBlogUser(ADMIN_USERNAME)
         void shouldReturn404WhenCategoryDoesNotExist() throws Exception {
-            mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, "non-existent-category", UUID.randomUUID()))
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, "non-existent-category", UUID.randomUUID()))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.resource.not_found", "Category")));
+                    .andReturn();
 
-            Assertions.assertEquals(category.getSlug(), postRepository.findById(post.getId()).get().getCategory().getSlug());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Category"));
+            assertThat(postRepository.findById(post.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(deletedPost -> {
+                        assertThat(deletedPost.getCategory().getSlug()).isEqualTo(category.getSlug());
+                    });
         }
 
         @Test
         @DisplayName("Should return 403 when user doesn't have ADMIN Role")
         @WithMockBlogUser(USER_USERNAME)
         void shouldReturn403WhenUserDoesNotHaveADMINRole() throws Exception {
-            mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId()))
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId()))
                     .andExpect(status().isForbidden())
-                    .andExpect(jsonPath("$.error.message").value("Access Denied"));
+                    .andReturn();
 
-            Assertions.assertEquals(category.getSlug(), postRepository.findById(post.getId()).get().getCategory().getSlug());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Access Denied");
+
+            assertThat(postRepository.findById(post.getId())).isPresent()
+                    .get()
+                    .satisfies(deletedPost -> {
+                        assertThat(deletedPost.getCategory().getSlug()).isEqualTo(category.getSlug());
+                    });
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthorised")
         void shouldReturn401WhenTheUserIsUnauthorised() throws Exception {
-            mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId()))
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, category.getSlug(), category.getId()))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error.message").value("Full authentication is required to access this resource"));
+                    .andReturn();
 
-            Assertions.assertEquals(category.getSlug(), postRepository.findById(post.getId()).get().getCategory().getSlug());
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(postRepository.findById(post.getId())).isPresent()
+                    .get()
+                    .satisfies(deletedPost -> {
+                        assertThat(deletedPost.getCategory().getSlug()).isEqualTo(category.getSlug());
+                    });
         }
 
         @Test
@@ -397,9 +508,12 @@ public class AdminControllerIT extends BaseIT {
         void shouldReturn406WhenDeletingUncategorisedCategory() throws Exception {
             CategoryEntity uncategorisedCategory = categoryRepository.findBySlug("uncategorised").orElseThrow();
 
-            mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, uncategorisedCategory.getSlug(), uncategorisedCategory.getId()))
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH, uncategorisedCategory.getSlug(), uncategorisedCategory.getId()))
                     .andExpect(status().isNotAcceptable())
-                    .andExpect(jsonPath("$.error.message").value(messageService.get("exception.invalid.action.uncategorised_category_deletion")));
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.uncategorised_category_deletion"));
         }
     }
 }

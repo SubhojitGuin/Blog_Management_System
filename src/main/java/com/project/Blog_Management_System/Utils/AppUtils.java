@@ -90,7 +90,6 @@ public class AppUtils {
             Sort.Order order = new Sort.Order(direction, property);
             orders.add(order);
         }
-
         return Sort.by(orders);
     }
 
