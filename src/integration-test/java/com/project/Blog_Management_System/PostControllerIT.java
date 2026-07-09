@@ -3,9 +3,7 @@ package com.project.Blog_Management_System;
 import com.project.Blog_Management_System.Advice.ApiError;
 import com.project.Blog_Management_System.Annotations.WithMockBlogUser;
 import com.project.Blog_Management_System.Constants.ApiRoutes;
-import com.project.Blog_Management_System.Dto.PostInfoDTO;
-import com.project.Blog_Management_System.Dto.PostRequestDTO;
-import com.project.Blog_Management_System.Dto.PostResponseDTO;
+import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
@@ -49,6 +47,12 @@ public class PostControllerIT extends BaseIT {
     private PostRepository postRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private BookmarkRepository bookmarkRepository;
+
+    @Autowired
     private ApplicationEvents applicationEvents;
 
     @Autowired
@@ -56,6 +60,7 @@ public class PostControllerIT extends BaseIT {
 
     private UserEntity user;
     private UserEntity adminUser;
+
     private static final String USERNAME = "testuser";
     private static final String ADMIN_USERNAME = "testadmin";
 
@@ -69,6 +74,7 @@ public class PostControllerIT extends BaseIT {
 
         adminUser = userRepository.saveAndFlush(testDataFactory.createUser()
                 .username(ADMIN_USERNAME)
+                .email("admin@gmail.com")
                 .roles(Set.of(Role.ADMIN))
                 .build());
 
@@ -1173,7 +1179,7 @@ public class PostControllerIT extends BaseIT {
                     .satisfies(updatedPost -> {
                         assertThat(updatedPost.getTitle()).isNotEqualTo(postRequestDTO.getTitle());
                         assertThat(updatedPost.getDescription()).isNotEqualTo(postRequestDTO.getDescription());
-                        assertThat(updatedPost.getCategory()).isNotEqualTo(postRequestDTO.getCategorySlug());
+                        assertThat(updatedPost.getCategory().getSlug()).isNotEqualTo(postRequestDTO.getCategorySlug());
                         assertThat(updatedPost.getContent()).isNotEqualTo(postRequestDTO.getContent());
                         assertThat(updatedPost.getStatus()).isNotEqualTo(postRequestDTO.getStatus());
                     });
@@ -1215,47 +1221,128 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("DELETE" + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE)
     class DeletePost {
 
+        PostEntity post;
+        UserEntity otherUser;
+        private static final String OTHERUSER_USERNAME = "testotheruser";
+
+        @BeforeEach
+        void addPost() {
+            post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .build());
+
+            otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser(OTHERUSER_USERNAME, "other@gmail.com", "OtherPassword@123"));
+        }
+
         @Test
         @DisplayName("Should return 204, when post is deleted successfully")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenPostIsDeletedSuccessfully() throws Exception {
+            mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE, post.getSlug(), post.getId()))
+                    .andExpect(status().isNoContent())
+                    .andReturn();
 
-
+            assertThat(postRepository.findById(post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 204, when a PUBLISHED post is deleted successfully by an ADMIN user")
+        @WithMockBlogUser(ADMIN_USERNAME)
         void shouldReturn204WhenAPUBLISHEDPostIsDeletedSuccessfullyByAnADMINUser() throws Exception {
+            mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE, post.getSlug(), post.getId()))
+                    .andExpect(status().isNoContent())
+                    .andReturn();
 
-        }
-
-        @Test
-        @DisplayName("Should return 403 when the user is not the owner of the PUBLISHED post")
-        void shouldReturn403WhenTheUserIsNotTheOwnerOfThePUBLISHEDPost() throws Exception {
-
+            assertThat(postRepository.findById(post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 403 when the user is not the owner of the PUBLISHED post and the user doesn't have ADMIN role")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn403WhenTheUserIsNotTheOwnerOfThePUBLISHEDPostAndTheUserDoesntHaveADMINRole() throws Exception {
+            PostEntity post1 = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .build());
 
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE, post1.getSlug(), post1.getId()))
+                    .andExpect(status().isForbidden())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.auth.access.denied", "delete", "post"));
+
+            assertThat(postRepository.findById(post1.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 404, when post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenPostDoesNotExist() throws Exception {
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE, "invalid-post", UUID.randomUUID()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 404 when the user is not the owner of the UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheUserIsNotTheOwnerOfTheUNPUBLISHEDPost() throws Exception {
+            PostEntity post1 = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE, post1.getSlug(), post1.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+
+            assertThat(postRepository.findById(post1.getId())).isPresent();
+        }
+
+        @Test
+        @DisplayName("Should return 404 when Admin deletes UNPUBLISHED post")
+        @WithMockBlogUser(ADMIN_USERNAME)
+        void shouldReturn404WhenTheAdminDeletesUNPUBLISHEDPost() throws Exception {
+            PostEntity post1 = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE, post1.getSlug(), post1.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+
+            assertThat(postRepository.findById(post1.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE, post.getSlug(), post.getId()))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+            assertThat(postRepository.findById(post.getId())).isPresent();
         }
     }
 
@@ -1263,34 +1350,107 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH)
     class FindTopLevelCommentsOfPost {
 
+        PostEntity post;
+        CommentEntity comment1, comment2, comment3, comment4;
+
+        @BeforeEach
+        void setUp() {
+            post = postRepository.saveAndFlush(testDataFactory.createPost().user(user).category(category).build());
+            comment1 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(adminUser, post, null));
+            comment2 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+            comment3 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+            comment4 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(adminUser, post, comment1));
+        }
+
         @Test
         @DisplayName("Should return 200 and the top level comments successfully of the PUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn200AndTheTopLevelCommentsSuccessfullyOfThePUBLISHEDPost() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post.getSlug(), post.getId()))
+                    .andExpect(status().isOk())
+                    .andReturn();
 
+            TestSliceResponse<CommentResponseDTO> slice = testResponseExtractor.extractSlicePayload(response, CommentResponseDTO.class);
+            assertThat(slice.getContent()).hasSize(3)
+                    .extracting(CommentResponseDTO::getId)
+                    .containsExactlyInAnyOrder(comment1.getId(), comment2.getId(), comment3.getId());
         }
 
         @Test
         @DisplayName("Should return 200 and the top level comments successfully of the UNPUBLISHED post when the user is the owner of the post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn200AndTopLevelCommentsSuccessfullyOfUNPUBLISHEDPostWhenUserIsTheOwnerOfPost() throws Exception {
+            PostEntity post1 = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            CommentEntity comment1 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(adminUser, post1, null));
+            CommentEntity comment2 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post1, null));
+            CommentEntity comment3 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post1, null));
+            CommentEntity comment4 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(adminUser, post1, comment1));
+
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post1.getSlug(), post1.getId()))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            TestSliceResponse<CommentResponseDTO> slice = testResponseExtractor.extractSlicePayload(response, CommentResponseDTO.class);
+            assertThat(slice.getContent()).hasSize(3)
+                    .extracting(CommentResponseDTO::getId)
+                    .containsExactlyInAnyOrder(comment1.getId(), comment2.getId(), comment3.getId());
         }
 
         @Test
         @DisplayName("Should return 404 when the post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, "invalid-slug", UUID.randomUUID()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 404 when the user is not the owner of the UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheUserIsNotTheOwnerOfTheUNPUBLISHEDPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("otherUser", "otherUser@example.com", "OtherPassword@123"));
+
+            PostEntity post1 = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+
+            CommentEntity comment1 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(adminUser, post1, null));
+            CommentEntity comment2 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post1, null));
+            CommentEntity comment3 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post1, null));
+            CommentEntity comment4 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(adminUser, post1, comment1));
+
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post1.getSlug(), post1.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
 
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post.getSlug(), post.getId()))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -1298,41 +1458,138 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH)
     class FindRepliesOfComment {
 
+        PostEntity post;
+        CommentEntity parentComment;
+        CommentEntity reply1, reply2;
+
+        @BeforeEach
+        void setup() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+            parentComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+            reply1 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, parentComment));
+            reply2 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, parentComment));
+        }
+
+
         @Test
         @DisplayName("Should return 200 and the replies of the comment successfully of the PUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn200AndTheRepliesOfTheCommentSuccessfullyOfThePUBLISHEDPost() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId()))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            TestSliceResponse<CommentResponseDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, CommentResponseDTO.class);
+
+            assertThat(sliceResponse.getContent())
+                    .hasSize(2)
+                    .extracting(CommentResponseDTO::getId)
+                    .containsExactlyInAnyOrder(reply1.getId(), reply2.getId());
         }
 
         @Test
         @DisplayName("Should return 200 and the replies of the comment successfully of the UNPUBLISHED post when the user is the owner of the post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn200AndTheRepliesOfTheCommentSuccessfullyOfTheUNPUBLISHEDPostWhenTheUserIsTheOwnerOfThePost() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+            CommentEntity parentComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+            CommentEntity reply1 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, parentComment));
+            CommentEntity reply2 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, parentComment));
+
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId()))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            TestSliceResponse<CommentResponseDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, CommentResponseDTO.class);
+
+            assertThat(sliceResponse.getContent())
+                    .hasSize(2)
+                    .extracting(CommentResponseDTO::getId)
+                    .containsExactlyInAnyOrder(reply1.getId(), reply2.getId());
         }
 
         @Test
         @DisplayName("Should return 404 when post does not exist")
-        void shouldReturn404WhenThePostDoesNotExist() throws Exception {}
+        @WithMockBlogUser(USERNAME)
+        void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, "invalid-slug", UUID.randomUUID(), parentComment.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+        }
 
         @Test
         @DisplayName("Should return 404 when parent comment does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheParentCommentDoesNotExist() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), UUID.randomUUID()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Comment"));
         }
 
         @Test
         @DisplayName("Should return 404 when the user is not the owner of the UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheUserIsNotTheOwnerOfTheUNPUBLISHEDPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("otheruser", "other@gmail.com", "OtherPassword@123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+
+            CommentEntity parentComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+            CommentEntity reply1 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, parentComment));
+            CommentEntity reply2 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, parentComment));
+
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 400 in case of Parent comment and post mismatch")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn400InCaseOfParentCommentAndPostMismatch() throws Exception {
+            PostEntity anotherPost = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+            CommentEntity anotherParentComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, anotherPost, null));
+            CommentEntity reply1 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, anotherPost, anotherParentComment));
+            CommentEntity reply2 = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, anotherPost, anotherParentComment));
 
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), anotherParentComment.getId()))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.illegal.argument.parent_comment_post_mismatch"));
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId()))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -1340,40 +1597,151 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("POST" + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH)
     class AddTopLevelComment {
 
+        PostEntity post;
+
+        @BeforeEach
+        void setup() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+        }
+
         @Test
         @DisplayName("Should return 201 and the created comment successfully for the PUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn201AndTheCreatedCommentSuccessfullyForThePUBLISHEDPost() throws Exception {
+            CommentRequestDTO comment = CommentRequestDTO.builder()
+                    .body("This is a test comment for the PUBLISHED post.")
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(comment)))
+                    .andExpect(status().isCreated())
+                    .andReturn();
+
+            CommentResponseDTO commentResponse = testResponseExtractor.extractPayload(response, CommentResponseDTO.class);
+
+            assertThat(commentResponse.getUser().getUsername()).isEqualTo(USERNAME);
+            assertThat(commentResponse.getIsAuthor()).isTrue();
+            assertThat(commentResponse.getBody()).isEqualTo(comment.getBody());
+            assertThat(commentResponse.getParentId()).isNull();
+            assertThat(commentResponse.getHasReplies()).isFalse();
+
+            assertThat(commentRepository.findById(commentResponse.getId()))
+                    .isPresent()
+                    .get()
+                    .satisfies(savedComment -> {
+                        assertThat(savedComment.getBody()).isEqualTo(comment.getBody());
+                        assertThat(savedComment.getUser().getUsername()).isEqualTo(USERNAME);
+                        assertThat(savedComment.getPost().getId()).isEqualTo(post.getId());
+                        assertThat(savedComment.getParent()).isNull();
+                    });
         }
 
         @Test
         @DisplayName("Should return 400 when input data is invalid")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn400WhenInputDataIsInvalid() throws Exception {
+            CommentRequestDTO comment = CommentRequestDTO.builder().build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(comment)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("body", messageService.get("validation.comment.body.not_blank")));
         }
 
         @Test
         @DisplayName("Should return 404 when the post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            CommentRequestDTO comment = CommentRequestDTO.builder()
+                    .body("This is a test comment for the PUBLISHED post.")
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, "invalid-slug", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(comment)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
 
         }
 
         @Test
         @DisplayName("Should return 404, when non author adds comment to an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheNonAuthorAddsCommentToUNPUBLISHEDPost() throws Exception {
+            UserEntity anotherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("anotheruser", "another@gmail.com", "Another@123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(anotherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            CommentRequestDTO comment = CommentRequestDTO.builder()
+                    .body("This is a test comment for the UNPUBLISHED post.")
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(comment)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 406, when author adds comment to unpublished post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn406WhenAuthorAddsCommentToUnpublishedPost() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+
+            CommentRequestDTO comment = CommentRequestDTO.builder()
+                    .body("This is a test comment for the UNPUBLISHED post.")
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(comment)))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
 
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            CommentRequestDTO comment = CommentRequestDTO.builder()
+                    .body("This is a test comment for the UNPUBLISHED post.")
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(comment)))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -1381,52 +1749,198 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("POST " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH)
     class AddReplyToComment {
 
+        PostEntity post;
+        CommentEntity parentComment;
+
+        @BeforeEach
+        void setup() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+            parentComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+        }
+
         @Test
         @DisplayName("Should return 201, when a reply to a top level comment is added successfully")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn201AndTheCreatedCommentSuccessfullyForTheTopLevelCommentOfThePUBLISHEDPost() throws Exception {
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isCreated())
+                    .andReturn();
+
+            CommentResponseDTO commentResponse = testResponseExtractor.extractPayload(response, CommentResponseDTO.class);
+
+            assertThat(commentResponse).isNotNull();
+            assertThat(commentResponse.getBody()).isEqualTo(commentRequest.getBody());
+            assertThat(commentResponse.getUser().getUsername()).isEqualTo(USERNAME);
+            assertThat(commentResponse.getParentId()).isEqualTo(parentComment.getId());
+            assertThat(commentResponse.getHasReplies()).isFalse();
+            assertThat(commentResponse.getIsAuthor()).isTrue();
+
+            assertThat(commentRepository.findById(commentResponse.getId())).isPresent()
+                    .get()
+                    .satisfies(replyComment -> {
+                        assertThat(replyComment.getBody()).isEqualTo(commentRequest.getBody());
+                        assertThat(replyComment.getUser().getUsername()).isEqualTo(USERNAME);
+                        assertThat(replyComment.getPost().getId()).isEqualTo(post.getId());
+                        assertThat(replyComment.getParent().getId()).isEqualTo(parentComment.getId());
+                        assertThat(replyComment.getDepth()).isEqualTo(1);
+                    });
         }
 
         @Test
         @DisplayName("Should return 404 when post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, "invalid-slug", UUID.randomUUID(), parentComment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 404 when parent comment does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheParentCommentDoesNotExist() throws Exception {
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Comment"));
         }
 
         @Test
         @DisplayName("Should return 404, when non author adds a reply to top level comment of an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheNonAuthorAddsReplyToTopLevelCommentToUNPUBLISHEDPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+            CommentEntity parentComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 406, when author adds reply to a top level comment to UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn406WhenAuthorAddsReplyToTopLevelCommentToUNPUBLISHEDPost() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+            CommentEntity parentComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
         }
 
         @Test
         @DisplayName("Should return 400 in case of Parent comment and post mismatch")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn400InCaseOfParentCommentAndPostMismatch() throws Exception {
+            PostEntity otherPost = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, otherPost.getSlug(), otherPost.getId(), parentComment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.illegal.argument.parent_comment_post_mismatch"));
         }
 
         @Test
         @DisplayName("Should return 400, when user tries to add a reply to another comment reply")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn400WhenUserTriesToAddAnotherCommentReply() throws Exception {
+            CommentEntity childComment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, parentComment));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), childComment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.illegal.argument.invalid_comment_depth"));
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is a test reply comment")
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH, post.getSlug(), post.getId(), parentComment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -1434,98 +1948,372 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("PUT " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH)
     class UpdateComment {
 
+        PostEntity post;
+
+        @BeforeEach
+        void setup() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+        }
+
         @Test
         @DisplayName("Should return 200 and the updated comment successfully")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn200AndTheUpdatedCommentSuccessfully() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+            commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, comment));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is the updated Comment")
+                    .build();
+
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            CommentResponseDTO commentResponse = testResponseExtractor.extractPayload(response, CommentResponseDTO.class);
+            assertThat(commentResponse.getBody()).isEqualTo(commentRequest.getBody());
+            assertThat(commentResponse.getUser().getUsername()).isEqualTo(USERNAME);
+            assertThat(commentResponse.getParentId()).isNull();
+            assertThat(commentResponse.getHasReplies()).isTrue();
+            assertThat(commentResponse.getIsAuthor()).isTrue();
+
+            assertThat(commentRepository.findById(commentResponse.getId())).isPresent()
+                    .get()
+                    .satisfies(updatedComment -> {
+                        assertThat(updatedComment.getBody()).isEqualTo(commentRequest.getBody());
+                    });
         }
 
         @Test
         @DisplayName("Should return 400 when the input data is invalid")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn400WhenTheInputDataIsInvalid() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder().build();
+
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("body", messageService.get("validation.comment.body.not_blank")));
+
+            assertThat(commentRepository.findById(comment.getId())).isPresent()
+                    .get()
+                    .satisfies(updatedComment -> {
+                        assertThat(updatedComment.getBody()).isEqualTo(comment.getBody());
+                    });
         }
 
         @Test
         @DisplayName("Should return 404 when the post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is the updated comment body")
+                    .build();
+
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, "nonexistent-post-slug", UUID.randomUUID(), comment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+            assertThat(commentRepository.findById(comment.getId())).isPresent()
+                    .get()
+                    .satisfies(updatedComment -> {
+                        assertThat(updatedComment.getBody()).isEqualTo(comment.getBody());
+                    });
         }
 
         @Test
         @DisplayName("Should return 404 when a non-author user tries to update a comment of an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheNonAuthorUserTriesToUpdateAnUnpublishedPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is an updated comment body")
+                    .build();
+
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+            assertThat(commentRepository.findById(comment.getId())).isPresent()
+                    .get()
+                    .satisfies(updatedComment -> {
+                        assertThat(updatedComment.getBody()).isEqualTo(comment.getBody());
+                    });
         }
 
         @Test
         @DisplayName("Should return 404 when the comment does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheCommentDoesNotExist() throws Exception {
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is comment body")
+                    .build();
 
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Comment"));
         }
 
         @Test
         @DisplayName("Should return 406 when the author updates the comment of an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn406WhenAuthorUpdatesCommentOfUnpublishedPost() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is comment body")
+                    .build();
+
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
+
+            assertThat(commentRepository.findById(comment.getId())).isPresent()
+                    .get()
+                    .satisfies(updatedComment -> {
+                        assertThat(updatedComment.getBody()).isEqualTo(comment.getBody());
+                    });
         }
 
         @Test
         @DisplayName("Should return 403 when when the user is not author of the comment")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn403WhenTheUserIsNotAuthorOfTheComment() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(otherUser, post, null));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is comment body")
+                    .build();
+
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isForbidden())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.auth.access.denied", "update", "comment"));
+
+            assertThat(commentRepository.findById(comment.getId())).isPresent()
+                    .get()
+                    .satisfies(updatedComment -> {
+                        assertThat(updatedComment.getBody()).isEqualTo(comment.getBody());
+                    });
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
 
+            CommentRequestDTO commentRequest = CommentRequestDTO.builder()
+                    .body("This is comment body")
+                    .build();
+
+            MvcResult response = mockMvc.perform(put(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(commentRequest)))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(commentRepository.findById(comment.getId())).isPresent()
+                    .get()
+                    .satisfies(updatedComment -> {
+                        assertThat(updatedComment.getBody()).isEqualTo(comment.getBody());
+                    });
         }
     }
 
     @Nested
-    @DisplayName("DELETE " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE)
+    @DisplayName("DELETE " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH)
     class DeleteComment {
 
-        @Test
-        @DisplayName("Should return 204, when comment is deleted successfully")
-        void shouldReturn204WhenCommentIsDeletedSuccessfully() throws Exception {
+        PostEntity post;
 
+        @BeforeEach
+        void setup() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+        }
+
+        @Test
+        @DisplayName("Should return 204, when comment of a PUBLISHED post is deleted successfully by the author")
+        @WithMockBlogUser(USERNAME)
+        void shouldReturn204WhenCommentOfAPUBLISHEDPostIsDeletedSuccessfullyByTheAuthor() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+
+            mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId()))
+                            .andExpect(status().isNoContent());
+
+            assertThat(commentRepository.findById(comment.getId())).isNotPresent();
+        }
+
+        @Test
+        @DisplayName("Should return 204, when comment of a PUBLISHED post is deleted successfully by an ADMIN")
+        @WithMockBlogUser(ADMIN_USERNAME)
+        void shouldReturn204WhenCommentOfAPUBLISHEDPostIsDeletedSuccessfullyByADMIN() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+
+            mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId()))
+                    .andExpect(status().isNoContent());
+
+            assertThat(commentRepository.findById(comment.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 404 when the post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
 
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, "invalid-slug", post.getId(), comment.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+            assertThat(commentRepository.findById(comment.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 404 when a non-author user tries to delete a comment of an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheNonAuthorUserTriesToDeleteAnUnpublishedPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(otherUser, post, null));
 
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+            assertThat(commentRepository.findById(comment.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 404 when the comment does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheCommentDoesNotExist() throws Exception {
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), UUID.randomUUID()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Comment"));
         }
 
         @Test
         @DisplayName("Should return 406 when the author deletes the comment of an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn406WhenAuthorDeletesCommentOfUnpublishedPost() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
 
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId()))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
+            assertThat(commentRepository.findById(comment.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 403 when when the user is not author of the comment")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn403WhenTheUserIsNotAuthorOfTheComment() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(otherUser, post, null));
 
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId()))
+                    .andExpect(status().isForbidden())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.auth.access.denied", "delete", "comment"));
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            CommentEntity comment = commentRepository.saveAndFlush(testDataFactory.createCustomComment(user, post, null));
+
+            MvcResult response = mockMvc.perform(delete(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH, post.getSlug(), post.getId(), comment.getId()))
+                            .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
+
+            assertThat(commentRepository.findById(comment.getId())).isPresent();
 
         }
     }
@@ -1535,22 +2323,84 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH)
     class GetLikesOfPost{
 
+        PostEntity post;
+
+        @BeforeEach
+        void setUp() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+        }
+
         @Test
         @DisplayName("Should return 200 and the likes of the post successfully")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn200AndTheLikesOfThePostSuccessfully() throws Exception {
+            LikeEntity like1 = likeRepository.saveAndFlush(LikeEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
 
+            LikeEntity like2 = likeRepository.saveAndFlush(LikeEntity.builder()
+                    .user(adminUser)
+                    .post(post)
+                    .build());
+
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId()))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            TestSliceResponse<LikeInfoDTO> sliceResponse = testResponseExtractor.extractSlicePayload(response, LikeInfoDTO.class);
+
+            assertThat(sliceResponse.getContent())
+                    .hasSize(2)
+                    .extracting(LikeInfoDTO::getLikeId)
+                    .containsExactlyInAnyOrder(like1.getId(), like2.getId());
         }
 
         @Test
         @DisplayName("Should return 404 when the post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, "invalid-slug", UUID.randomUUID()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+        }
+
+        @Test
+        @DisplayName("Should return 404 when a non author tries to retrieve likes of an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
+        void shouldReturn404WhenNonAuthorRetrievesLikesOfUNPUBLISHEDPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+
+            LikeEntity like = likeRepository.saveAndFlush(LikeEntity.builder()
+                    .user(otherUser)
+                    .post(post)
+                    .build());
+
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId()))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            MvcResult response = mockMvc.perform(get(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId()))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
 
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -1558,70 +2408,261 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("POST " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH)
     class LikeOrDislikePost {
 
+        PostEntity post;
+
+        @BeforeEach
+        void setup() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+        }
+
         @Test
         @DisplayName("Should return 204 when the user successfully likes a post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserSuccessfullyLikesPost() throws Exception {
+            LikeDTO like = LikeDTO.builder()
+                    .like(true)
+                    .build();
 
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 204 when the user likes a liked post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserLikesALikedPost() throws Exception {
+            likeRepository.save(LikeEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
 
+            LikeDTO like = LikeDTO.builder()
+                    .like(true)
+                    .build();
+
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 204 when the user successfully dislikes a post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserSuccessfullyDislikesPost() throws Exception {
+            likeRepository.save(LikeEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
 
+            LikeDTO like = LikeDTO.builder()
+                    .like(false)
+                    .build();
+
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 204 when the user dislikes a disliked post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserDislikesADislikedPost() throws Exception {
+            LikeDTO like = LikeDTO.builder()
+                    .like(false)
+                    .build();
 
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 400 when input data is invalid")
+        @WithMockBlogUser(USERNAME)
         void  shouldReturn400WhenTheInputDataIsInvalid() throws Exception {
+            LikeDTO like = LikeDTO.builder()
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isBadRequest())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.validation.failed"));
+            assertThat(errorResponse.getSubErrors())
+                    .hasSize(1)
+                    .extracting(ApiError.FieldError::getField, ApiError.FieldError::getMessage)
+                    .containsExactlyInAnyOrder(tuple("like", messageService.get("validation.like.like.not_null")));
         }
 
         @Test
         @DisplayName("Should return 404 when post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            LikeDTO like = LikeDTO.builder()
+                    .like(true)
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, "invalid-slug", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 404 when the user is not the owner and likes an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheUserIsNotTheOwnerOfTheUNPUBLISHEDPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            LikeDTO like = LikeDTO.builder()
+                    .like(true)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 404 when the user is not the owner and dislikes an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheUserIsNotTheOwnerOfTheUNPUBLISHEDPostWhileDisliking() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
 
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
+
+            likeRepository.save(LikeEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
+
+            LikeDTO like = LikeDTO.builder()
+                    .like(false)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 406 when the user is the owner and likes an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn406WhenTheUserIsTheOwnerOfTheUNPUBLISHEDPostWhileLiking() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            LikeDTO like = LikeDTO.builder()
+                    .like(true)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
+
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 406 when the user is the owner and dislikes an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn406WhenTheUserIsTheOwnerOfTheUNPUBLISHEDPostWhileDisliking() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            likeRepository.save(LikeEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
+
+            LikeDTO like = LikeDTO.builder()
+                    .like(false)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
+
+            assertThat(likeRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            LikeDTO like = LikeDTO.builder()
+                    .like(true)
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(like)))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 
@@ -1629,64 +2670,237 @@ public class PostControllerIT extends BaseIT {
     @DisplayName("POST " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH)
     class BookmarkOrUnbookmarkPost {
 
+        PostEntity post;
+
+        @BeforeEach
+        void setup() {
+            post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
+        }
+
+
         @Test
         @DisplayName("Should return 204 when the user successfully bookmarks a post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserSuccessfullyBookmarksPost() throws Exception {
+            BookmarkDTO bookmarkRequest = BookmarkDTO.builder()
+                    .bookmark(true)
+                    .build();
 
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmarkRequest)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 204 when the user bookmarks a bookmarked post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserBookmarksABookmarkedPost() throws Exception {
+            bookmarkRepository.save(BookmarkEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
 
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(true)
+                    .build();
+
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 204 when the user successfully unbookmarks a post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserSuccessfullyUnbookmarksPost() throws Exception {
+            bookmarkRepository.save(BookmarkEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
 
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(false)
+                    .build();
+
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 204 when the user unbookmarks an unbookmarked post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn204WhenTheUserUnbookmarksAUnbookmarkedPost() throws Exception {
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(false)
+                    .build();
 
+            mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNoContent());
+
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 404 when post does not exist")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenThePostDoesNotExist() throws Exception {
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(true)
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, "invalid-slug", UUID.randomUUID())
+                            .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
         }
 
         @Test
         @DisplayName("Should return 406 when the author bookmarks a UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn406WhenTheAuthorBookmarksABookmarksABookmarkedPost() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(true)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
+
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
+        @WithMockBlogUser(USERNAME)
         @DisplayName("Should return 406 when the author unbookmarks a UNPUBLISHED post")
         void shouldReturn406WhenTheAuthorUnbookmarksAUnbookmarkedPost() throws Exception {
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(user)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            bookmarkRepository.saveAndFlush(BookmarkEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
+
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(false)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNotAcceptable())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.invalid.action.unpublished_post"));
+
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 404 when the user is not the owner and bookmarks an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheUserIsNotTheOwnerAndBookmarksAnUNPUBLISHEDPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(true)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isNotPresent();
         }
 
         @Test
         @DisplayName("Should return 404 when the user is not the owner and unbookmarks an UNPUBLISHED post")
+        @WithMockBlogUser(USERNAME)
         void shouldReturn404WhenTheUserIsNotTheOwnerAndUnbookmarksAnUNPUBLISHEDPost() throws Exception {
+            UserEntity otherUser = userRepository.saveAndFlush(testDataFactory.createCustomUser("OtherUser", "otheruser@gmail.com","other@Password123"));
+            PostEntity post = postRepository.saveAndFlush(testDataFactory.createPost()
+                    .user(otherUser)
+                    .category(category)
+                    .status(PostStatus.DRAFT)
+                    .build());
 
+            bookmarkRepository.saveAndFlush(BookmarkEntity.builder()
+                    .user(user)
+                    .post(post)
+                    .build());
+
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(false)
+                    .build();
+
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isNotFound())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo(messageService.get("exception.resource.not_found", "Post"));
+            assertThat(bookmarkRepository.findByUserIdAndPostId(user.getId(), post.getId())).isPresent();
         }
 
         @Test
         @DisplayName("Should return 401 when the user is unauthenticated")
         void shouldReturn401WhenTheUserIsUnauthenticated() throws Exception {
+            BookmarkDTO bookmark = BookmarkDTO.builder()
+                    .bookmark(true)
+                    .build();
 
+            MvcResult response = mockMvc.perform(post(ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH, post.getSlug(), post.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(bookmark)))
+                    .andExpect(status().isUnauthorized())
+                    .andReturn();
+
+            ApiError errorResponse = testResponseExtractor.extractError(response);
+            assertThat(errorResponse.getMessage()).isEqualTo("Full authentication is required to access this resource");
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Utils;
 
 import com.project.Blog_Management_System.Entities.CategoryEntity;
+import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Gender;
@@ -84,4 +85,21 @@ public final class TestDataFactory {
                 .build();
     }
 
+    /**
+     * Comment Entity Blueprints
+     */
+    public CommentEntity.CommentEntityBuilder createComment() {
+            return CommentEntity.builder()
+                    .body("This is a test comment")
+                    .depth(0);
+    }
+
+    public CommentEntity createCustomComment(UserEntity user, PostEntity post, CommentEntity parent) {
+        return createComment()
+                .user(user)
+                .post(post)
+                .parent(parent)
+                .depth(parent == null ? 0 : parent.getDepth() + 1)
+                .build();
+    }
 }

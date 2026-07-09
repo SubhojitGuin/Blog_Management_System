@@ -38,6 +38,7 @@ public interface BookmarkRepository extends JpaRepository<BookmarkEntity, UUID> 
                 FROM BookmarkEntity b
                 JOIN b.post p
                 WHERE b.user.id = :userId
+                AND p.status = com.project.Blog_Management_System.Enums.PostStatus.PUBLISHED
                 AND (:bookmarkCursor IS NULL OR b.id < :bookmarkCursor)
                 ORDER BY b.id DESC
             """)

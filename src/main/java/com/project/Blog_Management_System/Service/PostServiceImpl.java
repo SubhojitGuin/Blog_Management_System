@@ -268,6 +268,8 @@ public class PostServiceImpl implements PostService {
 
         CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
         commentResponseDTO.setIsAuthor(true);
+        commentResponseDTO.setHasReplies(false);
+
         return commentResponseDTO;
     }
 
@@ -335,6 +337,7 @@ public class PostServiceImpl implements PostService {
 
         CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
         commentResponseDTO.setIsAuthor(true);
+        commentResponseDTO.setHasReplies(false);
         return commentResponseDTO;
     }
 
@@ -359,6 +362,7 @@ public class PostServiceImpl implements PostService {
         CommentEntity savedComment = commentRepository.saveAndFlush(comment);
         CommentResponseDTO commentResponseDTO = modelMapper.map(savedComment, CommentResponseDTO.class);
         commentResponseDTO.setIsAuthor(true);
+        commentResponseDTO.setHasReplies(commentRepository.existsByParentId(comment.getId()));
         return commentResponseDTO;
     }
 
