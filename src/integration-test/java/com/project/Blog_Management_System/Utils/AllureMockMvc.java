@@ -107,7 +107,8 @@ public class AllureMockMvc {
         Map<String, String> cookieMap = new HashMap<>();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                cookieMap.put(cookie.getName(), maskString(cookie.getValue()));
+                String cookiePair = cookie.getName().toLowerCase() + ":" + cookie.getValue();
+                cookieMap.put(cookie.getName(), SENSITIVE_PATTERN.matcher(cookiePair).matches() ? MASK_VALUE : cookie.getValue());
             }
         }
         return cookieMap;
