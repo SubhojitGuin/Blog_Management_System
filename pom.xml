@@ -47,7 +47,21 @@
         <java.version>21</java.version>
         <skip.ut>false</skip.ut>
         <skip.it>false</skip.it>
+        <allure.version>2.35.1</allure.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-bom</artifactId>
+                <version>${allure.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -220,6 +234,22 @@
             <version>2.2.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-jupiter-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-attachments</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -316,6 +346,9 @@
                     <skipTests>${skip.ut}</skipTests>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${argLine} -Xshare:off</argLine>
+                    <systemPropertyVariables>
+                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
@@ -336,6 +369,9 @@
                     <skipTests>${skip.it}</skipTests>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>${argLine} -Xshare:off</argLine>
+                    <systemPropertyVariables>
+                        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
@@ -345,6 +381,15 @@
                 <version>12.6.1</version>
             </plugin>
 
+             <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.12.0</version>
+                <configuration>
+                    <reportVersion>${allure.version}</reportVersion>
+                    <resultsDirectory>${project.build.directory}/allure-results</resultsDirectory>
+                </configuration>
+              </plugin>
         </plugins>
     </build>
 
