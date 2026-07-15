@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
@@ -13,6 +14,10 @@ import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
 import com.project.Blog_Management_System.Utils.ValidationUtils;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -39,8 +44,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Feature("Service / User Service Tests")
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+class UserServiceImplTest extends BaseTest {
 
     @Mock
     private UserRepository userRepository;
@@ -92,6 +98,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("addUser(UserEntity)")
+    @Story("Adding a new user to the system")
+    @Severity(SeverityLevel.CRITICAL)
     class AddUser {
 
         @Test
@@ -111,6 +119,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("getUserByUsernameOrEmail(String, String)")
+    @Story("Retrieving a user by username or email")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserByUsernameOrEmail {
 
         @Test
@@ -146,6 +156,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("updateProfile(ProfileUpdateDTO)")
+    @Story("Updating the current user's profile information")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateProfile {
 
         @Test
@@ -196,6 +208,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("updatePassword(PasswordUpdateDTO)")
+    @Story("Updating the current user's password and invalidating existing tokens")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdatePassword {
 
         @Test
@@ -236,6 +250,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("updateUserName(UsernameUpdateDTO)")
+    @Story("Updating the current user's username and invalidating existing tokens")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateUserName {
 
         @Test
@@ -273,6 +289,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("updateEmail(EmailUpdateDTO)")
+    @Story("Updating the current user's email and invalidating existing tokens")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateEmail {
 
         @Test
@@ -310,6 +328,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("followOrUnfollowUser(String, UUID, FollowDTO)")
+    @Story("Following or unfollowing another user and updating counts accordingly")
+    @Severity(SeverityLevel.NORMAL)
     class FollowOrUnfollow {
 
         @Test
@@ -485,6 +505,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("getUserProfile(String, UUID)")
+    @Story("Retrieving a user's profile information and marking if it's the current user")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserProfile {
 
         @Test
@@ -515,6 +537,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("searchUsers(String)")
+    @Story("Searching for users by username or name")
+    @Severity(SeverityLevel.NORMAL)
     class SearchUsers {
 
         @Test
@@ -532,6 +556,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("getUserById(UUID)")
+    @Story("Retrieving a user by their unique identifier")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserById {
 
         @Test
@@ -555,6 +581,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("getFollowers(String, UUID, UUID, int)")
+    @Story("Retrieving a user's followers")
+    @Severity(SeverityLevel.NORMAL)
     class GetFollowers {
 
         @Test
@@ -590,6 +618,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("getFollowings(String, UUID, UUID, int)")
+    @Story("Retrieving a user's followings")
+    @Severity(SeverityLevel.NORMAL)
     class GetFollowings {
 
         @Test
@@ -625,6 +655,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("deleteUser()")
+    @Story("Marking the current user as inactive for soft deletion")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteUser {
 
         @Test
@@ -643,6 +675,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("getUserPosts(String, UUID, UUID, int)")
+    @Story("Retrieving a slice of posts for a specific user")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserPosts {
 
         @Test
@@ -678,6 +712,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("getUserBookmarks(UUID, int)")
+    @Story("Retrieving a slice of bookmarks for the current user")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserBookmarks {
 
         @Test
@@ -696,6 +732,8 @@ class UserServiceImplTest {
 
     @Nested
     @DisplayName("loadUserByUsername(String)")
+    @Story("Loading user details by username for authentication")
+    @Severity(SeverityLevel.CRITICAL)
     class LoadUserByUsername {
 
         @Test

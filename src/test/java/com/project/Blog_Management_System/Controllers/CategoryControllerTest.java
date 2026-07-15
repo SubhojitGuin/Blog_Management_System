@@ -5,18 +5,20 @@ import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Security.JWTService;
-import com.project.Blog_Management_System.Security.WebSecurityConfig;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
@@ -36,8 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CategoryController.class)
-@Import(WebSecurityConfig.class)
-public class CategoryControllerTest {
+@Feature("Controller / Category Controller Test")
+public class CategoryControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -76,6 +78,8 @@ public class CategoryControllerTest {
 
     @Nested
     @DisplayName("getPostsByCategory(String, UUID, UUID, Integer)")
+    @Story("User retrieves Posts By Category")
+    @Severity(SeverityLevel.NORMAL)
     class GetPostsByCategory {
 
         @Test
@@ -168,6 +172,8 @@ public class CategoryControllerTest {
 
     @Nested
     @DisplayName("getAllCategories()")
+    @Story("User retrieves all categories")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllCategories {
 
         @Test
@@ -227,6 +233,8 @@ public class CategoryControllerTest {
 
     @Nested
     @DisplayName("getCategoryDetails(String, UUID)")
+    @Story("User retrieves category details")
+    @Severity(SeverityLevel.NORMAL)
     class GetCategoryDetails {
 
         @Test

@@ -1,5 +1,10 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.BaseTest;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,8 +23,9 @@ import java.util.concurrent.TimeUnit;
 import static com.project.Blog_Management_System.Constants.RedisConstants.*;
 import static org.mockito.Mockito.*;
 
+@Feature("Service / Redis View Count Service Tests")
 @ExtendWith(MockitoExtension.class)
-class RedisViewCountServiceImplTest {
+class RedisViewCountServiceImplTest extends BaseTest {
 
     @Mock
     private StringRedisTemplate redisTemplate;
@@ -51,6 +57,8 @@ class RedisViewCountServiceImplTest {
 
     @Nested
     @DisplayName("addViewer(UUID, UUID)")
+    @Story("Add Post Viewer and increment post view count to Redis, set TTL for new post bucket")
+    @Severity(SeverityLevel.CRITICAL)
     class AddViewer {
 
         @Test

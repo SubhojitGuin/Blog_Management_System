@@ -12,6 +12,10 @@ import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Repositories.UserRepository;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,6 +32,7 @@ import static org.assertj.core.groups.Tuple.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Feature("Admin Category Management")
 public class AdminControllerIT extends BaseIT {
 
     @Autowired
@@ -65,6 +70,8 @@ public class AdminControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.CATEGORY_BASE_PATH)
+    @Story("Admin creates category")
+    @Severity(SeverityLevel.CRITICAL)
     class CreateCategory {
 
         @Test
@@ -212,6 +219,8 @@ public class AdminControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("PUT " + ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH)
+    @Story("Admin updates category")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateCategory {
 
         @Test
@@ -388,6 +397,8 @@ public class AdminControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("DELETE " + ApiRoutes.ADMIN_BASE_PATH + ApiRoutes.ADMIN_CATEGORY_PATH)
+    @Story("Admin deletes category")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteCategory {
 
         private PostEntity post;

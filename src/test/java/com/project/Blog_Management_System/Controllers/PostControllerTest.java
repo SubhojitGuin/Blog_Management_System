@@ -5,16 +5,18 @@ import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Security.JWTService;
-import com.project.Blog_Management_System.Security.WebSecurityConfig;
 import com.project.Blog_Management_System.Service.Interfaces.PostService;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import com.project.Blog_Management_System.Utils.MessageService;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Slice;
@@ -37,8 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PostController.class)
-@Import(WebSecurityConfig.class)
-public class PostControllerTest {
+@Feature("Controller / Post Controller Test")
+public class PostControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,6 +62,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("searchPosts(PostFilterRequestDTO, List, int, int)")
+    @Story("User searches Posts")
+    @Severity(SeverityLevel.NORMAL)
     class SearchPosts {
 
         @Test
@@ -94,6 +98,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("getPost(String, UUID)")
+    @Story("User retrieves post")
+    @Severity(SeverityLevel.NORMAL)
     class GetPost {
 
         @Test
@@ -146,6 +152,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("updatePost(PostRequestDTO, String, UUID)")
+    @Story("User updates their own post")
+    @Severity(SeverityLevel.NORMAL)
     class UpdatePost {
 
         @Test
@@ -198,6 +206,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("deletePost(String, UUID)")
+    @Story("User deletes their own post")
+    @Severity(SeverityLevel.NORMAL)
     class DeletePost {
 
         @Test
@@ -241,6 +251,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("createPost(PostRequestDTO)")
+    @Story("User creates a post")
+    @Severity(SeverityLevel.CRITICAL)
     class CreatePost {
 
         @Test
@@ -302,6 +314,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("getAllPosts(UUID, Integer)")
+    @Story("User retrieves all posts")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllPosts {
 
         @Test
@@ -365,6 +379,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("getAllPostsOfFollowings(UUID, Integer)")
+    @Story("User retrieves all posts of followings")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllPostsOfFollowings {
 
         @Test
@@ -411,6 +427,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("getAllUnpublishedPosts(PostStatus, UUID, Integer)")
+    @Story("User retrieves their own unpublished posts")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllUnpublishedPosts {
 
         @Test
@@ -460,6 +478,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("findTopLevelCommentsOfPost(String, UUID, UUID, int)")
+    @Story("User retrieves top level comments of a post")
+    @Severity(SeverityLevel.NORMAL)
     class FindTopLevelCommentsOfPost {
 
         @Test
@@ -528,6 +548,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("findRepliesOfComment(String, UUID, UUID, UUID, int)")
+    @Story("User retrieves the replies of a comment")
+    @Severity(SeverityLevel.NORMAL)
     class FindRepliesOfComment {
 
         @Test
@@ -584,6 +606,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("addTopLevelComment(String, UUID, CommentRequestDTO)")
+    @Story("User adds a top level comment to a post")
+    @Severity(SeverityLevel.NORMAL)
     class AddTopLevelComment {
 
         @Test
@@ -631,6 +655,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("addReplyToComment(String, UUID, UUID, CommentRequestDTO)")
+    @Story("User adds reply to a comment")
+    @Severity(SeverityLevel.NORMAL)
     class AddReplyToComment {
 
         @Test
@@ -682,6 +708,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("updateComment(String, UUID, UUID, CommentRequestDTO)")
+    @Story("User updates their own comment")
+    @Severity(SeverityLevel.NORMAL)
     class UpdateComment {
 
         @Test
@@ -734,6 +762,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("deleteComment(String, UUID, UUID)")
+    @Story("User deletes their own comment")
+    @Severity(SeverityLevel.NORMAL)
     class DeleteComment {
 
         @Test
@@ -769,6 +799,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("getLikesOfPost(String, UUID, UUID, int)")
+    @Story("User retrieves likes of a post")
+    @Severity(SeverityLevel.NORMAL)
     class GetLikesOfPost {
 
         @Test
@@ -829,6 +861,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("likeOrDislikePost(String, UUID, LikeDTO)")
+    @Story("User likes or dislikes a post")
+    @Severity(SeverityLevel.NORMAL)
     class LikeOrDislikePost {
 
         @Test
@@ -867,6 +901,8 @@ public class PostControllerTest {
 
     @Nested
     @DisplayName("bookmarkOrUnbookmarkPost(String, UUID, BookmarkDTO)")
+    @Story("User bookmarks or unbookmarks a post")
+    @Severity(SeverityLevel.NORMAL)
     class BookmarkOrUnbookmarkPost {
 
         @Test

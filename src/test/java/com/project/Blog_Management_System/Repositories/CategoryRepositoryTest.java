@@ -2,17 +2,17 @@ package com.project.Blog_Management_System.Repositories;
 
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +20,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class CategoryRepositoryTest {
+@Feature("Repository / Category Repository Tests")
+public class CategoryRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -38,6 +35,8 @@ public class CategoryRepositoryTest {
 
     @Nested
     @DisplayName("findBySlug(String)")
+    @Story("Find Category by slug")
+    @Severity(SeverityLevel.CRITICAL)
     class FindBySlug {
 
         @Test
@@ -84,6 +83,8 @@ public class CategoryRepositoryTest {
 
     @Nested
     @DisplayName("saveAndFlush()")
+    @Story("Save Category")
+    @Severity(SeverityLevel.CRITICAL)
     class SaveCategory {
 
         @Test
@@ -118,6 +119,8 @@ public class CategoryRepositoryTest {
 
     @Nested
     @DisplayName("findById(UUID)")
+    @Story("Find Category by ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindById {
 
         @Test
@@ -140,6 +143,8 @@ public class CategoryRepositoryTest {
 
     @Nested
     @DisplayName("deleteById(UUID)")
+    @Story("Delete Category by ID")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteById {
 
         @Test
@@ -174,6 +179,8 @@ public class CategoryRepositoryTest {
 
     @Nested
     @DisplayName("findAll()")
+    @Story("Find All Categories")
+    @Severity(SeverityLevel.CRITICAL)
     class FindAll {
 
         @Test

@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Security;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Dto.LoginRequestDTO;
 import com.project.Blog_Management_System.Dto.SignUpRequestDTO;
 import com.project.Blog_Management_System.Dto.UserDTO;
@@ -10,6 +11,10 @@ import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
 import io.jsonwebtoken.JwtException;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,8 +38,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Feature("Security / Auth Service Tests")
 @ExtendWith(MockitoExtension.class)
-class AuthServiceTest {
+class AuthServiceTest extends BaseTest {
 
     @Mock
     private UserService userService;
@@ -62,6 +68,8 @@ class AuthServiceTest {
 
     @Nested
     @DisplayName("signUp(SignUpRequestDTO)")
+    @Story("Sign Up / Register a new user")
+    @Severity(SeverityLevel.CRITICAL)
     class SignUp {
 
         @Test
@@ -118,6 +126,8 @@ class AuthServiceTest {
 
     @Nested
     @DisplayName("login(LoginRequestDTO)")
+    @Story("Login an existing user")
+    @Severity(SeverityLevel.CRITICAL)
     class Login {
 
         @Test
@@ -219,6 +229,8 @@ class AuthServiceTest {
 
     @Nested
     @DisplayName("refreshToken(String)")
+    @Story("Refresh auth tokens")
+    @Severity(SeverityLevel.CRITICAL)
     class RefreshToken {
 
         @Test

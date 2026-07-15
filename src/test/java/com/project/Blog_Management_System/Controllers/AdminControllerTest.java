@@ -5,18 +5,20 @@ import com.project.Blog_Management_System.Dto.CategoryRequestDTO;
 import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Security.JWTService;
-import com.project.Blog_Management_System.Security.WebSecurityConfig;
 import com.project.Blog_Management_System.Service.Interfaces.CategoryService;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -34,8 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminController.class)
-@Import(WebSecurityConfig.class)
-public class AdminControllerTest {
+@Feature("Controller / Admin Controller Test")
+public class AdminControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -77,6 +79,8 @@ public class AdminControllerTest {
 
     @Nested
     @DisplayName("createCategory(CategoryRequestDTO)")
+    @Story("Admin creates category")
+    @Severity(SeverityLevel.CRITICAL)
     class CreateCategory {
 
         @Test
@@ -129,6 +133,8 @@ public class AdminControllerTest {
 
     @Nested
     @DisplayName("updateCategory(CategoryRequestDTO, String, UUID)")
+    @Story("Admin Updates Category")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateCategory {
 
         @Test
@@ -184,6 +190,8 @@ public class AdminControllerTest {
 
     @Nested
     @DisplayName("deleteCategory(String, UUID, String)")
+    @Story("Admin Deletes Category")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteCategory {
 
         @Test

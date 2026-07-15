@@ -1,10 +1,15 @@
 package com.project.Blog_Management_System.Utils;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,8 +31,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Feature("Utils / AppUtils Tests")
 @ExtendWith(MockitoExtension.class)
-class AppUtilsTest {
+class AppUtilsTest extends BaseTest {
 
     @Mock
     private MessageService messageService;
@@ -53,6 +59,8 @@ class AppUtilsTest {
 
     @Nested
     @DisplayName("getCurrentUser()")
+    @Story("Retrieves the currently authenticated user entity from the security context")
+    @Severity(SeverityLevel.CRITICAL)
     class GetCurrentUser {
 
         @Test
@@ -70,12 +78,14 @@ class AppUtilsTest {
 
     @Nested
     @DisplayName("hasRole()")
+    @Story("Checks if the currently authenticated user has a specific role")
+    @Severity(SeverityLevel.CRITICAL)
     class HasRole {
 
         @Test
         @DisplayName("returns true when user has matching role authority")
         void returnsTrueWhenUserHasMatchingRole() {
-            Collection authorities = List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            Collection<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
             when(securityContext.getAuthentication()).thenReturn(authentication);
             doReturn(authorities).when(authentication).getAuthorities();
 
@@ -87,7 +97,7 @@ class AppUtilsTest {
         @Test
         @DisplayName("returns false when user does not have matching role authority")
         void returnsFalseWhenUserDoesNotHaveMatchingRole() {
-            Collection authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            Collection<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
             when(securityContext.getAuthentication()).thenReturn(authentication);
             doReturn(authorities).when(authentication).getAuthorities();
 
@@ -99,6 +109,8 @@ class AppUtilsTest {
 
     @Nested
     @DisplayName("generateSlug()")
+    @Story("Generates URL-friendly slugs from input strings")
+    @Severity(SeverityLevel.CRITICAL)
     class GenerateSlug {
 
         @ParameterizedTest
@@ -109,7 +121,7 @@ class AppUtilsTest {
                 "'   spaces   test   ', 'spaces-test'"
         })
         @DisplayName("converts various string types to URL-friendly slugs")
-        void convertsStringtoSlug(String input, String expectedSlug) {
+        void convertsStringToSlug(String input, String expectedSlug) {
             String result = AppUtils.generateSlug(input);
             assertEquals(expectedSlug, result);
         }
@@ -117,6 +129,8 @@ class AppUtilsTest {
 
     @Nested
     @DisplayName("convertToSort()")
+    @Story("Converts a list of sort field strings into a Spring Data Sort object")
+    @Severity(SeverityLevel.CRITICAL)
     class ConvertToSort {
 
         private final Set<String> allowedFields = Set.of(PostEntity.Fields.title, PostEntity.Fields.createdAt);
@@ -158,6 +172,8 @@ class AppUtilsTest {
 
     @Nested
     @DisplayName("applyStatusAndPublishAt()")
+    @Story("Applies post status and publish date to a PostEntity based on input parameters")
+    @Severity(SeverityLevel.CRITICAL)
     class ApplyStatusAndPublishAt {
 
         private PostEntity post;
@@ -209,6 +225,8 @@ class AppUtilsTest {
 
     @Nested
     @DisplayName("getCommentSnippet()")
+    @Story("Generates a snippet from a comment's body")
+    @Severity(SeverityLevel.CRITICAL)
     class GetCommentSnippet {
 
         @Mock

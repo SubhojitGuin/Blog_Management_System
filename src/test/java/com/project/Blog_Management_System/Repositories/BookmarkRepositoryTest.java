@@ -6,28 +6,25 @@ import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class BookmarkRepositoryTest {
+@Feature("Repository / Bookmark Repository Tests")
+public class BookmarkRepositoryTest extends BaseRepositoryTest{
 
     @Autowired
     private BookmarkRepository bookmarkRepository;
@@ -53,6 +50,8 @@ public class BookmarkRepositoryTest {
 
     @Nested
     @DisplayName("findByUserIdAndPostId(UUID, UUID)")
+    @Story("Find Bookmark by User ID and Post ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByUserIdAndPostId {
 
         @Test
@@ -104,6 +103,8 @@ public class BookmarkRepositoryTest {
 
     @Nested
     @DisplayName("deleteByUserIdAndPostId(UUID, UUID)")
+    @Story("Delete Bookmark by User ID and Post ID")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteByUserIdAndPostId {
 
         @Test
@@ -150,6 +151,8 @@ public class BookmarkRepositoryTest {
 
     @Nested
     @DisplayName("findByUser(UUID, UUID, Pageable)")
+    @Story("Find Bookmarks by User ID with Pagination")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByUser {
 
         @Test

@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Utils;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Entities.CategoryEntity;
 import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
@@ -7,6 +8,10 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,8 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+@Feature("Utils / ValidationUtils Tests")
 @ExtendWith(MockitoExtension.class)
-class ValidationUtilsTest {
+class ValidationUtilsTest extends BaseTest {
 
     @Mock
     private MessageService messageService;
@@ -32,6 +38,8 @@ class ValidationUtilsTest {
 
     @Nested
     @DisplayName("isInvalidCategory()")
+    @Story("Validate Category existence and slug matching")
+    @Severity(SeverityLevel.CRITICAL)
     class IsInvalidCategory {
 
         @Test
@@ -71,6 +79,8 @@ class ValidationUtilsTest {
 
     @Nested
     @DisplayName("isInvalidUser()")
+    @Story("Validate User existence, deletion status, and username matching")
+    @Severity(SeverityLevel.CRITICAL)
     class IsInvalidUser {
 
         @Test
@@ -125,6 +135,8 @@ class ValidationUtilsTest {
 
     @Nested
     @DisplayName("isInvalidPost()")
+    @Story("Validate Post existence and slug matching")
+    @Severity(SeverityLevel.CRITICAL)
     class IsInvalidPost {
 
         @Test
@@ -163,6 +175,8 @@ class ValidationUtilsTest {
 
     @Nested
     @DisplayName("isPublishedPost()")
+    @Story("Validate published post status")
+    @Severity(SeverityLevel.CRITICAL)
     class IsPublishedPost {
 
         @Test
@@ -219,6 +233,8 @@ class ValidationUtilsTest {
 
         @Nested
     @DisplayName("isInvalidComment()")
+    @Story("Validate Comment existence")
+    @Severity(SeverityLevel.CRITICAL)
     class IsInvalidComment {
 
         @Test
@@ -242,6 +258,8 @@ class ValidationUtilsTest {
 
     @Nested
     @DisplayName("validateReplyDepth()")
+    @Story("Validate Reply Depth")
+    @Severity(SeverityLevel.CRITICAL)
     class ValidateReplyDepth {
 
         @Test

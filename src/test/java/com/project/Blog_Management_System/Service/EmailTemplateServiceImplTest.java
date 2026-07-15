@@ -1,9 +1,14 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Dto.EmailMessageDTO;
 import com.project.Blog_Management_System.TemplateModels.*;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -21,8 +26,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Feature("Service / Email Template Service Tests")
 @ExtendWith(MockitoExtension.class)
-class EmailTemplateServiceImplTest {
+class EmailTemplateServiceImplTest extends BaseTest {
 
     @Mock
     private Configuration freemarkerConfig;
@@ -52,6 +58,8 @@ class EmailTemplateServiceImplTest {
 
     @Nested
     @DisplayName("buildNewPostByAuthor(String, String, String, String)")
+    @Story("Builds an Email Message for notifying subscribers about a new post by an author")
+    @Severity(SeverityLevel.CRITICAL)
     class BuildNewPostByAuthor {
 
         @Test
@@ -104,6 +112,8 @@ class EmailTemplateServiceImplTest {
 
     @Nested
     @DisplayName("buildPostPublished(String, String, String)")
+    @Story("Builds an Email Message for notifying subscribers about a published post")
+    @Severity(SeverityLevel.CRITICAL)
     class BuildPostPublished {
 
         @Test
@@ -129,6 +139,8 @@ class EmailTemplateServiceImplTest {
 
     @Nested
     @DisplayName("buildPostCommented(String, String, String, String, String)")
+    @Story("Builds an Email Message for notifying post authors about new comments on their posts")
+    @Severity(SeverityLevel.CRITICAL)
     class BuildPostCommented {
 
         @Test
@@ -154,6 +166,8 @@ class EmailTemplateServiceImplTest {
 
     @Nested
     @DisplayName("buildCommentReplied(String, String, String, String, String, String, String)")
+    @Story("Builds an Email Message for notifying users about replies to their comments")
+    @Severity(SeverityLevel.CRITICAL)
     class BuildCommentReplied {
 
         @Test
@@ -179,6 +193,8 @@ class EmailTemplateServiceImplTest {
 
     @Nested
     @DisplayName("buildPostLiked(String, String, String, String)")
+    @Story("Builds an Email Message for notifying post authors about new likes on their posts")
+    @Severity(SeverityLevel.CRITICAL)
     class BuildPostLiked {
 
         @Test
@@ -204,6 +220,8 @@ class EmailTemplateServiceImplTest {
 
     @Nested
     @DisplayName("buildNewFollower(String, String, String)")
+    @Story("Builds an Email Message for notifying users about new followers")
+    @Severity(SeverityLevel.CRITICAL)
     class BuildNewFollower {
         @Test
         @DisplayName("returns mapped EmailMessageDTO capturing simple user connection follower metrics")

@@ -6,6 +6,7 @@ import com.project.Blog_Management_System.Utils.TestDataFactory;
 import com.project.Blog_Management_System.Utils.TestResponseExtractor;
 import com.redis.testcontainers.RedisContainer;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Epic;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -29,6 +30,7 @@ import java.util.Objects;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("integration-test")
+@Epic("Blog Management System Integration Tests")
 @Import({TestResponseExtractor.class, AllureMockMvcConfig.class})
 public abstract class BaseIT implements TestWatcher {
 

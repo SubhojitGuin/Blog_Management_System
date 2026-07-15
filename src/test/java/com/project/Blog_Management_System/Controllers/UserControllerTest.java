@@ -7,16 +7,18 @@ import com.project.Blog_Management_System.Exceptions.InvalidActionException;
 import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Security.JWTService;
-import com.project.Blog_Management_System.Security.WebSecurityConfig;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import com.project.Blog_Management_System.Utils.MessageService;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.MediaType;
@@ -38,8 +40,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-@Import(WebSecurityConfig.class)
-public class UserControllerTest {
+@Feature("Controller / User Controller Test")
+public class UserControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -114,6 +116,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("updateUserProfile(ProfileUpdateDTO)")
+    @Story("Update user profile information")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateUserProfile {
 
         @Test
@@ -146,6 +150,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("updateUserPassword(PasswordUpdateDTO, HttpServletResponse)")
+    @Story("User updates password")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateUserPassword {
 
         @Test
@@ -189,6 +195,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("updateUserName(UsernameUpdateDTO, HttpServletResponse)")
+    @Story("User updates username")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateUserName {
 
         @Test
@@ -232,6 +240,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("updateEmail(EmailUpdateDTO, HttpServletResponse)")
+    @Story("User updates Email")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateEmail {
 
         @Test
@@ -275,6 +285,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("getUserProfile(String, UUID)")
+    @Story("Retrieve user profile information")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserProfile {
 
         @Test
@@ -305,6 +317,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("searchUsers(String)")
+    @Story("Search for users by username")
+    @Severity(SeverityLevel.NORMAL)
     class SearchUsers {
 
         @Test
@@ -336,6 +350,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("followOrUnfollowUser(String, UUID, FollowDTO)")
+    @Story("Follow or unfollow a user")
+    @Severity(SeverityLevel.NORMAL)
     class FollowOrUnfollowUser {
 
         @Test
@@ -378,6 +394,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("getFollowers(String, UUID, UUID, int)")
+    @Story("Retrieve followers of a user")
+    @Severity(SeverityLevel.NORMAL)
     class GetFollowers {
 
         @Test
@@ -414,6 +432,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("getFollowings(String, UUID, UUID, int)")
+    @Story("Retrieve followings of a user")
+    @Severity(SeverityLevel.NORMAL)
     class GetFollowings {
 
         @Test
@@ -450,6 +470,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("deleteUser()")
+    @Story("User deletes their account")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteUser {
 
         @Test
@@ -466,6 +488,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("getUserPosts(String, UUID, UUID, int)")
+    @Story("Retrieve User Posts")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserPosts {
 
         @Test
@@ -514,6 +538,8 @@ public class UserControllerTest {
 
     @Nested
     @DisplayName("getUserBookmarks(UUID, int)")
+    @Story("Retrieve bookmarks of the current user")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserBookmarks {
 
         @Test

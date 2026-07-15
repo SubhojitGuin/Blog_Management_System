@@ -11,6 +11,10 @@ import com.project.Blog_Management_System.Events.NewPostPublishedEvent;
 import com.project.Blog_Management_System.Repositories.*;
 import com.project.Blog_Management_System.Utils.TestPageResponse;
 import com.project.Blog_Management_System.Utils.TestSliceResponse;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,6 +35,7 @@ import static org.assertj.core.groups.Tuple.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Feature("Post Management")
 @RecordApplicationEvents
 public class PostControllerIT extends BaseIT {
 
@@ -84,6 +89,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.POSTS_BASE_PATH)
+    @Story("User creates post")
+    @Severity(SeverityLevel.CRITICAL)
     class CreatePost {
 
         @Test
@@ -325,6 +332,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH)
+    @Story("User retrieves all posts")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllPosts {
 
         @Test
@@ -397,6 +406,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_FOLLOWING_PATH)
+    @Story("User retrieves all posts of followings")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllPostsOfFollowings {
 
         UserEntity followingUser;
@@ -485,6 +496,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PERSONAL_PATH)
+    @Story("User retrieves all personal posts")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllPersonalPosts {
 
         PostEntity scheduledPost, publishedPost, draftPost;
@@ -606,6 +619,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_SEARCH_PATH)
+    @Story("User searches posts")
+    @Severity(SeverityLevel.NORMAL)
     class SearchPosts {
 
         PostEntity post1, post2, post3, post4, post5;
@@ -827,6 +842,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE)
+    @Story("User retrieves a post")
+    @Severity(SeverityLevel.NORMAL)
     class GetPost {
 
         PostEntity post;
@@ -934,6 +951,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("PUT " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE)
+    @Story("User updates post")
+    @Severity(SeverityLevel.NORMAL)
     class UpdatePost {
 
         PostEntity post;
@@ -1219,6 +1238,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("DELETE" + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_PATH_VARIABLE)
+    @Story("User deletes post")
+    @Severity(SeverityLevel.CRITICAL)
     class DeletePost {
 
         PostEntity post;
@@ -1348,6 +1369,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH)
+    @Story("User retrieves top level comments of a post")
+    @Severity(SeverityLevel.NORMAL)
     class FindTopLevelCommentsOfPost {
 
         PostEntity post;
@@ -1456,6 +1479,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH)
+    @Story("User retrieves replies of comment")
+    @Severity(SeverityLevel.NORMAL)
     class FindRepliesOfComment {
 
         PostEntity post;
@@ -1595,6 +1620,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST" + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENTS_PATH)
+    @Story("User adds a top level comment to post")
+    @Severity(SeverityLevel.NORMAL)
     class AddTopLevelComment {
 
         PostEntity post;
@@ -1747,6 +1774,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_REPLIES_PATH)
+    @Story("User adds a reply to a comment")
+    @Severity(SeverityLevel.NORMAL)
     class AddReplyToComment {
 
         PostEntity post;
@@ -1946,6 +1975,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("PUT " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH)
+    @Story("User updates a comment")
+    @Severity(SeverityLevel.NORMAL)
     class UpdateComment {
 
         PostEntity post;
@@ -2180,6 +2211,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("DELETE " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_COMMENT_PATH)
+    @Story("User deletes a comment")
+    @Severity(SeverityLevel.NORMAL)
     class DeleteComment {
 
         PostEntity post;
@@ -2321,6 +2354,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH)
+    @Story("User retrieves likes of a post")
+    @Severity(SeverityLevel.NORMAL)
     class GetLikesOfPost{
 
         PostEntity post;
@@ -2406,6 +2441,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_LIKES_PATH)
+    @Story("User likes or dislikes a post")
+    @Severity(SeverityLevel.NORMAL)
     class LikeOrDislikePost {
 
         PostEntity post;
@@ -2668,6 +2705,8 @@ public class PostControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.POSTS_BASE_PATH + ApiRoutes.POST_BOOKMARK_PATH)
+    @Story("User bookmarks or unbookmarks a post")
+    @Severity(SeverityLevel.NORMAL)
     class BookmarkOrUnbookmarkPost {
 
         PostEntity post;
@@ -2676,7 +2715,6 @@ public class PostControllerIT extends BaseIT {
         void setup() {
             post = postRepository.saveAndFlush(testDataFactory.createCustomPost(user, category));
         }
-
 
         @Test
         @DisplayName("Should return 204 when the user successfully bookmarks a post")
