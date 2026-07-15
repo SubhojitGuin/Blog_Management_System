@@ -253,6 +253,19 @@
     </dependencies>
     <build>
         <plugins>
+            <!-- Mockito Agent Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- 1. Compiler Configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -345,7 +358,11 @@
                     <!-- Listens to your custom flag -->
                     <skipTests>${skip.ut}</skipTests>
                     <!--suppress UnresolvedMavenProperty -->
-                    <argLine>${argLine} -Xshare:off</argLine>
+                    <argLine>
+                        ${argLine}
+                        -javaagent:"${org.mockito:mockito-core:jar}"
+                        -Xshare:off
+                    </argLine>
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
@@ -368,7 +385,11 @@
                     <!-- Listens to your custom flag -->
                     <skipTests>${skip.it}</skipTests>
                     <!--suppress UnresolvedMavenProperty -->
-                    <argLine>${argLine} -Xshare:off</argLine>
+                    <argLine>
+                        ${argLine}
+                        -javaagent:"${org.mockito:mockito-core:jar}"
+                        -Xshare:off
+                    </argLine>
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                     </systemPropertyVariables>
