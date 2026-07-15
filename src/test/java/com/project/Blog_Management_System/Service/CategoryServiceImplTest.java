@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Dto.CategoryRequestDTO;
 import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
@@ -13,6 +14,10 @@ import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
 import com.project.Blog_Management_System.Utils.ValidationUtils;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -34,8 +39,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Feature("Service / Category Service Tests")
 @ExtendWith(MockitoExtension.class)
-public class CategoryServiceImplTest {
+public class CategoryServiceImplTest extends BaseTest {
 
     @Mock
     private PostRepository postRepository;
@@ -78,6 +84,8 @@ public class CategoryServiceImplTest {
 
     @Nested
     @DisplayName("createCategory(CategoryRequestDTO)")
+    @Story("Create a new category and return its details")
+    @Severity(SeverityLevel.CRITICAL)
     class CreateCategory {
         @Test
         @DisplayName("returns CategoryResponseDTO when slug is available and category saved")
@@ -170,6 +178,8 @@ public class CategoryServiceImplTest {
     
     @Nested
     @DisplayName("getPostsByCategory(String, UUID, UUID, Integer)")
+    @Story("Retrieve posts by category with pagination and user context")
+    @Severity(SeverityLevel.NORMAL)
     class GetPostsByCategory {
 
         @Test
@@ -212,6 +222,8 @@ public class CategoryServiceImplTest {
 
     @Nested
     @DisplayName("getAllCategories()")
+    @Story("Retrieve all categories")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllCategories {
 
         @Test
@@ -245,6 +257,8 @@ public class CategoryServiceImplTest {
 
     @Nested
     @DisplayName("getCategoryDetails(String, UUID)")
+    @Story("Retrieve category details by slug and ID")
+    @Severity(SeverityLevel.NORMAL)
     class GetCategoryDetails {
 
         @Test
@@ -290,6 +304,8 @@ public class CategoryServiceImplTest {
 
     @Nested
     @DisplayName("updateCategory(String, UUID, CategoryRequestDTO)")
+    @Story("Update category details and return updated information")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateCategory {
 
         @Test
@@ -374,6 +390,8 @@ public class CategoryServiceImplTest {
 
     @Nested
     @DisplayName("deleteCategory(String, UUID, String)")
+    @Story("Delete a category and reassign posts to another category")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteCategory {
 
         @Test

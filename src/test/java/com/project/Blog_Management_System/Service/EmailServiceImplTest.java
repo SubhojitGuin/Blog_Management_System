@@ -1,5 +1,10 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.BaseTest;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,8 +25,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Feature("Service / Email Service Tests")
 @ExtendWith(MockitoExtension.class)
-public class EmailServiceImplTest {
+public class EmailServiceImplTest extends BaseTest {
 
     @Mock
     private JavaMailSender mailSender;
@@ -45,6 +51,8 @@ public class EmailServiceImplTest {
 
     @Nested
     @DisplayName("sendEmail(String, String, String)")
+    @Story("Send Email Functionality")
+    @Severity(SeverityLevel.CRITICAL)
     class SendEmail {
 
         @Test
@@ -89,6 +97,8 @@ public class EmailServiceImplTest {
 
     @Nested
     @DisplayName("recoverMailException(MailException, String, String, String)")
+    @Story("Recover from MailException Functionality")
+    @Severity(SeverityLevel.CRITICAL)
     class RecoverMailException {
 
         @Test
@@ -104,6 +114,8 @@ public class EmailServiceImplTest {
 
     @Nested
     @DisplayName("recoverMessagingException(MessagingException, String, String, String)")
+    @Story("Recover from MessagingException Functionality")
+    @Severity(SeverityLevel.CRITICAL)
     class RecoverMessagingException {
 
         @Test

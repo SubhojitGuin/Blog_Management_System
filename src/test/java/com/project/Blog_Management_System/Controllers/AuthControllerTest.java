@@ -8,9 +8,12 @@ import com.project.Blog_Management_System.Exceptions.ResourceConflictException;
 import com.project.Blog_Management_System.Exceptions.ResourceNotFoundException;
 import com.project.Blog_Management_System.Security.AuthService;
 import com.project.Blog_Management_System.Security.JWTService;
-import com.project.Blog_Management_System.Security.WebSecurityConfig;
 import com.project.Blog_Management_System.Service.Interfaces.UserService;
 import com.project.Blog_Management_System.Utils.MessageService;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +21,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,8 +37,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
-@Import(WebSecurityConfig.class)
-public class AuthControllerTest {
+@Feature("Controller / Auth Controller Test")
+public class AuthControllerTest extends BaseControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,6 +83,8 @@ public class AuthControllerTest {
 
     @Nested
     @DisplayName("signup(SignUpRequestDTO)")
+    @Story("User SignUp")
+    @Severity(SeverityLevel.BLOCKER)
     class Signup {
 
         @Test
@@ -213,6 +217,8 @@ public class AuthControllerTest {
 
     @Nested
     @DisplayName("login(LoginRequestDTO, HttpServletResponse)")
+    @Story("User Login")
+    @Severity(SeverityLevel.BLOCKER)
     class Login {
 
         @Test
@@ -320,6 +326,8 @@ public class AuthControllerTest {
 
     @Nested
     @DisplayName("refresh(HttpServletRequest, HttpServletResponse)")
+    @Story("Refresh Access Token")
+    @Severity(SeverityLevel.BLOCKER)
     class Refresh {
 
         @Test

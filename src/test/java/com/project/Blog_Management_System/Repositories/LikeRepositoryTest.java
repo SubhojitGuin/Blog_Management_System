@@ -6,28 +6,26 @@ import com.project.Blog_Management_System.Entities.LikeEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class LikeRepositoryTest {
+@Feature("Repository / Like Repository Tests")
+public class LikeRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private LikeRepository likeRepository;
@@ -58,6 +56,8 @@ public class LikeRepositoryTest {
 
     @Nested
     @DisplayName("saveAndFlush()")
+    @Story("Save a like to the database")
+    @Severity(SeverityLevel.CRITICAL)
     class SaveAndFlush {
 
         @Test
@@ -82,6 +82,8 @@ public class LikeRepositoryTest {
 
     @Nested
     @DisplayName("findByUserIdAndPostId(UUID, UUID)")
+    @Story("Find a like by user ID and post ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByUserIdAndPostId {
 
         @Test
@@ -130,6 +132,8 @@ public class LikeRepositoryTest {
 
     @Nested
     @DisplayName("deleteByUserIdAndPostId(UUID, UUID)")
+    @Story("Delete a like by user ID and post ID")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteByUserIdAndPostId {
 
         @Test
@@ -171,6 +175,8 @@ public class LikeRepositoryTest {
 
     @Nested
     @DisplayName("findLikesOfPost(UUID, UUID, Pageable)")
+    @Story("Find likes for a specific post by Post ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindLikesOfPost {
 
         @Test

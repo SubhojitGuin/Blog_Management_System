@@ -10,6 +10,10 @@ import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.Gender;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Security.JWTService;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Feature("User Authentication")
 public class AuthControllerIT extends BaseIT {
 
     @Autowired
@@ -44,6 +49,8 @@ public class AuthControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_SIGNUP)
+    @Story("User SignUp")
+    @Severity(SeverityLevel.BLOCKER)
     class Signup {
 
         private SignUpRequestDTO validSignUpRequest;
@@ -159,6 +166,8 @@ public class AuthControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_LOGIN)
+    @Story("User Login")
+    @Severity(SeverityLevel.BLOCKER)
     class Login {
 
         @Test
@@ -250,6 +259,8 @@ public class AuthControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.AUTH_BASE_PATH + ApiRoutes.AUTH_REFRESH)
+    @Story("Refresh Access Token")
+    @Severity(SeverityLevel.BLOCKER)
     class RefreshToken {
 
         private Cookie validRefreshTokenCookie;

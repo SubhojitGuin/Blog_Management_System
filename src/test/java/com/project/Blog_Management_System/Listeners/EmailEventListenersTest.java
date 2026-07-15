@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Listeners;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Dto.EmailMessageDTO;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
@@ -8,6 +9,10 @@ import com.project.Blog_Management_System.Repositories.FollowRepository;
 import com.project.Blog_Management_System.Service.Interfaces.EmailService;
 import com.project.Blog_Management_System.Service.Interfaces.EmailTemplateService;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,8 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@Feature("Listener / Email Event Listeners Test")
 @ExtendWith(MockitoExtension.class)
-class EmailEventListenersTest {
+class EmailEventListenersTest extends BaseTest {
 
     @Mock
     private EmailService emailService;
@@ -46,6 +52,8 @@ class EmailEventListenersTest {
 
     @Nested
     @DisplayName("handleNewPostPublished(NewPostPublishedEvent)")
+    @Story("Notify all followers when a new post is published")
+    @Severity(SeverityLevel.CRITICAL)
     class HandleNewPostPublished {
 
         @Test
@@ -178,6 +186,8 @@ class EmailEventListenersTest {
 
     @Nested
     @DisplayName("handleScheduledPostPublishedEvent(ScheduledPostPublishedEvent)")
+    @Story("Notify author and followers when a scheduled post is published")
+    @Severity(SeverityLevel.CRITICAL)
     class HandleScheduledPostPublishedEvent {
 
         @Test
@@ -274,6 +284,8 @@ class EmailEventListenersTest {
 
     @Nested
     @DisplayName("handleCommentAddedEvent(CommentAddedEvent)")
+    @Story("Notify post author when a new comment is added")
+    @Severity(SeverityLevel.CRITICAL)
     class HandleCommentAddedEvent {
         @Test
         @DisplayName("sends comment notification email to post author")
@@ -316,6 +328,8 @@ class EmailEventListenersTest {
 
     @Nested
     @DisplayName("handleCommentRepliedEvent(CommentRepliedEvent)")
+    @Story("Notify parent commenter when their comment receives a reply")
+    @Severity(SeverityLevel.CRITICAL)
     class HandleCommentRepliedEvent {
         @Test
         @DisplayName("sends reply notification email to parent commenter")
@@ -359,6 +373,8 @@ class EmailEventListenersTest {
 
     @Nested
     @DisplayName("handlePostLikedEvent(PostLikedEvent)")
+    @Story("Notify post author when their post is liked")
+    @Severity(SeverityLevel.CRITICAL)
     class HandlePostLikedEvent {
         @Test
         @DisplayName("sends like notification email to post author")
@@ -386,6 +402,8 @@ class EmailEventListenersTest {
 
     @Nested
     @DisplayName("handleNewFollowerEvent(NewFollowerEvent)")
+    @Story("Notify user when a new follower is added")
+    @Severity(SeverityLevel.CRITICAL)
     class HandleNewFollowerEvent {
         @Test
         @DisplayName("sends new follower notification email to followee")

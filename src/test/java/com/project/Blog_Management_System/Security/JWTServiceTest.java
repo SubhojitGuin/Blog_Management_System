@@ -1,10 +1,15 @@
 package com.project.Blog_Management_System.Security;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.WeakKeyException;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,8 +26,9 @@ import java.util.UUID;
 import static io.jsonwebtoken.security.Keys.hmacShaKeyFor;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Feature("Security / JWT Service Tests")
 @ExtendWith(MockitoExtension.class)
-class JWTServiceTest {
+class JWTServiceTest extends BaseTest {
 
     private static final String SECRET = "this-is-a-very-strong-test-secret-key-1234567890";
 
@@ -46,6 +52,8 @@ class JWTServiceTest {
 
     @Nested
     @DisplayName("generateAccessToken(UserEntity)")
+    @Story("Generate Access Token")
+    @Severity(SeverityLevel.CRITICAL)
     class GenerateAccessToken {
 
         @Test
@@ -83,6 +91,8 @@ class JWTServiceTest {
 
     @Nested
     @DisplayName("generateRefreshToken(UserEntity)")
+    @Story("Generate Refresh Token")
+    @Severity(SeverityLevel.CRITICAL)
     class GenerateRefreshToken {
 
         @Test
@@ -109,6 +119,8 @@ class JWTServiceTest {
     }
 
     @Nested
+    @Story("Get User ID from Token")
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("getUserIdFromToken(String)")
     class GetUserIdFromToken {
 
@@ -151,6 +163,8 @@ class JWTServiceTest {
     }
 
     @Nested
+    @Story("Get Token Version from Token")
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("getTokenVersionFromToken(String)")
     class GetTokenVersionFromToken {
 

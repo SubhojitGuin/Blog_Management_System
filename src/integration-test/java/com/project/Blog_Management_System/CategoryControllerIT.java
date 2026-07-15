@@ -12,6 +12,10 @@ import com.project.Blog_Management_System.Repositories.CategoryRepository;
 import com.project.Blog_Management_System.Repositories.PostRepository;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Utils.TestSliceResponse;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Feature("Category Retrieval Operations")
 public class CategoryControllerIT extends BaseIT {
 
     @Autowired
@@ -50,6 +55,8 @@ public class CategoryControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_POSTS)
+    @Story("User retrieves posts by category")
+    @Severity(SeverityLevel.NORMAL)
     class GetPostsByCategory {
 
         private PostEntity post;
@@ -178,6 +185,8 @@ public class CategoryControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.CATEGORY_BASE_PATH)
+    @Story("User gets all categories")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllCategories {
 
         @Test
@@ -213,6 +222,8 @@ public class CategoryControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.CATEGORY_BASE_PATH + ApiRoutes.CATEGORY_PATH_VARIABLE)
+    @Story("User retrieves category details")
+    @Severity(SeverityLevel.NORMAL)
     class GetCategoryDetails {
 
         @Test

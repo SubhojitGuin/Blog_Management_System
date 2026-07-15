@@ -7,6 +7,10 @@ import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,22 +18,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class PostRepositoryTest {
+@Feature("Repository / Post Repository Tests")
+public class PostRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private PostRepository postRepository;
@@ -70,6 +68,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("findPostsByUser(UUID, UUID, Pageable)")
+    @Story("Find Posts by User ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindPostsByUser {
 
         @Test
@@ -136,6 +136,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("findPostsByCategory(UUID, UUID, UUID, Pageable)")
+    @Story("Find Posts by Category ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindPostsByCategory {
 
         @Test
@@ -233,6 +235,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("updatePostsCategory(CategoryEntity, CategoryEntity)")
+    @Story("Update Posts Category")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdatePostsCategory {
 
         @Test
@@ -260,6 +264,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("findAllPosts(PostStatus, UUID, Pageable)")
+    @Story("Find All Posts by Status")
+    @Severity(SeverityLevel.CRITICAL)
     class FindAllPosts {
 
         @Test
@@ -308,6 +314,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("findAllPostsOfFollowings(UUID, PostStatus, UUID, Pageable)")
+    @Story("Find All Posts of Followed Users")
+    @Severity(SeverityLevel.CRITICAL)
     class FindAllPostsOfFollowings {
 
         @Test
@@ -354,6 +362,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("incrementLikeCount(UUID) and decrementLikeCount(UUID)")
+    @Story("Update Post Like Count")
+    @Severity(SeverityLevel.CRITICAL)
     class LikeCountUpdates {
 
         @Test
@@ -380,6 +390,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("incrementCommentCount(UUID) and decrementCommentCount(UUID)")
+    @Story("Update Post Comment Count")
+    @Severity(SeverityLevel.CRITICAL)
     class CommentCountUpdates {
 
         @Test
@@ -406,6 +418,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("incrementViewCount(UUID, Long)")
+    @Story("Update Post View Count")
+    @Severity(SeverityLevel.CRITICAL)
     class ViewCountUpdates {
 
         @Test
@@ -432,6 +446,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("publishDuePosts(LocalDateTime)")
+    @Story("Publish Due Scheduled Posts")
+    @Severity(SeverityLevel.CRITICAL)
     class PublishDuePosts {
 
         @Test
@@ -465,6 +481,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("findByUserIdAndStatus(UUID, PostStatus, UUID, Pageable)")
+    @Story("Find Posts by User ID and Status")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByUserIdAndStatus {
 
         @Test
@@ -532,6 +550,8 @@ public class PostRepositoryTest {
 
     @Nested
     @DisplayName("findByStatusAndPublishAtLessThanEqual(PostStatus, LocalDateTime)")
+    @Story("Find Scheduled Posts Due for Publishing")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByStatusAndPublishAtLessThanEqual {
 
         @Test

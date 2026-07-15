@@ -1,9 +1,14 @@
 package com.project.Blog_Management_System.Schedulers;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Repositories.FollowRepository;
 import com.project.Blog_Management_System.Repositories.UserRepository;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,8 +29,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@Feature("Scheduler / User Batch Scheduler Tests")
 @ExtendWith(MockitoExtension.class)
-public class UserBatchSchedulerTest {
+public class UserBatchSchedulerTest extends BaseTest {
 
     @Mock
     private UserRepository userRepository;
@@ -38,6 +44,8 @@ public class UserBatchSchedulerTest {
 
     @Nested
     @DisplayName("deleteUsersInBatches()")
+    @Story("Deletes inactive users in batches and anonymizes their data")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteUsersInBatches {
 
         @Test

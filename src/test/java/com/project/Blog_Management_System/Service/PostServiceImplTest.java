@@ -1,5 +1,6 @@
 package com.project.Blog_Management_System.Service;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Enums.PostStatus;
@@ -15,6 +16,10 @@ import com.project.Blog_Management_System.Utils.AppUtils;
 import com.project.Blog_Management_System.Utils.MessageService;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
 import com.project.Blog_Management_System.Utils.ValidationUtils;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -42,8 +47,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Feature("Service / Post Service Tests")
 @ExtendWith(MockitoExtension.class)
-public class PostServiceImplTest {
+public class PostServiceImplTest extends BaseTest {
 
     @Mock
     private PostRepository postRepository;
@@ -147,6 +153,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("createPost(PostRequestDTO)")
+    @Story("Create a new post with valid data and handle events")
+    @Severity(SeverityLevel.CRITICAL)
     class CreatePost {
 
         @Test
@@ -288,6 +296,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("getAllPosts(UUID, int)")
+    @Story("Retrieve all published posts with cursor-based pagination")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllPosts {
 
         @Test
@@ -353,6 +363,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("getAllPostsOfFollowings(UUID, int)")
+    @Story("Retrieve all posts from followed users with cursor-based pagination")
+    @Severity(SeverityLevel.NORMAL)
     class GetAllPostsOfFollowings {
 
         @Test
@@ -413,6 +425,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("searchPosts(PostFilterRequestDTO, int, int, List)")
+    @Story("Search for posts based on specified criteria")
+    @Severity(SeverityLevel.NORMAL)
     class SearchPosts {
 
         @Test
@@ -518,6 +532,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("getPostsByStatus(PostStatus, UUID, int)")
+    @Story("Retrieve user's posts filtered by status with cursor-based pagination")
+    @Severity(SeverityLevel.NORMAL)
     class GetPostsByStatus {
 
         @Test
@@ -580,6 +596,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("getPost(String, UUID)")
+    @Story("Retrieve a single post by slug and ID, handling ownership and like status")
+    @Severity(SeverityLevel.NORMAL)
     class GetPost {
 
         @Test
@@ -777,6 +795,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("updatePost(String, UUID, PostRequestDTO)")
+    @Story("Update an existing post with validation and ownership checks")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdatePost {
 
         @Test
@@ -931,6 +951,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("deletePost(String, UUID)")
+    @Story("Delete a post with ownership and status checks, and decrement user's post count")
+    @Severity(SeverityLevel.CRITICAL)
     class DeletePost {
 
         @Test
@@ -1055,6 +1077,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("getTopLevelCommentsOfPost(String, UUID, UUID, int)")
+    @Story("Retrieve top-level comments of a post with cursor-based pagination and access control")
+    @Severity(SeverityLevel.NORMAL)
     class GetTopLevelCommentsOfPost {
 
         @Test
@@ -1174,6 +1198,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("getRepliesOfComment(String, UUID, UUID, UUID, int)")
+    @Story("Retrieve replies of a comment with cursor-based pagination and access control")
+    @Severity(SeverityLevel.NORMAL)
     class GetRepliesOfComment {
 
         @Test
@@ -1335,6 +1361,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("addTopLevelComments(String, UUID, CommentRequestDTO)")
+    @Story("Add a top-level comment to a post with validation, mapping, and event publishing")
+    @Severity(SeverityLevel.NORMAL)
     class AddTopLevelComments {
 
         @Test
@@ -1446,6 +1474,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("addReplyToComment(String, UUID, UUID, CommentRequestDTO)")
+    @Story("Add a reply to a comment with validation, mapping, and event publishing")
+    @Severity(SeverityLevel.CRITICAL)
     class AddReplyToComment {
 
         @Test
@@ -1570,6 +1600,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("updateComment(String, UUID, UUID, CommentRequestDTO)")
+    @Story("Update a comment with ownership check and mapping")
+    @Severity(SeverityLevel.NORMAL)
     class UpdateComment {
 
         @Test
@@ -1645,6 +1677,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("deleteComment(String, UUID, UUID)")
+    @Story("Delete a comment with ownership check, count decrement, and event publishing")
+    @Severity(SeverityLevel.NORMAL)
     class DeleteComment {
 
         @Test
@@ -1756,6 +1790,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("getLikesOfPost(String, UUID, UUID, int)")
+    @Story("Retrieve likes of a post with cursor-based pagination and access control")
+    @Severity(SeverityLevel.NORMAL)
     class GetLikesOfPost {
 
         @Test
@@ -1809,6 +1845,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("likeOrDislikePost(String, UUID, LikeDTO)")
+    @Story("Like or dislike a post with validation, count update, and event publishing")
+    @Severity(SeverityLevel.NORMAL)
     class LikeOrDislikePost {
 
         @Test
@@ -1933,6 +1971,8 @@ public class PostServiceImplTest {
 
     @Nested
     @DisplayName("bookmarkOrUnbookmarkPost(String, UUID, BookmarkDTO)")
+    @Story("Bookmark or unbookmark a post with validation and count update")
+    @Severity(SeverityLevel.NORMAL)
     class BookmarkOrUnbookmarkPost {
 
         @Test

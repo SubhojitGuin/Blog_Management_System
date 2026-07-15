@@ -7,6 +7,10 @@ import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Repositories.*;
 import com.project.Blog_Management_System.Utils.TestSliceResponse;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +29,7 @@ import static org.assertj.core.groups.Tuple.tuple;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Feature("User Management")
 public class UserControllerIT extends BaseIT {
 
     @Autowired
@@ -56,6 +61,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("PUT " + ApiRoutes.USERS_BASE_PATH)
+    @Story("User updates profile")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateUserProfile {
 
         @Test
@@ -174,6 +181,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("PATCH " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_PASSWORD_PATH)
+    @Story("User updates password")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateUserPassword {
 
         @Test
@@ -290,6 +299,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("PATCH " +  ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_USERNAME_PATH)
+    @Story("User updates username")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateUserName {
 
         @Test
@@ -430,6 +441,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("PATCH " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_UPDATE_EMAIL_PATH)
+    @Story("User updates email")
+    @Severity(SeverityLevel.CRITICAL)
     class UpdateEmail {
 
         @Test
@@ -571,6 +584,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_PATH_VARIABLE)
+    @Story("User retrives a user profile")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserProfile {
         @Test
         @DisplayName("Should return 200, when user profile is returned.")
@@ -621,6 +636,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_SEARCH_PATH)
+    @Story("User searches other user's profile")
+    @Severity(SeverityLevel.NORMAL)
     class SearchUsers {
 
         UserEntity user1, user2, user3, user4, user5;
@@ -710,6 +727,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("POST " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOW_PATH)
+    @Story("User follows or unfollows other users")
+    @Severity(SeverityLevel.NORMAL)
     class FollowOrUnfollowUser {
 
         UserEntity followee;
@@ -865,6 +884,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWERS_PATH)
+    @Story("User gets an user's followers")
+    @Severity(SeverityLevel.NORMAL)
     class GetFollowers {
 
         @Test
@@ -966,6 +987,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_FOLLOWINGS_PATH)
+    @Story("User gets an user's followings")
+    @Severity(SeverityLevel.NORMAL)
     class GetFollowings {
 
         @Test
@@ -1071,6 +1094,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("DELETE " + ApiRoutes.USERS_BASE_PATH)
+    @Story("User deletes profile")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteUser {
 
         @Test
@@ -1107,6 +1132,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_POSTS_PATH)
+    @Story("User retrieves other user's post")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserPosts {
 
         @Test
@@ -1198,6 +1225,8 @@ public class UserControllerIT extends BaseIT {
 
     @Nested
     @DisplayName("GET " + ApiRoutes.USERS_BASE_PATH + ApiRoutes.USER_BOOKMARKS_PATH)
+    @Story("User gets their bookmarks")
+    @Severity(SeverityLevel.NORMAL)
     class GetUserBookmarks {
 
         @Test

@@ -1,6 +1,11 @@
 package com.project.Blog_Management_System.Schedulers;
 
+import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Repositories.PostRepository;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,8 +29,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@Feature("Scheduler / View Sync Scheduler Tests")
 @ExtendWith(MockitoExtension.class)
-public class ViewSyncSchedulerTest {
+public class ViewSyncSchedulerTest extends BaseTest {
 
     @Mock
     private PostRepository postRepository;
@@ -41,6 +47,8 @@ public class ViewSyncSchedulerTest {
 
     @Nested
     @DisplayName("syncViews()")
+    @Story("Synchronizes view counts from Redis to the database")
+    @Severity(SeverityLevel.CRITICAL)
     class SyncViews {
 
         @Test

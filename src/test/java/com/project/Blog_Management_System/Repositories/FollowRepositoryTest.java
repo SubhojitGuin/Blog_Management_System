@@ -4,28 +4,26 @@ import com.project.Blog_Management_System.Dto.FollowInfoDTO;
 import com.project.Blog_Management_System.Entities.FollowEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class FollowRepositoryTest {
+@Feature("Repository / Follow Repository Tests")
+public class FollowRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private FollowRepository followRepository;
@@ -50,6 +48,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("saveAndFlush()")
+    @Story("Save a follow relationship")
+    @Severity(SeverityLevel.CRITICAL)
     class SaveAndFlush {
 
         @Test
@@ -85,6 +85,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("findFollowers(UUID, UUID, Pageable)")
+    @Story("Find followers for a user by User ID and Follow Cursor")
+    @Severity(SeverityLevel.CRITICAL)
     class FindFollowers {
 
         @Test
@@ -178,6 +180,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("findFollowing(UUID, UUID, Pageable)")
+    @Story("Find followings for a user by User ID and Follow Cursor")
+    @Severity(SeverityLevel.CRITICAL)
     class FindFollowing {
 
         @Test
@@ -271,6 +275,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("deleteByFollowerIdAndFollowingId(UUID, UUID)")
+    @Story("Delete a follow relationship by follower and following IDs")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteByFollowerIdAndFollowingId {
 
         @Test
@@ -312,6 +318,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("deleteByFollowerIdOrFollowingId(UUID, UUID)")
+    @Story("Delete follow relationships by follower or following ID")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteByFollowerIdOrFollowingId {
 
         @Test
@@ -352,6 +360,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("findByFollowerIdAndFollowingId(UUID, UUID)")
+    @Story("Find a follow relationship by follower and following IDs")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByFollowerIdAndFollowingId {
 
         @Test
@@ -400,6 +410,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("findByFollowingId(UUID)")
+    @Story("Find all follow relationships for a given following user ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByFollowingId {
 
         @Test
@@ -427,6 +439,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("findById(UUID)")
+    @Story("Find a follow relationship by its unique ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindById {
 
         @Test
@@ -453,6 +467,8 @@ public class FollowRepositoryTest {
 
     @Nested
     @DisplayName("findAll()")
+    @Story("Find all follow relationships")
+    @Severity(SeverityLevel.CRITICAL)
     class FindAll {
 
         @Test

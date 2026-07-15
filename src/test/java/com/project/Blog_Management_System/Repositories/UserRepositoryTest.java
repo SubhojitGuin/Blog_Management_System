@@ -3,6 +3,10 @@ package com.project.Blog_Management_System.Repositories;
 import com.project.Blog_Management_System.Dto.UserInfoDTO;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,11 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,10 +23,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class UserRepositoryTest {
+@Feature("Repository / User Repository Tests")
+public class UserRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -47,6 +45,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("findByUsernameIgnoreCase(String)")
+    @Story("Find User by username ignoring case")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByUsernameIgnoreCase {
 
         @Test
@@ -88,6 +88,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("findByUsernameIgnoreCaseOrEmailIgnoreCase(String, String)")
+    @Story("Find User by username or email ignoring case")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByUsernameIgnoreCaseOrEmailIgnoreCase {
 
         @Test
@@ -128,6 +130,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("findByEmailIgnoreCase(String)")
+    @Story("Find User by email ignoring case")
+    @Severity(SeverityLevel.CRITICAL)
     class FindByEmailIgnoreCase {
 
         @Test
@@ -169,6 +173,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(String, Pageable)")
+    @Story("Find Users by username or name containing ignoring case")
+    @Severity(SeverityLevel.CRITICAL)
     class FindUsersByUsernameOrNameContaining {
 
         @Test
@@ -262,6 +268,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("findInactiveUsers(LocalDateTime, Pageable)")
+    @Story("Find Inactive Users")
+    @Severity(SeverityLevel.CRITICAL)
     class FindInactiveUsers {
 
         @Test
@@ -390,6 +398,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("incrementPostCount(UUID)")
+    @Story("Increment Post Count for User")
+    @Severity(SeverityLevel.CRITICAL)
     class IncrementPostCount {
 
         @Test
@@ -451,6 +461,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("decrementPostCount(UUID)")
+    @Story("Decrement Post Count for User")
+    @Severity(SeverityLevel.CRITICAL)
     class DecrementPostCount {
 
         @Test
@@ -515,6 +527,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("incrementFollowersCount(UUID)")
+    @Story("Increment Followers Count for User")
+    @Severity(SeverityLevel.CRITICAL)
     class IncrementFollowersCount {
 
         @Test
@@ -576,6 +590,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("decrementFollowersCount(UUID)")
+    @Story("Decrement Followers Count for User")
+    @Severity(SeverityLevel.CRITICAL)
     class DecrementFollowersCount {
 
         @Test
@@ -640,6 +656,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("incrementFollowingsCount(UUID)")
+    @Story("Increment Followings Count for User")
+    @Severity(SeverityLevel.CRITICAL)
     class IncrementFollowingsCount {
 
         @Test
@@ -701,6 +719,8 @@ public class UserRepositoryTest {
 
     @Nested
     @DisplayName("decrementFollowingsCount(UUID)")
+    @Story("Decrement Followings Count for User")
+    @Severity(SeverityLevel.CRITICAL)
     class DecrementFollowingsCount {
 
         @Test

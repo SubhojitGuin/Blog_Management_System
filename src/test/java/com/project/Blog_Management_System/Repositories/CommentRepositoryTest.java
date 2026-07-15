@@ -6,6 +6,10 @@ import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
 import com.project.Blog_Management_System.Utils.TestEntityFactory;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import jakarta.persistence.EntityManager;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,21 +17,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2)
-public class CommentRepositoryTest {
+@Feature("Repository / Comment Repository Tests")
+public class CommentRepositoryTest extends BaseRepositoryTest {
 
     @Autowired
     private CommentRepository commentRepository;
@@ -61,6 +59,8 @@ public class CommentRepositoryTest {
 
     @Nested
     @DisplayName("findTopLevelByPost(UUID, UUID, UUID, Pageable)")
+    @Story("Find top-level comments by post with pagination")
+    @Severity(SeverityLevel.CRITICAL)
     class FindTopLevelByPost {
 
         @Test
@@ -185,6 +185,8 @@ public class CommentRepositoryTest {
 
     @Nested
     @DisplayName("findRepliesByParentId(UUID, UUID, UUID, Pageable)")
+    @Story("Find replies by parent comment with pagination")
+    @Severity(SeverityLevel.CRITICAL)
     class FindRepliesByParentId {
 
         @Test
@@ -310,6 +312,8 @@ public class CommentRepositoryTest {
 
     @Nested
     @DisplayName("saveAndFlush()")
+    @Story("Save comments to the database")
+    @Severity(SeverityLevel.CRITICAL)
     class SaveComment {
 
         @Test
@@ -359,6 +363,8 @@ public class CommentRepositoryTest {
 
     @Nested
     @DisplayName("findById(UUID)")
+    @Story("Find comment by ID")
+    @Severity(SeverityLevel.CRITICAL)
     class FindById {
 
         @Test
@@ -402,6 +408,8 @@ public class CommentRepositoryTest {
 
     @Nested
     @DisplayName("deleteById(UUID)")
+    @Story("Delete comment by ID")
+    @Severity(SeverityLevel.CRITICAL)
     class DeleteComment {
 
         @Test

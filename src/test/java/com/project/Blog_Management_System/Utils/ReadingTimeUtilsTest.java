@@ -1,5 +1,10 @@
 package com.project.Blog_Management_System.Utils;
 
+import com.project.Blog_Management_System.BaseTest;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,11 +13,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ReadingTimeUtilsTest {
+@Feature("Utils / ReadingTimeUtils Tests")
+class ReadingTimeUtilsTest extends BaseTest {
 
     @Nested
     @DisplayName("estimate()")
-    class Estimate {
+    @Story("Estimate reading time based on word count")
+    @Severity(SeverityLevel.NORMAL)
+    class ReadingTimeEstimate {
 
         @Test
         @DisplayName("returns 1 minute when content is null")
