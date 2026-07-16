@@ -26,7 +26,7 @@ public class TestEntityFactory {
         category.setDescription("Test description of category " + suffix);
         category.setSlug("test-category-" + suffix);
         category.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000")); // Default system user
-        category.setCreatedDate(LocalDateTime.now());
+        category.setCreatedAt(LocalDateTime.now());
         return category;
     }
 
@@ -40,7 +40,7 @@ public class TestEntityFactory {
         post.setCategory(category);
         post.setStatus(PostStatus.PUBLISHED);
         post.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000")); // Default system user
-        post.setCreatedDate(LocalDateTime.now());
+        post.setCreatedAt(LocalDateTime.now());
         return post;
     }
 
@@ -58,7 +58,7 @@ public class TestEntityFactory {
         comment.setPost(targetPost);
         comment.setDepth(0);
         comment.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000")); // Default system user
-        comment.setCreatedDate(LocalDateTime.now());
+        comment.setCreatedAt(LocalDateTime.now());
         return comment;
     }
 
@@ -70,7 +70,7 @@ public class TestEntityFactory {
         reply.setParent(parent);
         reply.setDepth(parent.getDepth() + 1);
         reply.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        reply.setCreatedDate(LocalDateTime.now());
+        reply.setCreatedAt(LocalDateTime.now());
         return reply;
     }
 

@@ -6,8 +6,10 @@ CREATE TABLE IF NOT EXISTS comments
     post_id    UUID                        NOT NULL,
     parent_id  UUID,
     depth      INTEGER                     NOT NULL,
+    created_by UUID                        NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_modified_by     UUID,
+    updated_at TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_comments PRIMARY KEY (id)
 );
 

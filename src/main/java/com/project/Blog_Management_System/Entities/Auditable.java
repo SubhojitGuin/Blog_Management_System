@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@FieldNameConstants
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
@@ -31,15 +33,15 @@ public abstract class Auditable {
     private UUID createdBy;
 
     @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private LocalDateTime createdDate;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @LastModifiedBy
     @Column(name = "last_modified_by")
     private UUID lastModifiedBy;
 
     @LastModifiedDate
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
 }

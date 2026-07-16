@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Utils;
 
 import com.project.Blog_Management_System.BaseTest;
+import com.project.Blog_Management_System.Entities.Auditable;
 import com.project.Blog_Management_System.Entities.CommentEntity;
 import com.project.Blog_Management_System.Entities.PostEntity;
 import com.project.Blog_Management_System.Entities.UserEntity;
@@ -133,7 +134,7 @@ class AppUtilsTest extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     class ConvertToSort {
 
-        private final Set<String> allowedFields = Set.of(PostEntity.Fields.title, PostEntity.Fields.createdAt);
+        private final Set<String> allowedFields = Set.of(PostEntity.Fields.title, Auditable.Fields.createdAt);
 
         @Test
         @DisplayName("successfully parses valid sort fields with direction parameters")

@@ -328,7 +328,7 @@ public class CommentRepositoryTest extends BaseRepositoryTest {
             assertEquals(0, saved.getDepth());
             assertNull(saved.getParent());
             assertNotNull(saved.getCreatedAt());
-            assertNotNull(saved.getUpdatedAt());
+            assertNull(saved.getUpdatedAt());
         }
 
         @Test
@@ -344,7 +344,7 @@ public class CommentRepositoryTest extends BaseRepositoryTest {
             assertEquals(1, saved.getDepth());
             assertEquals(parent.getId(), saved.getParent().getId());
             assertNotNull(saved.getCreatedAt());
-            assertNotNull(saved.getUpdatedAt());
+            assertNull(saved.getUpdatedAt());
         }
 
         @Test

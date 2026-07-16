@@ -30,7 +30,7 @@ public final class TestDataFactory {
                 .name("Test Category")
                 .description("Test category description")
                 .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-                .createdDate(LocalDateTime.now());
+                .createdAt(LocalDateTime.now());
     }
 
     public CategoryEntity createCustomCategory(String name, String description) {
@@ -81,7 +81,7 @@ public final class TestDataFactory {
                 .viewCount(0L)
                 .status(PostStatus.PUBLISHED)
                 .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-                .createdDate(LocalDateTime.now());
+                .createdAt(LocalDateTime.now());
     }
 
     public PostEntity createCustomPost(UserEntity user, CategoryEntity category) {
@@ -99,7 +99,7 @@ public final class TestDataFactory {
                     .body("This is a test comment")
                     .depth(0)
                     .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000000"))
-                    .createdDate(LocalDateTime.now());
+                    .createdAt(LocalDateTime.now());
     }
 
     public CommentEntity createCustomComment(UserEntity user, PostEntity post, CommentEntity parent) {

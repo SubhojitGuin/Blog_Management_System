@@ -105,8 +105,8 @@ public class PostServiceImpl implements PostService {
 
         final Set<String> ALLOWED_SORT_FIELDS = Set.of(
                 PostEntity.Fields.title,
-                PostEntity.Fields.createdAt,
-                PostEntity.Fields.updatedAt,
+                Auditable.Fields.createdAt,
+                Auditable.Fields.updatedAt,
                 PostEntity.Fields.likeCount,
                 PostEntity.Fields.commentCount,
                 PostEntity.Fields.readingTimeMinutes
