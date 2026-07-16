@@ -13,8 +13,10 @@ CREATE TABLE IF NOT EXISTS posts
     view_count           BIGINT                      NOT NULL,
     status               VARCHAR(20)                 NOT NULL,
     publish_at           TIMESTAMP WITHOUT TIME ZONE,
+    created_by           UUID                        NOT NULL,
     created_at           TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at           TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_modified_by     UUID,
+    updated_at           TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_posts PRIMARY KEY (id)
 );
 

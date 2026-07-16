@@ -3,6 +3,7 @@ package com.project.Blog_Management_System.Service;
 import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Dto.*;
 import com.project.Blog_Management_System.Entities.*;
+import com.project.Blog_Management_System.Entities.Auditable;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Events.CommentAddedEvent;
 import com.project.Blog_Management_System.Events.CommentRepliedEvent;
@@ -144,8 +145,8 @@ public class PostServiceImplTest extends BaseTest {
 
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of(
             PostEntity.Fields.title,
-            PostEntity.Fields.createdAt,
-            PostEntity.Fields.updatedAt,
+            Auditable.Fields.createdAt,
+            Auditable.Fields.updatedAt,
             PostEntity.Fields.likeCount,
             PostEntity.Fields.commentCount,
             PostEntity.Fields.readingTimeMinutes

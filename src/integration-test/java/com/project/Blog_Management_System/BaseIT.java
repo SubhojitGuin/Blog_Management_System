@@ -111,9 +111,9 @@ public abstract class BaseIT implements TestWatcher {
             jdbcTemplate.execute(truncateQuery);
 
             String addUncategorisedCategoryQuery = """
-                    INSERT INTO CATEGORIES(ID, DESCRIPTION, NAME, SLUG, CREATED_AT, UPDATED_AT, CREATED_BY, CREATED_DATE, LAST_MODIFIED_BY, LAST_MODIFIED_DATE)
+                    INSERT INTO CATEGORIES(ID, DESCRIPTION, NAME, SLUG, CREATED_BY, CREATED_AT, LAST_MODIFIED_BY, UPDATED_AT)
                     VALUES ('019def21-0c08-71a0-94fa-7752a369d39a', 'Default category', 'Uncategorised', 'uncategorised',
-                        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '00000000-0000-0000-0000-000000000000', CURRENT_TIMESTAMP, NULL, NULL)
+                        '00000000-0000-0000-0000-000000000000', CURRENT_TIMESTAMP, NULL, NULL)
                     ON CONFLICT (ID) DO NOTHING
                 """;
 
