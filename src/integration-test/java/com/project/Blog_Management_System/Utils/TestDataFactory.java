@@ -12,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 public final class TestDataFactory {
@@ -26,7 +28,9 @@ public final class TestDataFactory {
     public CategoryEntity.CategoryEntityBuilder createCategory() {
         return CategoryEntity.builder()
                 .name("Test Category")
-                .description("Test category description");
+                .description("Test category description")
+                .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                .createdDate(LocalDateTime.now());
     }
 
     public CategoryEntity createCustomCategory(String name, String description) {
@@ -75,7 +79,9 @@ public final class TestDataFactory {
                 .likeCount(0)
                 .commentCount(0)
                 .viewCount(0L)
-                .status(PostStatus.PUBLISHED);
+                .status(PostStatus.PUBLISHED)
+                .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                .createdDate(LocalDateTime.now());
     }
 
     public PostEntity createCustomPost(UserEntity user, CategoryEntity category) {
@@ -91,7 +97,9 @@ public final class TestDataFactory {
     public CommentEntity.CommentEntityBuilder createComment() {
             return CommentEntity.builder()
                     .body("This is a test comment")
-                    .depth(0);
+                    .depth(0)
+                    .createdBy(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                    .createdDate(LocalDateTime.now());
     }
 
     public CommentEntity createCustomComment(UserEntity user, PostEntity post, CommentEntity parent) {
