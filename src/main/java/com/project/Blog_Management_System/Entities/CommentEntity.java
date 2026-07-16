@@ -2,7 +2,11 @@ package com.project.Blog_Management_System.Entities;
 
 import com.project.Blog_Management_System.Annotations.uuidV7.GeneratedUuidV7;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,12 +20,12 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 @Table(name = "comments", indexes = {
         @Index(name = "idx_comments_post_depth", columnList = "post_id, depth"),
         @Index(name = "idx_comments_parent_id", columnList = "parent_id")
 })
-public class CommentEntity {
+public class CommentEntity extends Auditable {
 
     @Id
     @GeneratedUuidV7

@@ -2,7 +2,11 @@ package com.project.Blog_Management_System.Entities;
 
 import com.project.Blog_Management_System.Annotations.uuidV7.GeneratedUuidV7;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -13,7 +17,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Table(name = "bookmarks",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"user_id", "post_id"})

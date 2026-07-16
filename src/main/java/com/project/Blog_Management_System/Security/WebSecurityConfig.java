@@ -1,9 +1,8 @@
 package com.project.Blog_Management_System.Security;
 
+import com.project.Blog_Management_System.Enums.Role;
 import com.project.Blog_Management_System.Logging.RequestLoggingFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,10 +23,7 @@ public class WebSecurityConfig {
 
     private final JWTAuthFilter jwtAuthFilter;
     private final RequestLoggingFilter requestLoggingFilter;
-
-    @Autowired
-    @Qualifier("handlerExceptionResolver")
-    private HandlerExceptionResolver handlerExceptionResolver;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
@@ -38,7 +34,7 @@ public class WebSecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                         .requestMatchers("/posts/**").authenticated()
                         .requestMatchers("/users/**").authenticated()
                         .requestMatchers("/category/**").authenticated()

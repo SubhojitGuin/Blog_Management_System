@@ -4,7 +4,9 @@ import com.project.Blog_Management_System.Entities.*;
 import com.project.Blog_Management_System.Enums.PostStatus;
 import com.project.Blog_Management_System.Enums.Role;
 
+import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 public class TestEntityFactory {
 
@@ -23,6 +25,8 @@ public class TestEntityFactory {
         category.setName("Test Category " + suffix);
         category.setDescription("Test description of category " + suffix);
         category.setSlug("test-category-" + suffix);
+        category.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000")); // Default system user
+        category.setCreatedDate(LocalDateTime.now());
         return category;
     }
 
@@ -35,6 +39,8 @@ public class TestEntityFactory {
         post.setUser(user);
         post.setCategory(category);
         post.setStatus(PostStatus.PUBLISHED);
+        post.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000")); // Default system user
+        post.setCreatedDate(LocalDateTime.now());
         return post;
     }
 
@@ -51,6 +57,8 @@ public class TestEntityFactory {
         comment.setUser(commentAuthor);
         comment.setPost(targetPost);
         comment.setDepth(0);
+        comment.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000")); // Default system user
+        comment.setCreatedDate(LocalDateTime.now());
         return comment;
     }
 
@@ -61,6 +69,8 @@ public class TestEntityFactory {
         reply.setPost(targetPost);
         reply.setParent(parent);
         reply.setDepth(parent.getDepth() + 1);
+        reply.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        reply.setCreatedDate(LocalDateTime.now());
         return reply;
     }
 
