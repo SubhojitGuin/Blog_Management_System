@@ -114,6 +114,7 @@ jobs:
           ./mvnw -B compile sonar:sonar \
             -Dsonar.projectKey=${{ vars.PROJECT_KEY }}\
             -Dsonar.organization=${{ vars.ORGANIZATION_KEY }} \
+            -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco-ut/jacoco.xml,target/site/jacoco-it/jacoco.xml \
             -Dsonar.qualitygate.wait=true \
             -Dsonar.exclusions="**/Advice/**,**/Annotations/**,**/Enums/**,**/Entities/**,**/Config/**,**/Constants/**,**/Logging/**,**/Specifications/**,**/*Application.java"
