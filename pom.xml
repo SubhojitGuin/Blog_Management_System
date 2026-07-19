@@ -48,6 +48,7 @@
         <skip.ut>false</skip.ut>
         <skip.it>false</skip.it>
         <allure.version>2.35.1</allure.version>
+        <jacoco.reportFolder>jacoco</jacoco.reportFolder>
     </properties>
 
     <dependencyManagement>
@@ -324,6 +325,9 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>${project.reporting.outputDirectory}/${jacoco.reportFolder}</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
