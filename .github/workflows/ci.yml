@@ -62,10 +62,15 @@ jobs:
       - name: Ensure Maven wrapper is executable
         run: chmod +x ./mvnw
 
+      - name: Verify Docker Status
+        run: docker info
+
       - name: Run Integration Tests
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: "true"
         run: ./mvnw -B clean verify -Dskip.ut -Djacoco.reportFolder=jacoco-it
 
-      - name: Upload Unit Test JaCoCo Report
+      - name: Upload Integration Test JaCoCo Report
         uses: actions/upload-artifact@v7
         with:
           name: jacoco-it-report
@@ -153,7 +158,7 @@ jobs:
     steps:
       - name: Verify Status
         run: |
-          if [[ "${{ needs.sonarcloud.result }}" == "failure" || "${{ needs.codeql-analysis.result }}" == "failure" ]];
+          if [[ "${{ needs.sonarcloud.result }}" != "success" || "${{ needs.codeql-analysis.result }}" != "success" ]];
           then
             echo "Pipeline Gate Failed."
             exit 1
