@@ -66,8 +66,6 @@ jobs:
         run: docker info
 
       - name: Run Integration Tests
-        env:
-          TESTCONTAINERS_RYUK_DISABLED: "true"
         run: ./mvnw -B clean verify -Dskip.ut -Djacoco.reportFolder=jacoco-it
 
       - name: Upload Integration Test JaCoCo Report
