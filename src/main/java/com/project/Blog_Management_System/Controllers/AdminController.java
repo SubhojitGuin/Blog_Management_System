@@ -117,10 +117,4 @@ public class AdminController {
         categoryService.deleteCategory(category_slug, category_id, newSlug);
         return ResponseEntity.noContent().build();
     }
-
-    @GetMapping
-    public ResponseEntity<String> healthCheck() {
-        return new ResponseEntity<>("OK", HttpStatus.OK);
-    }
-
 }
