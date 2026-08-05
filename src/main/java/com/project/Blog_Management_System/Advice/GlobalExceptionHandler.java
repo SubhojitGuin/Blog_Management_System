@@ -7,6 +7,7 @@ import com.project.Blog_Management_System.Utils.MessageService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -174,6 +175,15 @@ public class GlobalExceptionHandler {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .message(ex.getMessage())
+                .build();
+        return buildErrorResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<?>> handleOptimisticLockingFailureException(OptimisticLockingFailureException ex) {
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.CONFLICT)
+                .message(messageService.get("exception.optimistic_locking_failure"))
                 .build();
         return buildErrorResponseEntity(apiError);
     }

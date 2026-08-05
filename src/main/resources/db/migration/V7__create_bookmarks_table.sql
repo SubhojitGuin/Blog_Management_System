@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS bookmarks
     id            UUID                        NOT NULL,
     user_id       UUID                        NOT NULL,
     post_id       UUID                        NOT NULL,
-    bookmarked_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    bookmarked_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_bookmarks PRIMARY KEY (id)
 );
 

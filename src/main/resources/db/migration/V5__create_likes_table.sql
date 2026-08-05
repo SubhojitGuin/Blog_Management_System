@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS likes
     id       UUID                        NOT NULL,
     user_id  UUID                        NOT NULL,
     post_id  UUID                        NOT NULL,
-    liked_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    liked_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_likes PRIMARY KEY (id)
 );
 

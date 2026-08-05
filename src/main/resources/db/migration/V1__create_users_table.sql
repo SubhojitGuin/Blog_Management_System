@@ -8,14 +8,14 @@ CREATE TABLE IF NOT EXISTS users
     bio              VARCHAR(255),
     gender           VARCHAR(20),
     date_of_birth    date,
-    no_of_followers  INTEGER                     NOT NULL,
-    no_of_followings INTEGER                     NOT NULL,
-    no_of_posts      INTEGER                     NOT NULL,
-    active           BOOLEAN                     NOT NULL,
-    is_deleted       BOOLEAN                     NOT NULL,
-    token_version    INTEGER                     NOT NULL,
-    created_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    no_of_followers  INTEGER                     NOT NULL DEFAULT 0,
+    no_of_followings INTEGER                     NOT NULL DEFAULT 0,
+    no_of_posts      INTEGER                     NOT NULL DEFAULT 0,
+    active           BOOLEAN                     NOT NULL DEFAULT TRUE,
+    is_deleted       BOOLEAN                     NOT NULL DEFAULT FALSE,
+    token_version    INTEGER                     NOT NULL DEFAULT 0,
+    created_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT pk_users PRIMARY KEY (id)
 );
 
