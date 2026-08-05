@@ -1,6 +1,7 @@
 package com.project.Blog_Management_System.Service;
 
 import com.project.Blog_Management_System.Annotations.LogExecution;
+import com.project.Blog_Management_System.Annotations.TransactionalOptimisticRetry;
 import com.project.Blog_Management_System.Dto.CategoryRequestDTO;
 import com.project.Blog_Management_System.Dto.CategoryResponseDTO;
 import com.project.Blog_Management_System.Dto.PostResponseDTO;
@@ -85,7 +86,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
+    @TransactionalOptimisticRetry
     public CategoryResponseDTO updateCategory(String categorySlug, UUID categoryId, CategoryRequestDTO categoryRequestDTO) {
         CategoryEntity category = categoryRepository.findById(categoryId).orElse(null);
         validationUtils.isInvalidCategory(category, categorySlug);

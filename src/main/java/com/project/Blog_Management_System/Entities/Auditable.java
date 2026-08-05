@@ -41,7 +41,7 @@ public abstract class Auditable {
     private UUID lastModifiedBy;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
 }

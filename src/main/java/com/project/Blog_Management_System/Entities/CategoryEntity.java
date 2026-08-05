@@ -38,6 +38,9 @@ public class CategoryEntity extends Auditable {
     @Column(unique = true, nullable = false, length = 100)
     private String slug;
 
+    @Version
+    private Long version;
+
     @PrePersist
     @PreUpdate
     private void compute() {

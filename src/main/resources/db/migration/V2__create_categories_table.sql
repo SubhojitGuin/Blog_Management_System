@@ -5,9 +5,10 @@ CREATE TABLE IF NOT EXISTS categories
     description          VARCHAR(500)                NOT NULL,
     slug                 VARCHAR(100)                NOT NULL,
     created_by           UUID                        NOT NULL,
-    created_at           TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    created_at           TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_modified_by     UUID,
-    updated_at           TIMESTAMP WITHOUT TIME ZONE,
+    updated_at           TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    version              BIGINT                      NOT NULL DEFAULT 0,
     CONSTRAINT pk_categories PRIMARY KEY (id)
 );
 
