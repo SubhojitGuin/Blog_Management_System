@@ -111,7 +111,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./mvnw -B test-compile sonar:sonar \
+          ./mvnw -B test-compile sonar:sonar -U \
             -Dsonar.projectKey=${{ vars.PROJECT_KEY }} \
             -Dsonar.organization=${{ vars.ORGANIZATION_KEY }} \
             -Dsonar.host.url=https://sonarcloud.io \
