@@ -458,7 +458,7 @@ public class PostRepositoryTest extends BaseRepositoryTest {
             PostEntity future = savePost(authorOne, categoryOne, "future", PostStatus.SCHEDULED, now.plusHours(1));
             PostEntity alreadyPublished = savePost(authorOne, categoryOne, "published", PostStatus.PUBLISHED, null);
 
-            int updated = postRepository.publishDuePosts(now);
+            int updated = postRepository.publishDuePosts(now).size();
             entityManager.flush();
             entityManager.clear();
 
@@ -545,28 +545,6 @@ public class PostRepositoryTest extends BaseRepositoryTest {
             assertEquals(1, slice.getNumberOfElements());
             assertFalse(slice.hasNext());
             assertTrue(slice.getContent().stream().allMatch(dto -> dto.getId().compareTo(cursor) < 0));
-        }
-    }
-
-    @Nested
-    @DisplayName("findByStatusAndPublishAtLessThanEqual(PostStatus, LocalDateTime)")
-    @Story("Find Scheduled Posts Due for Publishing")
-    @Severity(SeverityLevel.CRITICAL)
-    class FindByStatusAndPublishAtLessThanEqual {
-
-        @Test
-        @DisplayName("returns only scheduled posts whose publish time is due")
-        public void returnsOnlyScheduledPostsWhosePublishTimeIsDue() {
-            LocalDateTime now = LocalDateTime.now();
-            PostEntity due = savePost(authorOne, categoryOne, "due", PostStatus.SCHEDULED, now.minusMinutes(10));
-            savePost(authorOne, categoryOne, "future", PostStatus.SCHEDULED, now.plusMinutes(10));
-            savePost(authorOne, categoryOne, "draft", PostStatus.DRAFT, now.minusMinutes(10));
-
-            List<PostEntity> found = postRepository.findByStatusAndPublishAtLessThanEqual(PostStatus.SCHEDULED, now);
-
-            assertEquals(1, found.size());
-            PostEntity firstFound = found.stream().findFirst().orElseThrow();
-            assertEquals(due.getId(), firstFound.getId());
         }
     }
 

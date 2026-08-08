@@ -48,7 +48,6 @@ public class EmailServiceImplTest extends BaseTest {
         ReflectionTestUtils.setField(emailService, "fromEmail", fromEmail);
     }
 
-
     @Nested
     @DisplayName("sendEmail(String, String, String)")
     @Story("Send Email Functionality")

@@ -29,9 +29,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@Feature("Scheduler / User Batch Scheduler Tests")
+@Feature("Scheduler / User Deletion Task Tests")
 @ExtendWith(MockitoExtension.class)
-public class UserBatchSchedulerTest extends BaseTest {
+public class UserDeletionTaskTest extends BaseTest {
 
     @Mock
     private UserRepository userRepository;
@@ -40,10 +40,10 @@ public class UserBatchSchedulerTest extends BaseTest {
     private FollowRepository followRepository;
 
     @InjectMocks
-    private UserBatchScheduler userBatchScheduler;
+    private UserDeletionTask userDeletionTask;
 
     @Nested
-    @DisplayName("deleteUsersInBatches()")
+    @DisplayName("execute()")
     @Story("Deletes inactive users in batches and anonymizes their data")
     @Severity(SeverityLevel.CRITICAL)
     class DeleteUsersInBatches {
@@ -62,7 +62,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(firstPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<List<UserEntity>> usersCaptor = ArgumentCaptor.forClass(List.class);
             verify(userRepository).saveAll(usersCaptor.capture());
@@ -97,7 +97,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(firstPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             verify(followRepository).deleteByFollowerIdOrFollowingId(inactiveUser.getId(), inactiveUser.getId());
         }
@@ -115,7 +115,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(firstPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<List<UserEntity>> usersCaptor = ArgumentCaptor.forClass(List.class);
             verify(userRepository).saveAll(usersCaptor.capture());
@@ -137,7 +137,7 @@ public class UserBatchSchedulerTest extends BaseTest {
                     .thenReturn(firstPage)
                     .thenReturn(secondPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             verify(userRepository, times(2)).saveAll(any(List.class));
         }
@@ -150,7 +150,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(emptyPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<LocalDateTime> cutoffCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
             verify(userRepository).findInactiveUsers(cutoffCaptor.capture(), any(PageRequest.class));
@@ -167,7 +167,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(emptyPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<PageRequest> pageCaptor = ArgumentCaptor.forClass(PageRequest.class);
             verify(userRepository).findInactiveUsers(any(LocalDateTime.class), pageCaptor.capture());
@@ -184,7 +184,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(emptyPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             verify(userRepository, never()).saveAll(any(List.class));
             verify(followRepository, never()).deleteByFollowerIdOrFollowingId(any(UUID.class), any(UUID.class));
@@ -203,7 +203,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             doThrow(new RuntimeException("Database error"))
                     .when(userRepository).saveAll(any(List.class));
 
-            assertThrows(RuntimeException.class, () -> userBatchScheduler.deleteUsersInBatches());
+            assertThrows(RuntimeException.class, () -> userDeletionTask.execute());
 
             verify(followRepository).deleteByFollowerIdOrFollowingId(user.getId(), user.getId());
         }
@@ -220,7 +220,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(firstPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<List<UserEntity>> usersCaptor = ArgumentCaptor.forClass(List.class);
             verify(userRepository).saveAll(usersCaptor.capture());
@@ -237,7 +237,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(emptyPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<PageRequest> pageCaptor = ArgumentCaptor.forClass(PageRequest.class);
             verify(userRepository).findInactiveUsers(any(LocalDateTime.class), pageCaptor.capture());
@@ -264,7 +264,7 @@ public class UserBatchSchedulerTest extends BaseTest {
                     .thenReturn(secondPage)
                     .thenReturn(thirdPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<PageRequest> pageCaptor = ArgumentCaptor.forClass(PageRequest.class);
             verify(userRepository, times(3)).findInactiveUsers(any(LocalDateTime.class), pageCaptor.capture());
@@ -287,7 +287,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(lastPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<List<UserEntity>> usersCaptor = ArgumentCaptor.forClass(List.class);
             verify(userRepository).saveAll(usersCaptor.capture());
@@ -307,7 +307,7 @@ public class UserBatchSchedulerTest extends BaseTest {
             when(userRepository.findInactiveUsers(any(LocalDateTime.class), any(PageRequest.class)))
                     .thenReturn(firstPage);
 
-            userBatchScheduler.deleteUsersInBatches();
+            userDeletionTask.execute();
 
             ArgumentCaptor<List<UserEntity>> usersCaptor = ArgumentCaptor.forClass(List.class);
             verify(userRepository).saveAll(usersCaptor.capture());
