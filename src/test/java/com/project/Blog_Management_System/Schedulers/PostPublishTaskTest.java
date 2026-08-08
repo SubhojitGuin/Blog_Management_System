@@ -29,12 +29,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@Feature("Scheduler / Post Publish Scheduler Tests")
+@Feature("Scheduler / Post Publish Task Tests")
 @ExtendWith(MockitoExtension.class)
-public class PostPublishSchedulerTest extends BaseTest {
+public class PostPublishTaskTest extends BaseTest {
 
     @Mock
     private PostRepository postRepository;
@@ -43,7 +42,7 @@ public class PostPublishSchedulerTest extends BaseTest {
     private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
-    private PostPublishScheduler postPublishScheduler;
+    private PostPublishTask postPublishTask;
 
     private UserEntity author;
     private CategoryEntity category;
@@ -61,7 +60,7 @@ public class PostPublishSchedulerTest extends BaseTest {
     }
 
     @Nested
-    @DisplayName("publishScheduledPosts()")
+    @DisplayName("execute()")
     @Story("Publish scheduled posts that are due and fire events for each published post")
     @Severity(SeverityLevel.CRITICAL)
     class PublishScheduledPosts {
@@ -71,11 +70,9 @@ public class PostPublishSchedulerTest extends BaseTest {
         void publishesDueScheduledPostsAndFiresEvents() {
             PostEntity duePost = createPostWithPublishTime(now.minusMinutes(5));
 
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of(duePost));
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(1);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of(duePost));
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
             ArgumentCaptor<ScheduledPostPublishedEvent> eventCaptor = ArgumentCaptor.forClass(ScheduledPostPublishedEvent.class);
             verify(eventPublisher).publishEvent(eventCaptor.capture());
@@ -97,11 +94,9 @@ public class PostPublishSchedulerTest extends BaseTest {
             PostEntity firstPost = createPostWithPublishTime(now.minusMinutes(10));
             PostEntity secondPost = createPostWithPublishTime(now.minusMinutes(5));
 
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of(firstPost, secondPost));
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(2);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of(firstPost, secondPost));
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
             ArgumentCaptor<ScheduledPostPublishedEvent> eventCaptor = ArgumentCaptor.forClass(ScheduledPostPublishedEvent.class);
             verify(eventPublisher, times(2)).publishEvent(eventCaptor.capture());
@@ -117,39 +112,21 @@ public class PostPublishSchedulerTest extends BaseTest {
         @Test
         @DisplayName("does not publish when no scheduled posts are due")
         void doesNotPublishWhenNoPostsAreDue() {
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of());
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(0);
 
-            postPublishScheduler.publishScheduledPosts();
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of());
+
+            postPublishTask.execute();
 
             verify(eventPublisher, never()).publishEvent(any(ScheduledPostPublishedEvent.class));
         }
 
-        @Test
-        @DisplayName("finds only scheduled posts with publish time less than or equal to current time")
-        void findsOnlyScheduledPostsWithDuePublishTime() {
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of());
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(0);
-
-            postPublishScheduler.publishScheduledPosts();
-
-            ArgumentCaptor<LocalDateTime> timeCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
-            verify(postRepository).findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), timeCaptor.capture());
-
-            LocalDateTime capturedDateTime = timeCaptor.getValue();
-            assertNotNull(capturedDateTime);
-        }
 
         @Test
         @DisplayName("calls publishDuePosts to update post status in database")
         void callsPublishDuePostsToUpdateStatus() {
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of());
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(0);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of());
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
             verify(postRepository).publishDuePosts(any(LocalDateTime.class));
         }
@@ -159,13 +136,11 @@ public class PostPublishSchedulerTest extends BaseTest {
         void capturesCorrectPostCountFromPublishDuePosts() {
             PostEntity post = createPostWithPublishTime(now.minusMinutes(5));
 
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of(post));
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(1);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of(post));
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
-            verify(postRepository).findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class));
+            verify(postRepository).publishDuePosts(any(LocalDateTime.class));
         }
 
         @Test
@@ -177,11 +152,9 @@ public class PostPublishSchedulerTest extends BaseTest {
             post.setTitle("Special Post Title");
             post.setUser(author);
 
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of(post));
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(1);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of(post));
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
             ArgumentCaptor<ScheduledPostPublishedEvent> eventCaptor = ArgumentCaptor.forClass(ScheduledPostPublishedEvent.class);
             verify(eventPublisher).publishEvent(eventCaptor.capture());
@@ -204,11 +177,9 @@ public class PostPublishSchedulerTest extends BaseTest {
             PostEntity post = createPostWithPublishTime(now.minusMinutes(5));
             post.setUser(specificAuthor);
 
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of(post));
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(1);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of(post));
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
             ArgumentCaptor<ScheduledPostPublishedEvent> eventCaptor = ArgumentCaptor.forClass(ScheduledPostPublishedEvent.class);
             verify(eventPublisher).publishEvent(eventCaptor.capture());
@@ -226,11 +197,9 @@ public class PostPublishSchedulerTest extends BaseTest {
         void firesEventsEvenWhenCountDiffers() {
             PostEntity post = createPostWithPublishTime(now.minusMinutes(5));
 
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of(post));
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(1);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of(post));
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
             verify(eventPublisher).publishEvent(any(ScheduledPostPublishedEvent.class));
         }
@@ -238,28 +207,24 @@ public class PostPublishSchedulerTest extends BaseTest {
         @Test
         @DisplayName("handles empty list of due posts gracefully")
         void handlesEmptyListGracefully() {
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of());
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(0);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of());
 
-            assertDoesNotThrow(() -> postPublishScheduler.publishScheduledPosts());
+            assertDoesNotThrow(() -> postPublishTask.execute());
 
             verify(eventPublisher, never()).publishEvent(any());
         }
 
         @Test
-        @DisplayName("processes posts based on findByStatusAndPublishAtLessThanEqual result")
+        @DisplayName("processes posts based on publishDuePosts result")
         void processesPostsFromRepository() {
             PostEntity post1 = createPostWithPublishTime(now.minusMinutes(10));
             PostEntity post2 = createPostWithPublishTime(now.minusMinutes(1));
 
             List<PostEntity> duePostsList = List.of(post1, post2);
 
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(duePostsList);
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(2);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(duePostsList);
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
             verify(eventPublisher, times(2)).publishEvent(any(ScheduledPostPublishedEvent.class));
         }
@@ -267,13 +232,11 @@ public class PostPublishSchedulerTest extends BaseTest {
         @Test
         @DisplayName("queries with correct post status filter")
         void queriesWithCorrectStatusFilter() {
-            when(postRepository.findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class)))
-                    .thenReturn(List.of());
-            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(0);
+            when(postRepository.publishDuePosts(any(LocalDateTime.class))).thenReturn(List.of());
 
-            postPublishScheduler.publishScheduledPosts();
+            postPublishTask.execute();
 
-            verify(postRepository).findByStatusAndPublishAtLessThanEqual(eq(PostStatus.SCHEDULED), any(LocalDateTime.class));
+            verify(postRepository).publishDuePosts(any(LocalDateTime.class));
         }
     }
 

@@ -148,15 +148,13 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
             """)
     void incrementViewCount(@Param("postId") UUID postId, @Param("delta") Long delta);
 
-    @Modifying
-    @Query("""
-                UPDATE PostEntity p
-                SET p.status = com.project.Blog_Management_System.Enums.PostStatus.PUBLISHED,
-                    p.publishAt = null
-                WHERE p.status = com.project.Blog_Management_System.Enums.PostStatus.SCHEDULED
-                AND p.publishAt <= :now
-            """)
-    int publishDuePosts(@Param("now") LocalDateTime now);
+    @Query(value = """
+            UPDATE posts
+            SET status = 'PUBLISHED', publish_at = NULL
+            WHERE status = 'SCHEDULED' AND publish_at <= :now
+            RETURNING *
+    """, nativeQuery = true)
+    List<PostEntity> publishDuePosts(@Param("now") LocalDateTime now);
 
     @Query("""
                 SELECT new com.project.Blog_Management_System.Dto.PostInfoDTO(
@@ -173,6 +171,4 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID>, JpaSpec
                                              @Param("postCursor") UUID postCursor,
                                              Pageable pageable);
 
-    List<PostEntity> findByStatusAndPublishAtLessThanEqual(
-            PostStatus status, LocalDateTime now);
 }

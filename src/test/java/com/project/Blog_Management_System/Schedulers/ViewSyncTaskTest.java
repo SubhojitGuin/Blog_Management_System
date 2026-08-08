@@ -29,9 +29,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@Feature("Scheduler / View Sync Scheduler Tests")
+@Feature("Scheduler / View Sync Task Tests")
 @ExtendWith(MockitoExtension.class)
-public class ViewSyncSchedulerTest extends BaseTest {
+public class ViewSyncTaskTest extends BaseTest {
 
     @Mock
     private PostRepository postRepository;
@@ -43,10 +43,10 @@ public class ViewSyncSchedulerTest extends BaseTest {
     private ValueOperations<String, String> valueOperations;
 
     @InjectMocks
-    private ViewSyncScheduler viewSyncScheduler;
+    private ViewSyncTask viewSyncTask;
 
     @Nested
-    @DisplayName("syncViews()")
+    @DisplayName("execute()")
     @Story("Synchronizes view counts from Redis to the database")
     @Severity(SeverityLevel.CRITICAL)
     class SyncViews {
@@ -64,7 +64,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("50");
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(postRepository).incrementViewCount(postId, 50L);
         }
@@ -88,7 +88,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(valueOperations.get(processingKey1)).thenReturn("100");
             when(valueOperations.get(processingKey2)).thenReturn("75");
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(postRepository).incrementViewCount(postId1, 100L);
             verify(postRepository).incrementViewCount(postId2, 75L);
@@ -107,7 +107,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("25");
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(redisTemplate).renameIfAbsent(viewKey, processingKey);
         }
@@ -125,7 +125,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("0");
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(postRepository, never()).incrementViewCount(any(UUID.class), any(Long.class));
             verify(redisTemplate).delete(processingKey);
@@ -144,7 +144,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn(null);
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(postRepository, never()).incrementViewCount(any(UUID.class), any(Long.class));
             verify(redisTemplate).delete(processingKey);
@@ -163,7 +163,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("100");
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(redisTemplate).delete(processingKey);
         }
@@ -173,7 +173,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
         void returnsEarlyWhenNoKeysExist() {
             when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(new HashSet<>());
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(postRepository, never()).incrementViewCount(any(UUID.class), any(Long.class));
             verify(redisTemplate, never()).delete(any(String.class));
@@ -184,7 +184,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
         void returnsEarlyWhenKeysResultIsNull() {
             when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(null);
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(postRepository, never()).incrementViewCount(any(UUID.class), any(Long.class));
             verify(redisTemplate, never()).delete(any(String.class));
@@ -203,7 +203,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("10");
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             ArgumentCaptor<UUID> postIdCaptor = ArgumentCaptor.forClass(UUID.class);
             verify(postRepository).incrementViewCount(postIdCaptor.capture(), eq(10L));
@@ -226,7 +226,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             doThrow(new RuntimeException("Database error"))
                     .when(postRepository).incrementViewCount(any(UUID.class), any(Long.class));
 
-            assertDoesNotThrow(() -> viewSyncScheduler.syncViews());
+            assertDoesNotThrow(() -> viewSyncTask.execute());
         }
 
         @Test
@@ -250,7 +250,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             doThrow(new RuntimeException("Error for post 1"))
                     .when(postRepository).incrementViewCount(postId1, 100L);
 
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
 
             verify(postRepository).incrementViewCount(postId2, 50L);
         }
@@ -266,7 +266,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("999999");
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
             ArgumentCaptor countCaptor = ArgumentCaptor.forClass(Long.class);
             verify(postRepository).incrementViewCount(eq(postId), (Long) countCaptor.capture());
             assertEquals(999999L, countCaptor.getValue());
@@ -276,7 +276,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
         @DisplayName("queries Redis with correct view key pattern")
         void queriesRedisWithCorrectPattern() {
             when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(new HashSet<>());
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
             verify(redisTemplate).keys(VIEW_KEY + "*");
         }
 
@@ -292,7 +292,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn(largeCount.toString());
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
             ArgumentCaptor countCaptor = ArgumentCaptor.forClass(Long.class);
             verify(postRepository).incrementViewCount(eq(postId), (Long) countCaptor.capture());
             assertEquals(largeCount, countCaptor.getValue());
@@ -319,7 +319,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(valueOperations.get(processingKey1)).thenReturn("100");
             when(valueOperations.get(processingKey2)).thenReturn("0");
             when(valueOperations.get(processingKey3)).thenReturn("50");
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
             verify(postRepository).incrementViewCount(postId1, 100L);
             verify(postRepository, never()).incrementViewCount(postId2, 0L);
             verify(postRepository).incrementViewCount(postId3, 50L);
@@ -335,7 +335,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             keys.add(viewKey);
             when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
             doThrow(new RuntimeException("Rename failed")).when(redisTemplate).renameIfAbsent(viewKey, processingKey);
-            assertDoesNotThrow(() -> viewSyncScheduler.syncViews());
+            assertDoesNotThrow(() -> viewSyncTask.execute());
             verify(redisTemplate, never()).opsForValue();
         }
 
@@ -355,7 +355,7 @@ public class ViewSyncSchedulerTest extends BaseTest {
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey1)).thenReturn("100");
             when(valueOperations.get(processingKey2)).thenReturn(null);
-            viewSyncScheduler.syncViews();
+            viewSyncTask.execute();
             verify(postRepository).incrementViewCount(postId1, 100L);
             verify(redisTemplate, times(2)).delete(any(String.class));
         }
