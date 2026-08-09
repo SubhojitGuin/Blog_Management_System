@@ -19,11 +19,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisKeyCommands;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -39,14 +46,17 @@ class AppUtilsTest extends BaseTest {
     @Mock
     private MessageService messageService;
 
-    @InjectMocks
-    private AppUtils appUtils;
-
     @Mock
     private SecurityContext securityContext;
 
     @Mock
     private Authentication authentication;
+
+    @Mock
+    private StringRedisTemplate redisTemplate;
+
+    @InjectMocks
+    private AppUtils appUtils;
 
     @BeforeEach
     void setUpSecurityContext() {
@@ -254,6 +264,71 @@ class AppUtilsTest extends BaseTest {
             String result = AppUtils.getCommentSnippet(comment);
 
             assertEquals(expectedSnippet, result);
+        }
+    }
+
+    @Nested
+    @DisplayName("scanKeys(String)")
+    @Story("Scans Redis keys matching a pattern without blocking the main event loop")
+    @Severity(SeverityLevel.CRITICAL)
+    class ScanKeys {
+
+        @Mock
+        private RedisConnection redisConnection;
+
+        @Mock
+        private RedisKeyCommands redisKeyCommands;
+
+        @Mock
+        private Cursor<byte[]> cursor;
+
+        @Test
+        @DisplayName("returns list of matching keys when keys are found")
+        void returnsMatchingKeysWhenFound() {
+            String pattern = "user:*";
+            byte[] key1 = "user:1".getBytes(StandardCharsets.UTF_8);
+            byte[] key2 = "user:2".getBytes(StandardCharsets.UTF_8);
+
+            // Mock the template execution to invoke the passed callback
+            when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
+                RedisCallback<?> callback = invocation.getArgument(0);
+                return callback.doInRedis(redisConnection);
+            });
+
+            // Mock the structural path to the scan command
+            when(redisConnection.keyCommands()).thenReturn(redisKeyCommands);
+            when(redisKeyCommands.scan(any(ScanOptions.class))).thenReturn(cursor);
+
+            // Mock the cursor iteration loop
+            when(cursor.hasNext()).thenReturn(true, true, false);
+            when(cursor.next()).thenReturn(key1, key2);
+
+            List<String> result = appUtils.scanKeys(pattern);
+
+            assertNotNull(result);
+            assertEquals(2, result.size());
+            assertTrue(result.contains("user:1"));
+            assertTrue(result.contains("user:2"));
+        }
+
+        @Test
+        @DisplayName("returns empty list when no keys match the pattern")
+        void returnsEmptyListWhenNoKeysMatch() {
+            String pattern = "nonexistent:*";
+
+            when(redisTemplate.execute(any(RedisCallback.class))).thenAnswer(invocation -> {
+                RedisCallback<?> callback = invocation.getArgument(0);
+                return callback.doInRedis(redisConnection);
+            });
+
+            when(redisConnection.keyCommands()).thenReturn(redisKeyCommands);
+            when(redisKeyCommands.scan(any(ScanOptions.class))).thenReturn(cursor);
+            when(cursor.hasNext()).thenReturn(false);
+
+            List<String> result = appUtils.scanKeys(pattern);
+
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
         }
     }
 }
