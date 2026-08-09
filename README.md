@@ -1,7 +1,7 @@
 # Blog Management System APIs Backend
 
 ---
-
+[![CI Pipeline](https://github.com/SubhojitGuin/Blog_Management_System/actions/workflows/ci.yml/badge.svg)](https://github.com/SubhojitGuin/Blog_Management_System/actions/workflows/ci.yml)
 ## Overview
 
 This application provides backend APIs for a **Blog Management System**, including
