@@ -1,13 +1,14 @@
 package com.project.Blog_Management_System.Schedulers;
 
 import com.project.Blog_Management_System.Repositories.PostRepository;
+import com.project.Blog_Management_System.Utils.AppUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import static com.project.Blog_Management_System.Constants.RedisConstants.VIEW_KEY;
@@ -20,14 +21,15 @@ public class ViewSyncTask {
 
     private final PostRepository postRepository;
     private final StringRedisTemplate redisTemplate;
+    private final AppUtils appUtils;
 
     @Transactional
     public void execute() {
         log.info("Starting view count synchronization...");
 
-        Set<String> keys = redisTemplate.keys(VIEW_KEY + "*");
+        List<String> keys = appUtils.scanKeys(VIEW_KEY + "*");
 
-        if (keys == null || keys.isEmpty()) {
+        if (keys.isEmpty()) {
             return;
         }
 

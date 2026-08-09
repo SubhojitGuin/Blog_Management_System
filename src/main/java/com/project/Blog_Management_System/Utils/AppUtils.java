@@ -8,9 +8,14 @@ import com.project.Blog_Management_System.Enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +27,8 @@ import java.util.Set;
 public class AppUtils {
 
     private final MessageService messageService;
+    private final StringRedisTemplate redisTemplate;
+    private static final int SCAN_BATCH_SIZE = 500;
 
     /**
      * Retrieves the currently authenticated user from the security context.
@@ -140,4 +147,28 @@ public class AppUtils {
                 : comment.getBody();
     }
 
+    /**
+     * Non-blocking replacement for redisTemplate.keys(pattern).
+     * Uses SCAN under the hood via RedisTemplate.execute(RedisCallback),
+     * iterating in small batches instead of locking the event loop.
+     */
+    public List<String> scanKeys(String pattern) {
+        List<String> result = new ArrayList<>();
+
+        ScanOptions options = ScanOptions.scanOptions()
+                .match(pattern)
+                .count(SCAN_BATCH_SIZE)
+                .build();
+
+        redisTemplate.execute((RedisCallback<Void>) connection -> {
+            try (Cursor<byte[]> cursor = connection.keyCommands().scan(options)) {
+                while (cursor.hasNext()) {
+                    result.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+            }
+            return null;
+        });
+
+        return result;
+    }
 }

@@ -2,6 +2,7 @@ package com.project.Blog_Management_System.Schedulers;
 
 import com.project.Blog_Management_System.BaseTest;
 import com.project.Blog_Management_System.Repositories.PostRepository;
+import com.project.Blog_Management_System.Utils.AppUtils;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
@@ -17,8 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.project.Blog_Management_System.Constants.RedisConstants.VIEW_KEY;
@@ -40,6 +41,9 @@ public class ViewSyncTaskTest extends BaseTest {
     private StringRedisTemplate redisTemplate;
 
     @Mock
+    private AppUtils appUtils;
+
+    @Mock
     private ValueOperations<String, String> valueOperations;
 
     @InjectMocks
@@ -57,10 +61,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("50");
 
@@ -79,11 +83,11 @@ public class ViewSyncTaskTest extends BaseTest {
             String processingKey1 = VIEW_PROCESSING_KEY + postId1;
             String processingKey2 = VIEW_PROCESSING_KEY + postId2;
 
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey1);
             keys.add(viewKey2);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey1)).thenReturn("100");
             when(valueOperations.get(processingKey2)).thenReturn("75");
@@ -100,10 +104,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("25");
 
@@ -118,10 +122,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("0");
 
@@ -137,10 +141,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn(null);
 
@@ -156,10 +160,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("100");
 
@@ -171,18 +175,7 @@ public class ViewSyncTaskTest extends BaseTest {
         @Test
         @DisplayName("returns early when no view keys exist in Redis")
         void returnsEarlyWhenNoKeysExist() {
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(new HashSet<>());
-
-            viewSyncTask.execute();
-
-            verify(postRepository, never()).incrementViewCount(any(UUID.class), any(Long.class));
-            verify(redisTemplate, never()).delete(any(String.class));
-        }
-
-        @Test
-        @DisplayName("returns early when keys result is null")
-        void returnsEarlyWhenKeysResultIsNull() {
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(null);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(new ArrayList<>());
 
             viewSyncTask.execute();
 
@@ -196,10 +189,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("10");
 
@@ -217,10 +210,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("50");
             doThrow(new RuntimeException("Database error"))
@@ -239,11 +232,11 @@ public class ViewSyncTaskTest extends BaseTest {
             String processingKey1 = VIEW_PROCESSING_KEY + postId1;
             String processingKey2 = VIEW_PROCESSING_KEY + postId2;
 
-            Set<String> keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey1);
             keys.add(viewKey2);
 
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey1)).thenReturn("100");
             when(valueOperations.get(processingKey2)).thenReturn("50");
@@ -261,9 +254,9 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn("999999");
             viewSyncTask.execute();
@@ -275,9 +268,9 @@ public class ViewSyncTaskTest extends BaseTest {
         @Test
         @DisplayName("queries Redis with correct view key pattern")
         void queriesRedisWithCorrectPattern() {
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(new HashSet<>());
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(new ArrayList<>());
             viewSyncTask.execute();
-            verify(redisTemplate).keys(VIEW_KEY + "*");
+            verify(appUtils).scanKeys(VIEW_KEY + "*");
         }
 
         @Test
@@ -286,10 +279,10 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
             Long largeCount = 1000000L;
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey)).thenReturn(largeCount.toString());
             viewSyncTask.execute();
@@ -310,11 +303,11 @@ public class ViewSyncTaskTest extends BaseTest {
             String processingKey1 = VIEW_PROCESSING_KEY + postId1;
             String processingKey2 = VIEW_PROCESSING_KEY + postId2;
             String processingKey3 = VIEW_PROCESSING_KEY + postId3;
-            Set keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey1);
             keys.add(viewKey2);
             keys.add(viewKey3);
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey1)).thenReturn("100");
             when(valueOperations.get(processingKey2)).thenReturn("0");
@@ -331,9 +324,9 @@ public class ViewSyncTaskTest extends BaseTest {
             UUID postId = UUID.randomUUID();
             String viewKey = "blog:view:post:" + postId;
             String processingKey = VIEW_PROCESSING_KEY + postId;
-            Set keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey);
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             doThrow(new RuntimeException("Rename failed")).when(redisTemplate).renameIfAbsent(viewKey, processingKey);
             assertDoesNotThrow(() -> viewSyncTask.execute());
             verify(redisTemplate, never()).opsForValue();
@@ -348,10 +341,10 @@ public class ViewSyncTaskTest extends BaseTest {
             String viewKey2 = "blog:view:post:" + postId2;
             String processingKey1 = VIEW_PROCESSING_KEY + postId1;
             String processingKey2 = VIEW_PROCESSING_KEY + postId2;
-            Set keys = new HashSet<>();
+            List<String> keys = new ArrayList<>();
             keys.add(viewKey1);
             keys.add(viewKey2);
-            when(redisTemplate.keys(VIEW_KEY + "*")).thenReturn(keys);
+            when(appUtils.scanKeys(VIEW_KEY + "*")).thenReturn(keys);
             when(redisTemplate.opsForValue()).thenReturn(valueOperations);
             when(valueOperations.get(processingKey1)).thenReturn("100");
             when(valueOperations.get(processingKey2)).thenReturn(null);
