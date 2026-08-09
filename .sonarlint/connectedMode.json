@@ -1,0 +1,5 @@
+{
+    "sonarCloudOrganization": "my-spring-boot-projects",
+    "projectKey": "Blog_Management_System",
+    "region": "EU"
+}

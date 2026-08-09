@@ -117,5 +117,4 @@ public class AdminController {
         categoryService.deleteCategory(category_slug, category_id, newSlug);
         return ResponseEntity.noContent().build();
     }
-
 }

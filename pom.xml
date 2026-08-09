@@ -48,6 +48,7 @@
         <skip.ut>false</skip.ut>
         <skip.it>false</skip.it>
         <allure.version>2.35.1</allure.version>
+        <jacoco.reportFolder>jacoco</jacoco.reportFolder>
     </properties>
 
     <dependencyManagement>
@@ -199,7 +200,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>12.6.1</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -324,6 +324,9 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <outputDirectory>${project.reporting.outputDirectory}/${jacoco.reportFolder}</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -412,7 +415,6 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>12.6.1</version>
             </plugin>
 
              <plugin>
@@ -425,6 +427,16 @@
                 </configuration>
               </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>5.7.0.6970</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>
